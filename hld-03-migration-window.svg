@@ -1,0 +1,165 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1700 900" width="1700" height="900" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">
+<defs>
+<marker id="wA" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#5A6B7B"/></marker>
+<marker id="wP" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#7A4FBF"/></marker>
+</defs>
+<rect width="1700" height="900" fill="#FFFFFF"/>
+
+<text x="50" y="50" font-size="29" font-weight="700" fill="#16324F">P2 — The Migration Window, Step by Step</text>
+<text x="50" y="78" font-size="15.5" fill="#5A6B7B">Deploy dark · freeze the single consumer · copy the MAU cohort · verify · resume dual-writing. Production reads are untouched throughout.</text>
+<line x1="50" y1="93" x2="1650" y2="93" stroke="#E3E8EE" stroke-width="2"/>
+
+<rect x="450" y="112" width="720" height="28" rx="6" fill="#FDECEA" stroke="#C0392B" stroke-width="1.8"/>
+<text x="810" y="132" font-size="13.5" font-weight="700" fill="#8E2A20" text-anchor="middle">◀  WRITE FREEZE — consumer at zero, Kafka buffering (target &lt; 1 hour)  ▶</text>
+
+<g font-size="12.5" font-weight="700" fill="#16324F" text-anchor="middle">
+<text x="335" y="164">T0 · DEPLOY DARK</text>
+<text x="570" y="164">T1 · FREEZE</text>
+<text x="810" y="164">T2 · COPY</text>
+<text x="1050" y="164">T3 · VERIFY</text>
+<text x="1290" y="164">T4 · RESUME</text>
+<text x="1520" y="164">T5 · DRAIN</text>
+</g>
+<g stroke="#E3E8EE" stroke-width="1.5" stroke-dasharray="5 5">
+<line x1="450" y1="174" x2="450" y2="760"/><line x1="690" y1="174" x2="690" y2="760"/>
+<line x1="930" y1="174" x2="930" y2="760"/><line x1="1170" y1="174" x2="1170" y2="760"/>
+<line x1="1410" y1="174" x2="1410" y2="760"/>
+</g>
+
+<!-- CONSUMER LANE -->
+<rect x="215" y="180" width="1425" height="150" rx="8" fill="#FAF8FE" stroke="#7A4FBF" stroke-width="1.5"/>
+<rect x="50" y="180" width="158" height="150" rx="8" fill="#E7E2F5" stroke="#7A4FBF" stroke-width="1.8"/>
+<text x="129" y="240" font-size="14" font-weight="700" fill="#3D2A63" text-anchor="middle">SINGLE</text>
+<text x="129" y="259" font-size="14" font-weight="700" fill="#3D2A63" text-anchor="middle">CONSUMER</text>
+<text x="129" y="281" font-size="11.5" fill="#4A3A73" text-anchor="middle">+ Kafka lag</text>
+<path d="M450,310 L1170,224 L1420,310 Z" fill="#F5CE8A" fill-opacity="0.7" stroke="#E0912A" stroke-width="1.5"/>
+<text x="815" y="292" font-size="11.5" font-weight="700" fill="#8A5A00" text-anchor="middle">lag builds — nothing is lost while retention holds</text>
+<text x="1300" y="292" font-size="11.5" font-weight="700" fill="#8A5A00" text-anchor="middle">lag drains</text>
+<text x="335" y="200" font-size="12" font-weight="700" fill="#3D2A63" text-anchor="middle">Deploy dual-write code</text>
+<text x="335" y="217" font-size="11.5" fill="#4A3A73" text-anchor="middle">with the flag OFF, consumer</text>
+<text x="335" y="233" font-size="11.5" fill="#4A3A73" text-anchor="middle">still RUNNING — validates the</text>
+<text x="335" y="249" font-size="11.5" fill="#4A3A73" text-anchor="middle">deploy on its own, so a bug and</text>
+<text x="335" y="265" font-size="11.5" fill="#4A3A73" text-anchor="middle">a backlog are never debugged</text>
+<text x="335" y="281" font-size="11.5" fill="#4A3A73" text-anchor="middle">at the same time</text>
+<text x="570" y="200" font-size="12" font-weight="700" fill="#8E2A20" text-anchor="middle">Scale consumer → 0</text>
+<text x="570" y="217" font-size="11.5" fill="#4A3A73" text-anchor="middle">producers keep publishing</text>
+<text x="570" y="233" font-size="11.5" fill="#4A3A73" text-anchor="middle">Flip the dual-write flag ON</text>
+<text x="570" y="249" font-size="11.5" fill="#4A3A73" text-anchor="middle">while stopped</text>
+<text x="1290" y="200" font-size="12" font-weight="700" fill="#14562F" text-anchor="middle">Restart consumer</text>
+<text x="1290" y="217" font-size="11.5" fill="#4A3A73" text-anchor="middle">now dual-writing with</text>
+<text x="1290" y="233" font-size="11.5" fill="#4A3A73" text-anchor="middle">read-through backfill on miss</text>
+<text x="1520" y="200" font-size="12" font-weight="700" fill="#3D2A63" text-anchor="middle">Buffered window</text>
+<text x="1520" y="217" font-size="11.5" fill="#4A3A73" text-anchor="middle">applied to BOTH clusters</text>
+<text x="1520" y="233" font-size="11.5" fill="#4A3A73" text-anchor="middle">lag returns to ~0</text>
+
+<!-- C1 LANE -->
+<rect x="215" y="342" width="1425" height="122" rx="8" fill="#F5FAFE" stroke="#2E7CB8" stroke-width="1.5"/>
+<rect x="50" y="342" width="158" height="122" rx="8" fill="#E3F0FB" stroke="#2E7CB8" stroke-width="1.8"/>
+<text x="129" y="388" font-size="15" font-weight="700" fill="#12496E" text-anchor="middle">C1</text>
+<text x="129" y="408" font-size="11.5" fill="#1B5C87" text-anchor="middle">8.10.0 · source</text>
+<text x="129" y="428" font-size="11" font-weight="700" fill="#1B5C87" text-anchor="middle">NEVER MODIFIED</text>
+<text x="129" y="446" font-size="11" fill="#1B5C87" text-anchor="middle">serves all prod reads</text>
+<text x="335" y="370" font-size="11.5" fill="#1B5C87" text-anchor="middle">Confirm green, no relocating</text>
+<text x="335" y="387" font-size="11.5" fill="#1B5C87" text-anchor="middle">shards. Snapshot + test-restore.</text>
+<text x="335" y="404" font-size="11.5" font-weight="700" fill="#12496E" text-anchor="middle">Compute the ABSOLUTE cutoff</text>
+<text x="335" y="421" font-size="11" fill="#8E2A20" text-anchor="middle">never now-30d — it re-evaluates</text>
+<text x="570" y="370" font-size="11.5" font-weight="700" fill="#12496E" text-anchor="middle">Writes stop →</text>
+<text x="570" y="387" font-size="11.5" fill="#1B5C87" text-anchor="middle">the index is now a stable,</text>
+<text x="570" y="404" font-size="11.5" fill="#1B5C87" text-anchor="middle">consistent source</text>
+<text x="810" y="370" font-size="11.5" fill="#1B5C87" text-anchor="middle">Scrolled by the reindex</text>
+<text x="810" y="387" font-size="11.5" fill="#1B5C87" text-anchor="middle">(read load only, over</text>
+<text x="810" y="404" font-size="11.5" fill="#1B5C87" text-anchor="middle">internal VPC networking)</text>
+<text x="1050" y="370" font-size="11.5" fill="#1B5C87" text-anchor="middle">Authoritative side of</text>
+<text x="1050" y="387" font-size="11.5" fill="#1B5C87" text-anchor="middle">the comparison</text>
+<text x="1290" y="370" font-size="11.5" fill="#1B5C87" text-anchor="middle">Receives writes again</text>
+<text x="1520" y="370" font-size="11.5" font-weight="700" fill="#12496E" text-anchor="middle">Still serving 100% of</text>
+<text x="1520" y="387" font-size="11.5" fill="#1B5C87" text-anchor="middle">production read traffic —</text>
+<text x="1520" y="404" font-size="11.5" fill="#1B5C87" text-anchor="middle">rollback target intact</text>
+
+<path fill="none" d="M810,466 L810,498" stroke="#7A4FBF" stroke-width="3" marker-end="url(#wP)"/>
+<text x="872" y="488" font-size="11.5" font-weight="700" fill="#5B3A94">remote _reindex</text>
+
+<!-- C3 LANE -->
+<rect x="215" y="500" width="1425" height="142" rx="8" fill="#F4FBF6" stroke="#37A05F" stroke-width="1.5"/>
+<rect x="50" y="500" width="158" height="142" rx="8" fill="#E4F5EA" stroke="#37A05F" stroke-width="1.8"/>
+<text x="129" y="552" font-size="15" font-weight="700" fill="#14562F" text-anchor="middle">C3</text>
+<text x="129" y="572" font-size="11.5" fill="#1E6B3E" text-anchor="middle">9.4.2 · target</text>
+<text x="129" y="592" font-size="11" font-weight="700" fill="#B03A2E" text-anchor="middle">NO PROD READS</text>
+<text x="129" y="612" font-size="11" fill="#1E6B3E" text-anchor="middle">replicas = 2</text>
+<text x="129" y="629" font-size="11" fill="#1E6B3E" text-anchor="middle">3 data nodes</text>
+<text x="335" y="528" font-size="12" font-weight="700" fill="#14562F" text-anchor="middle">Index PRE-CREATED</text>
+<text x="335" y="545" font-size="11.5" fill="#1E6B3E" text-anchor="middle">workindia-candidate-feature-embedded</text>
+<text x="335" y="560" font-size="11.5" fill="#1E6B3E" text-anchor="middle">mapping + analyzer + synonyms</text>
+<text x="335" y="576" font-size="11.5" fill="#1E6B3E" text-anchor="middle">+ dense_vector w/ index_options</text>
+<text x="335" y="594" font-size="11.5" font-weight="700" fill="#14562F" text-anchor="middle">set refresh_interval = -1</text>
+<text x="335" y="612" font-size="11" font-weight="700" fill="#B03A2E" text-anchor="middle">_reindex carries NO mappings</text>
+<text x="335" y="629" font-size="11" font-weight="700" fill="#B03A2E" text-anchor="middle">index_options is IMMUTABLE</text>
+<text x="570" y="528" font-size="12" fill="#1E6B3E" text-anchor="middle">Empty and idle</text>
+<text x="810" y="528" font-size="12" font-weight="700" fill="#14562F" text-anchor="middle">Bulk indexing the cohort</text>
+<text x="810" y="545" font-size="11.5" fill="#1E6B3E" text-anchor="middle">parallel streams over disjoint</text>
+<text x="810" y="562" font-size="11.5" fill="#1E6B3E" text-anchor="middle">sub-ranges of the MAU field</text>
+<text x="810" y="580" font-size="11" font-weight="700" fill="#B03A2E" text-anchor="middle">edge windows MUST be open-ended</text>
+<text x="810" y="597" font-size="11" font-weight="700" fill="#14562F" text-anchor="middle">refresh_interval STAYS -1 for the copy</text>
+<text x="810" y="614" font-size="11" fill="#1E6B3E" text-anchor="middle">replicas = 2 → replication is inline,</text>
+<text x="810" y="630" font-size="11" fill="#1E6B3E" text-anchor="middle">no separate recovery step</text>
+<text x="1050" y="527" font-size="12" font-weight="700" fill="#14562F" text-anchor="middle">1 · refresh_interval → 1s</text>
+<text x="1050" y="545" font-size="12" font-weight="700" fill="#14562F" text-anchor="middle">2 · manual POST /_refresh</text>
+<text x="1050" y="563" font-size="12" font-weight="700" fill="#14562F" text-anchor="middle">3 · compare counts</text>
+<text x="1050" y="582" font-size="11" fill="#1E6B3E" text-anchor="middle">against the SAME absolute cutoff</text>
+<text x="1050" y="598" font-size="11" fill="#1E6B3E" text-anchor="middle">used for the copy</text>
+<text x="1050" y="618" font-size="10.5" font-style="italic" fill="#B03A2E" text-anchor="middle">nothing is searchable until step 2 —</text>
+<text x="1050" y="632" font-size="10.5" font-style="italic" fill="#B03A2E" text-anchor="middle">verify AFTER the refresh, never before</text>
+<text x="1290" y="528" font-size="12" font-weight="700" fill="#14562F" text-anchor="middle">Receives dual-writes</text>
+<text x="1290" y="545" font-size="11.5" fill="#1E6B3E" text-anchor="middle">partial updates land directly;</text>
+<text x="1290" y="562" font-size="11.5" fill="#1E6B3E" text-anchor="middle">a 404 triggers the</text>
+<text x="1290" y="579" font-size="11.5" fill="#1E6B3E" text-anchor="middle">read-through backfill</text>
+<text x="1520" y="528" font-size="12" font-weight="700" fill="#14562F" text-anchor="middle">Cohort loaded</text>
+<text x="1520" y="545" font-size="11.5" fill="#1E6B3E" text-anchor="middle">record measured throughput</text>
+<text x="1520" y="562" font-size="11.5" fill="#1E6B3E" text-anchor="middle">→ ready for P3 embeddings</text>
+
+<!-- OPS LANE -->
+<rect x="215" y="652" width="1425" height="102" rx="8" fill="#FAFAFB" stroke="#8A93A0" stroke-width="1.5"/>
+<rect x="50" y="652" width="158" height="102" rx="8" fill="#EEF0F3" stroke="#8A93A0" stroke-width="1.8"/>
+<text x="129" y="700" font-size="14" font-weight="700" fill="#2B333D" text-anchor="middle">Ops /</text>
+<text x="129" y="720" font-size="14" font-weight="700" fill="#2B333D" text-anchor="middle">Gate</text>
+<text x="335" y="678" font-size="11.5" fill="#5A6B7B" text-anchor="middle">Verify Kafka retention exceeds</text>
+<text x="335" y="695" font-size="11.5" fill="#5A6B7B" text-anchor="middle">the planned freeze + margin.</text>
+<text x="335" y="712" font-size="11.5" fill="#5A6B7B" text-anchor="middle">Confirm the deploy is healthy.</text>
+<text x="570" y="678" font-size="11.5" fill="#5A6B7B" text-anchor="middle">Start the clock. Confirm lag</text>
+<text x="570" y="695" font-size="11.5" fill="#5A6B7B" text-anchor="middle">alarms fire as expected</text>
+<text x="570" y="712" font-size="11.5" fill="#5A6B7B" text-anchor="middle">(not silently suppressed)</text>
+<text x="810" y="678" font-size="11.5" fill="#5A6B7B" text-anchor="middle">Poll GET /_tasks/&lt;id&gt;. Watch</text>
+<text x="810" y="695" font-size="11.5" fill="#5A6B7B" text-anchor="middle">heap and rejections on C3.</text>
+<text x="810" y="712" font-size="11.5" fill="#5A6B7B" text-anchor="middle">Track against the window budget.</text>
+<rect x="938" y="658" width="224" height="90" rx="7" fill="#FDECEA" stroke="#C0392B" stroke-width="2"/>
+<text x="1050" y="680" font-size="12" font-weight="700" fill="#8E2A20" text-anchor="middle">GATE — blocks the restart</text>
+<text x="1050" y="698" font-size="11.5" fill="#96372C" text-anchor="middle">exact _count parity</text>
+<text x="1050" y="715" font-size="11.5" fill="#96372C" text-anchor="middle">+ sampled _source diff</text>
+<text x="1050" y="736" font-size="10.5" font-style="italic" fill="#96372C" text-anchor="middle">green health proves nothing here</text>
+<text x="1290" y="678" font-size="11.5" fill="#5A6B7B" text-anchor="middle">Smoke-test writes on both.</text>
+<text x="1290" y="695" font-size="11.5" fill="#5A6B7B" text-anchor="middle">Confirm dual-write error rate</text>
+<text x="1290" y="712" font-size="11.5" fill="#5A6B7B" text-anchor="middle">is zero and 404s are classified</text>
+<text x="1290" y="729" font-size="11.5" fill="#5A6B7B" text-anchor="middle">as expected, not errors.</text>
+<text x="1520" y="678" font-size="11.5" fill="#5A6B7B" text-anchor="middle">Confirm lag fully drained.</text>
+<text x="1520" y="695" font-size="11.5" fill="#5A6B7B" text-anchor="middle">Enable the daily drift check.</text>
+<text x="1520" y="712" font-size="11.5" fill="#5A6B7B" text-anchor="middle">Hand off to P3.</text>
+
+<!-- BOTTOM -->
+<rect x="50" y="778" width="512" height="96" rx="9" fill="#FDECEA" stroke="#C0392B" stroke-width="1.6"/>
+<text x="70" y="802" font-size="13" font-weight="700" fill="#8E2A20">Rollback at any point before T4</text>
+<text x="70" y="823" font-size="12" fill="#96372C">Abort the reindex, delete the C3 index, restart the consumer with the</text>
+<text x="70" y="841" font-size="12" fill="#96372C">dual-write flag off. Kafka replays the buffered window. Zero data loss,</text>
+<text x="70" y="859" font-size="12" fill="#96372C">zero production impact — C1 was never touched.</text>
+
+<rect x="582" y="778" width="512" height="96" rx="9" fill="#FDF6EC" stroke="#E0912A" stroke-width="1.6"/>
+<text x="602" y="802" font-size="13" font-weight="700" fill="#8A5A00">Overrun protocol — agree it BEFORE the window</text>
+<text x="602" y="823" font-size="12" fill="#7A5520">If T2 exceeds budget: either extend the freeze (Kafka lag simply grows —</text>
+<text x="602" y="841" font-size="12" fill="#7A5520">safe while retention holds) or abort and retry with narrower sub-ranges.</text>
+<text x="602" y="859" font-size="12" fill="#7A5520">An overrun is inconvenient, not dangerous.</text>
+
+<rect x="1114" y="778" width="531" height="96" rx="9" fill="#F3EEFB" stroke="#7A4FBF" stroke-width="1.6"/>
+<text x="1134" y="802" font-size="13" font-weight="700" fill="#3D2A63">Contingency — shrink the freeze to minutes</text>
+<text x="1134" y="823" font-size="12" fill="#4A3A73">Run the copy with writes ON, recording the minimum shard _seq_no first;</text>
+<text x="1134" y="841" font-size="12" fill="#4A3A73">then freeze only for a catch-up reindex on _seq_no ≥ checkpoint. Verified</text>
+<text x="1134" y="859" font-size="12" fill="#4A3A73">on 8.10. Needed only if 3M ever proves too slow — unlikely at this size.</text>
+</svg>

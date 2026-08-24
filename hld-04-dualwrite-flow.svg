@@ -1,0 +1,133 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1700 900" width="1700" height="900" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">
+<defs>
+<marker id="fA" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#44566B"/></marker>
+<marker id="fG" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#2E8B57"/></marker>
+<marker id="fR" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#C0392B"/></marker>
+</defs>
+<rect width="1700" height="900" fill="#FFFFFF"/>
+
+<text x="50" y="50" font-size="29" font-weight="700" fill="#16324F">Dual-Write Decision Flow — What the Single Consumer Does on Every Write</text>
+<text x="50" y="78" font-size="15.5" fill="#5A6B7B">Partial updates are fine. A 404 means the document is absent on C3 — which both bounds what C3 holds and triggers repair. This is the logic that keeps C3 correct and current.</text>
+<line x1="50" y1="93" x2="1650" y2="93" stroke="#E3E8EE" stroke-width="2"/>
+
+<!-- FLOW -->
+<rect x="60" y="130" width="230" height="62" rx="30" fill="#EEF0F3" stroke="#8A93A0" stroke-width="1.8"/>
+<text x="175" y="157" font-size="14" font-weight="700" fill="#2B333D" text-anchor="middle">Change arrives</text>
+<text x="175" y="177" font-size="12" fill="#5A6B7B" text-anchor="middle">from the Kafka topic</text>
+<path fill="none" d="M175,192 L175,222" stroke="#44566B" stroke-width="2.2" marker-end="url(#fA)"/>
+
+<rect x="60" y="224" width="230" height="76" rx="8" fill="#E3F0FB" stroke="#2E7CB8" stroke-width="2"/>
+<text x="175" y="250" font-size="14" font-weight="700" fill="#12496E" text-anchor="middle">1 · Write to C1</text>
+<text x="175" y="270" font-size="12" fill="#1B5C87" text-anchor="middle">always first — C1 is the</text>
+<text x="175" y="287" font-size="12" fill="#1B5C87" text-anchor="middle">source of record</text>
+<path fill="none" d="M175,300 L175,330" stroke="#44566B" stroke-width="2.2" marker-end="url(#fA)"/>
+
+<rect x="60" y="332" width="230" height="76" rx="8" fill="#E4F5EA" stroke="#37A05F" stroke-width="2"/>
+<text x="175" y="358" font-size="14" font-weight="700" fill="#14562F" text-anchor="middle">2 · Attempt C3 write</text>
+<text x="175" y="378" font-size="12" fill="#1E6B3E" text-anchor="middle">the same partial update</text>
+<text x="175" y="395" font-size="11.5" font-weight="700" fill="#8E2A20" text-anchor="middle">NEVER doc_as_upsert</text>
+<path fill="none" d="M175,408 L175,438" stroke="#44566B" stroke-width="2.2" marker-end="url(#fA)"/>
+
+<path fill="#FDF6EC" stroke="#E0912A" stroke-width="2.2" d="M175,440 L305,510 L175,580 L45,510 Z"/>
+<text x="175" y="500" font-size="14" font-weight="700" fill="#8A5A00" text-anchor="middle">404?</text>
+<text x="175" y="520" font-size="11.5" fill="#7A5520" text-anchor="middle">document missing</text>
+<text x="175" y="537" font-size="11.5" fill="#7A5520" text-anchor="middle">on C3</text>
+
+<path fill="none" d="M305,510 L400,510" stroke="#C0392B" stroke-width="2.2" marker-end="url(#fR)"/>
+<text x="352" y="500" font-size="12" font-weight="700" fill="#8E2A20" text-anchor="middle">YES</text>
+
+<path fill="none" d="M175,580 L175,626" stroke="#2E8B57" stroke-width="2.2" marker-end="url(#fG)"/>
+<text x="196" y="608" font-size="12" font-weight="700" fill="#1B5E3A">NO</text>
+<rect x="45" y="628" width="260" height="82" rx="8" fill="#E8F5EE" stroke="#2E8B57" stroke-width="2"/>
+<text x="175" y="654" font-size="13.5" font-weight="700" fill="#1B5E3A" text-anchor="middle">DONE — both updated</text>
+<text x="175" y="674" font-size="12" fill="#2E6B4A" text-anchor="middle">candidate is already in the</text>
+<text x="175" y="691" font-size="12" fill="#2E6B4A" text-anchor="middle">cohort. The common path,</text>
+<text x="175" y="705" font-size="11.5" font-style="italic" fill="#2E6B4A" text-anchor="middle">the large majority of traffic.</text>
+
+<!-- BRANCH: 404 -->
+<rect x="400" y="470" width="250" height="82" rx="8" fill="#E3F0FB" stroke="#2E7CB8" stroke-width="2"/>
+<text x="525" y="496" font-size="13.5" font-weight="700" fill="#12496E" text-anchor="middle">3 · GET full doc from C1</text>
+<text x="525" y="516" font-size="12" fill="#1B5C87" text-anchor="middle">it already contains the update</text>
+<text x="525" y="533" font-size="12" fill="#1B5C87" text-anchor="middle">just applied in step 1</text>
+<text x="525" y="548" font-size="11" font-style="italic" fill="#1B5C87" text-anchor="middle">so the partial need not be re-applied</text>
+<path fill="none" d="M650,510 L720,510" stroke="#44566B" stroke-width="2.2" marker-end="url(#fA)"/>
+
+<path fill="#FDF6EC" stroke="#E0912A" stroke-width="2.2" d="M865,432 L1010,510 L865,588 L720,510 Z"/>
+<text x="865" y="496" font-size="13" font-weight="700" fill="#8A5A00" text-anchor="middle">MAU predicate</text>
+<text x="865" y="515" font-size="13" font-weight="700" fill="#8A5A00" text-anchor="middle">passes?</text>
+<text x="865" y="537" font-size="11" fill="#7A5520" text-anchor="middle">checked on the document</text>
+<text x="865" y="552" font-size="11" fill="#7A5520" text-anchor="middle">in hand — no lookup needed</text>
+
+<path fill="none" d="M865,432 L865,382" stroke="#2E8B57" stroke-width="2.2" marker-end="url(#fG)"/>
+<text x="884" y="406" font-size="12" font-weight="700" fill="#1B5E3A">YES</text>
+<rect x="720" y="292" width="290" height="88" rx="8" fill="#E4F5EA" stroke="#37A05F" stroke-width="2.2"/>
+<text x="865" y="318" font-size="13.5" font-weight="700" fill="#14562F" text-anchor="middle">4 · Index the FULL document into C3</text>
+<text x="865" y="338" font-size="12" fill="#1E6B3E" text-anchor="middle">the candidate joins the cohort</text>
+<text x="865" y="355" font-size="12" fill="#1E6B3E" text-anchor="middle">→ returning dormant users</text>
+<text x="865" y="372" font-size="12" fill="#1E6B3E" text-anchor="middle">→ any document a dropped write lost</text>
+
+<path fill="none" d="M865,588 L865,634" stroke="#5A6B7B" stroke-width="2.2" marker-end="url(#fA)"/>
+<text x="884" y="614" font-size="12" font-weight="700" fill="#44566B">NO</text>
+<rect x="710" y="636" width="310" height="82" rx="8" fill="#EEF0F3" stroke="#8A93A0" stroke-width="2"/>
+<text x="865" y="662" font-size="13.5" font-weight="700" fill="#2B333D" text-anchor="middle">SKIP C3 — expected, not an error</text>
+<text x="865" y="682" font-size="12" fill="#5A6B7B" text-anchor="middle">candidate is not MAU. Nothing written.</text>
+<text x="865" y="700" font-size="12" font-weight="700" fill="#2B333D" text-anchor="middle">The 404 itself bounds C3 —</text>
+<text x="865" y="714" font-size="11.5" fill="#5A6B7B" text-anchor="middle">no membership set to maintain</text>
+
+<!-- FAILURE PATH -->
+<path fill="none" d="M1010,336 L1080,336" stroke="#C0392B" stroke-width="2.2" stroke-dasharray="6 4" marker-end="url(#fR)"/>
+<text x="1045" y="326" font-size="11" font-weight="700" fill="#8E2A20" text-anchor="middle">fail</text>
+<rect x="1080" y="292" width="250" height="88" rx="8" fill="#FDECEA" stroke="#C0392B" stroke-width="2"/>
+<text x="1205" y="318" font-size="13.5" font-weight="700" fill="#8E2A20" text-anchor="middle">Retry → DLQ</text>
+<text x="1205" y="338" font-size="12" fill="#96372C" text-anchor="middle">any C3 write failure retries,</text>
+<text x="1205" y="355" font-size="12" fill="#96372C" text-anchor="middle">then lands in a dead-letter</text>
+<text x="1205" y="372" font-size="12" fill="#96372C" text-anchor="middle">queue for replay</text>
+
+<!-- SIDE PANELS -->
+<rect x="1080" y="130" width="565" height="132" rx="9" fill="#FDECEA" stroke="#C0392B" stroke-width="1.8"/>
+<text x="1100" y="155" font-size="13.5" font-weight="700" fill="#8E2A20">THE TWO RULES THIS FLOW EXISTS TO ENFORCE</text>
+<text x="1100" y="180" font-size="12.5" font-weight="700" fill="#8E2A20">1 · Never doc_as_upsert on C3.</text>
+<text x="1100" y="198" font-size="12" fill="#96372C">A partial update upserted into a missing document creates a partial,</text>
+<text x="1100" y="215" font-size="12" fill="#96372C">corrupt record — a candidate with three fields and no name.</text>
+<text x="1100" y="238" font-size="12.5" font-weight="700" fill="#8E2A20">2 · Qualify the miss before backfilling.</text>
+<text x="1100" y="256" font-size="12" fill="#96372C">Otherwise a bulk job would drag all 47.1M into C3 — blowing cohort scope, sizing and budget.</text>
+
+<rect x="1080" y="400" width="565" height="300" rx="9" fill="#F6F8FB" stroke="#DDE3EA" stroke-width="1.5"/>
+<text x="1100" y="425" font-size="13" font-weight="700" fill="#16324F" letter-spacing="1.2">THE FIVE SITUATIONS THIS COVERS</text>
+
+<rect x="1096" y="437" width="533" height="46" rx="6" fill="#E8F5EE" stroke="#2E8B57" stroke-width="1.3"/>
+<text x="1110" y="455" font-size="12" font-weight="700" fill="#1B5E3A">In cohort, document present</text>
+<text x="1110" y="473" font-size="11.5" fill="#2E6B4A">Partial applies to both clusters identically. No backfill. Common path.</text>
+
+<rect x="1096" y="489" width="533" height="46" rx="6" fill="#EEF0F3" stroke="#8A93A0" stroke-width="1.3"/>
+<text x="1110" y="507" font-size="12" font-weight="700" fill="#2B333D">Not in cohort, not MAU</text>
+<text x="1110" y="525" font-size="11.5" fill="#5A6B7B">404 → predicate fails → skipped. C3 stays bounded to the cohort.</text>
+
+<rect x="1096" y="541" width="533" height="46" rx="6" fill="#E4F5EA" stroke="#37A05F" stroke-width="1.3"/>
+<text x="1110" y="559" font-size="12" font-weight="700" fill="#14562F">Returning dormant user (now MAU)</text>
+<text x="1110" y="577" font-size="11.5" fill="#1E6B3E">404 → predicate passes → full doc copied. Joins the cohort automatically.</text>
+
+<rect x="1096" y="593" width="533" height="46" rx="6" fill="#E4F5EA" stroke="#37A05F" stroke-width="1.3"/>
+<text x="1110" y="611" font-size="12" font-weight="700" fill="#14562F">New registration</text>
+<text x="1110" y="629" font-size="11.5" fill="#1E6B3E">A full document is written, so it enters C3 through the normal path.</text>
+
+<rect x="1096" y="645" width="533" height="46" rx="6" fill="#FDF6EC" stroke="#E0912A" stroke-width="1.3"/>
+<text x="1110" y="663" font-size="12" font-weight="700" fill="#8A5A00">A previous C3 write was dropped</text>
+<text x="1110" y="681" font-size="11.5" fill="#7A5520">Next write misses, refetches, rebuilds. THE repair path — see below.</text>
+
+<!-- BOTTOM -->
+<rect x="50" y="740" width="1000" height="134" rx="9" fill="#EEF4FB" stroke="#2E6DB4" stroke-width="1.6"/>
+<text x="70" y="765" font-size="13.5" font-weight="700" fill="#1C4E85">WHY THIS MATTERS MORE THAN IT LOOKS — partial writes do not self-heal</text>
+<text x="70" y="788" font-size="12.5" fill="#2A5C93">A full-document write is idempotent: if C3 ever falls behind, the next write overwrites the whole document and the divergence silently repairs itself.</text>
+<text x="70" y="807" font-size="12.5" fill="#2A5C93">A partial write does not. If one C3 write is dropped, C3 never re-learns the field it missed, and every later partial applies on top of a wrong base —</text>
+<text x="70" y="826" font-size="12.5" fill="#2A5C93">so the error is permanent and compounds. Nothing reads C3 broadly enough during the experiment to notice.</text>
+<text x="70" y="850" font-size="12.5" font-weight="700" fill="#1C4E85">Read-through-on-miss is therefore the repair mechanism, and the DLQ, replay and daily drift check are load-bearing controls — not optional hardening.</text>
+
+<rect x="1070" y="740" width="575" height="134" rx="9" fill="#F3EEFB" stroke="#7A4FBF" stroke-width="1.6"/>
+<text x="1090" y="765" font-size="13.5" font-weight="700" fill="#3D2A63">TWO SMALLER POINTS</text>
+<text x="1090" y="788" font-size="12.5" fill="#4A3A73"><tspan font-weight="700">Ordering.</tspan> Write C1 first, then read back. The document already</text>
+<text x="1090" y="806" font-size="12.5" fill="#4A3A73">contains the update, so the partial is not re-applied to C3 —</text>
+<text x="1090" y="824" font-size="12.5" fill="#4A3A73">one less step and one less race.</text>
+<text x="1090" y="848" font-size="12.5" fill="#4A3A73"><tspan font-weight="700">Concurrency.</tspan> If two writers miss at once, the earlier read can</text>
+<text x="1090" y="866" font-size="12.5" fill="#4A3A73">land last. Self-repairs next write; or use C1's _version with version_type: external.</text>
+</svg>

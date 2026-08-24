@@ -1,0 +1,3582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ES 9 Migration — Requirements Dashboard</title>
+  <style>
+    :root {
+      --bg: #f4f6f9;
+      --surface: #ffffff;
+      --border: #dde3ea;
+      --text: #16324f;
+      --muted: #5a6b7b;
+      --accent: #2e6db4;
+      --accent-soft: #eef4fb;
+      --green: #1b5e3a;
+      --green-soft: #e8f5ee;
+      --purple: #3d2a63;
+      --purple-soft: #f3eefb;
+      --orange: #8a5a00;
+      --orange-soft: #fdf6ec;
+      --red: #8e2a20;
+      --red-soft: #fdecea;
+      --radius: 10px;
+      --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      font-size: 14px;
+    }
+
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 20px 28px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    header h1 { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
+    header p { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+
+    .plan-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .plan-tab {
+      padding: 8px 18px;
+      font-size: 13px;
+      font-weight: 600;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      background: var(--bg);
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .plan-tab:hover { border-color: var(--accent); color: var(--text); }
+
+    .plan-tab.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+
+    .plan-tab .tab-status {
+      font-size: 10px;
+      font-weight: 700;
+      margin-left: 6px;
+      padding: 1px 6px;
+      border-radius: 4px;
+      vertical-align: middle;
+    }
+
+    .plan-tab.active .tab-status { background: rgba(255,255,255,0.25); color: #fff; }
+    .plan-tab:not(.active) .tab-status-committed { background: var(--green-soft); color: var(--green); }
+    .plan-tab:not(.active) .tab-status-draft { background: var(--orange-soft); color: var(--orange); }
+    .plan-tab:not(.active) .tab-status-analysis { background: #ede9fe; color: #6d28d9; }
+
+    .layout.consolidation-mode .sidebar-shell { display: none; }
+    .layout.consolidation-mode { grid-template-columns: 1fr; }
+
+    .consolidation-verdict {
+      border-radius: var(--radius);
+      border: 2px solid var(--border);
+      padding: 18px 20px;
+      margin-bottom: 20px;
+      background: var(--surface);
+    }
+
+    .consolidation-verdict.recommend-defer {
+      border-color: var(--orange);
+      background: var(--orange-soft);
+    }
+
+    .consolidation-verdict h3 {
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .consolidation-verdict p { font-size: 13px; line-height: 1.55; color: var(--text); margin: 0; }
+
+    .cons-pros-cons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+
+    @media (max-width: 900px) { .cons-pros-cons { grid-template-columns: 1fr; } }
+
+    .cons-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 18px;
+    }
+
+    .cons-box h4 {
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .cons-box.pros h4 { color: var(--green); }
+    .cons-box.cons h4 { color: #c0392b; }
+
+    .cons-box ul {
+      margin: 0;
+      padding-left: 18px;
+      font-size: 12.5px;
+      line-height: 1.5;
+      color: var(--muted);
+    }
+
+    .cons-box li { margin-bottom: 6px; }
+    .cons-box li strong { color: var(--text); }
+
+    .cons-scope-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12.5px;
+      margin-bottom: 24px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .cons-scope-table th,
+    .cons-scope-table td {
+      padding: 10px 14px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+
+    .cons-scope-table th {
+      background: var(--bg);
+      font-weight: 700;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--muted);
+    }
+
+    .cons-scope-table tr:last-child td { border-bottom: none; }
+
+    .cons-badge {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 4px;
+      text-transform: uppercase;
+    }
+
+    .cons-badge.in-scope { background: var(--green-soft); color: var(--green); }
+    .cons-badge.defer { background: var(--orange-soft); color: var(--orange); }
+    .cons-badge.optional { background: #ede9fe; color: #6d28d9; }
+
+    .cons-compare {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    @media (max-width: 1000px) { .cons-compare { grid-template-columns: 1fr; } }
+
+    .cons-compare-card {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      background: var(--surface);
+    }
+
+    .cons-compare-card.recommended {
+      border-color: var(--green);
+      box-shadow: 0 0 0 1px var(--green-soft);
+    }
+
+    .cons-compare-card h4 { font-size: 13px; font-weight: 700; margin-bottom: 8px; }
+    .cons-compare-card p { font-size: 12px; color: var(--muted); line-height: 1.45; margin: 0 0 8px; }
+    .cons-compare-card ul { font-size: 12px; color: var(--muted); padding-left: 16px; margin: 0; }
+
+    .cons-service-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 10px;
+      overflow: hidden;
+    }
+
+    .cons-service-card > summary {
+      padding: 12px 16px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 700;
+      list-style: none;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .cons-service-card > summary::-webkit-details-marker { display: none; }
+
+    .cons-effort {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 4px;
+      margin-left: auto;
+    }
+
+    .cons-effort.high { background: #fdecea; color: #c0392b; }
+    .cons-effort.medium { background: var(--orange-soft); color: var(--orange); }
+    .cons-effort.low { background: var(--green-soft); color: var(--green); }
+
+    .cons-service-body {
+      padding: 0 16px 14px;
+      border-top: 1px solid var(--border);
+      font-size: 12.5px;
+      line-height: 1.5;
+    }
+
+    .cons-service-body h5 {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin: 12px 0 6px;
+    }
+
+    .cons-service-body ul { margin: 0; padding-left: 18px; color: var(--muted); }
+    .cons-service-body li { margin-bottom: 4px; }
+    .cons-service-body code { font-size: 11px; }
+
+    .cons-flow {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 18px;
+      font-size: 12px;
+      line-height: 1.6;
+      color: var(--muted);
+      margin-bottom: 24px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+
+    .consolidation-why {
+      background: var(--surface);
+      border: 1px solid var(--accent);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      margin-bottom: 20px;
+    }
+
+    .consolidation-why h3 {
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 10px;
+      color: var(--text);
+    }
+
+    .consolidation-why p,
+    .consolidation-why li {
+      font-size: 13px;
+      line-height: 1.55;
+      color: var(--muted);
+    }
+
+    .consolidation-why p { margin: 0 0 10px; }
+    .consolidation-why ul { margin: 0; padding-left: 20px; }
+    .consolidation-why li { margin-bottom: 6px; }
+    .consolidation-why li strong { color: var(--text); }
+
+    .plan-banner {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 18px;
+      margin-bottom: 20px;
+      font-size: 13px;
+    }
+
+    .plan-banner h2 { font-size: 15px; font-weight: 700; margin-bottom: 6px; }
+    .plan-banner p { color: var(--muted); margin-bottom: 8px; }
+    .plan-banner ul { color: var(--muted); font-size: 12px; padding-left: 18px; }
+    .plan-banner li { margin-bottom: 4px; }
+    .plan-banner.draft { border-color: #e0912a; background: var(--orange-soft); }
+    .plan-banner.draft h2 { color: var(--orange); }
+
+    .layout {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 0;
+      min-height: calc(100vh - 80px);
+      position: relative;
+    }
+
+    .sidebar-shell {
+      position: relative;
+      display: flex;
+      min-width: 0;
+    }
+
+    aside {
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      padding: 20px 16px;
+      position: sticky;
+      top: 80px;
+      height: calc(100vh - 80px);
+      overflow-y: auto;
+      overflow-x: hidden;
+      width: 280px;
+      flex-shrink: 0;
+      transition: width 0.22s ease, padding 0.22s ease, opacity 0.18s ease, border-color 0.22s ease;
+    }
+
+    .layout.sidebar-collapsed aside {
+      width: 0;
+      padding-left: 0;
+      padding-right: 0;
+      opacity: 0;
+      border-right-color: transparent;
+      pointer-events: none;
+    }
+
+    .sidebar-toggle {
+      position: absolute;
+      top: 16px;
+      right: -14px;
+      z-index: 30;
+      width: 28px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: none;
+      border-radius: 0 8px 8px 0;
+      cursor: pointer;
+      box-shadow: 2px 0 8px rgba(0, 0, 0, 0.06);
+      color: var(--accent);
+      font-size: 20px;
+      font-weight: 700;
+      line-height: 1;
+      padding: 0;
+      transition: left 0.22s ease, right 0.22s ease, box-shadow 0.15s ease;
+    }
+
+    .sidebar-toggle:hover {
+      background: var(--accent-soft);
+      border-color: var(--accent);
+    }
+
+    .layout.sidebar-collapsed .sidebar-shell {
+      width: 0;
+      overflow: visible;
+    }
+
+    .layout.sidebar-collapsed .sidebar-toggle {
+      position: fixed;
+      left: 0;
+      right: auto;
+      top: 88px;
+      border-left: 1px solid var(--border);
+      box-shadow: 2px 0 10px rgba(0, 0, 0, 0.08);
+    }
+
+    aside h3 {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: var(--muted);
+      margin: 16px 0 8px;
+    }
+
+    aside h3:first-child { margin-top: 0; }
+
+    .filter-section { margin-bottom: 4px; }
+
+    .filter-section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin: 16px 0 6px;
+    }
+
+    .filter-section-header h3 { margin: 0; }
+
+    .filter-actions {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+    }
+
+    .filter-action {
+      background: none;
+      border: none;
+      padding: 0;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--accent);
+      cursor: pointer;
+    }
+
+    .filter-action:hover { text-decoration: underline; }
+
+    .filter-actions .sep { color: var(--border); font-size: 10px; }
+
+    .filter-group label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 5px 8px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+    }
+
+    .filter-group label:hover { background: var(--bg); }
+
+    .filter-group input { accent-color: var(--accent); }
+
+    .search-box {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 13px;
+      margin-bottom: 8px;
+    }
+
+    .search-box:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    main { padding: 24px 28px; overflow-y: auto; }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .stat {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+    }
+
+    .stat .num { font-size: 28px; font-weight: 700; line-height: 1.1; }
+    .stat .lbl { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+    .clusters {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .cluster {
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      border: 1.5px solid var(--border);
+    }
+
+    .cluster.old { background: #e3f0fb; border-color: #2e7cb8; }
+    .cluster.new { background: #e4f5ea; border-color: #37a05f; }
+
+    .cluster h4 { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+    .cluster .ver { font-size: 12px; color: var(--muted); }
+    .cluster .role { font-size: 12px; margin-top: 6px; }
+
+    .phases {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+
+    .phase-pill {
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .phase-pill:hover { border-color: var(--accent); }
+    .phase-pill.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .phase-pill.committed { border-color: #37a05f; }
+    .phase-pill.conditional { border-style: dashed; border-color: #7a4fbf; }
+    .phase-pill.draft { border-style: dashed; border-color: var(--orange); background: var(--orange-soft); color: var(--orange); }
+
+    .section-title {
+      font-size: 16px;
+      font-weight: 700;
+      margin: 28px 0 12px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--border);
+    }
+
+    .section-title:first-of-type { margin-top: 0; }
+
+    .section-subtitle {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.5;
+      margin: -6px 0 14px;
+      max-width: 920px;
+    }
+
+    .section-subtitle strong { color: var(--text); font-weight: 600; }
+
+    .repo-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 12px;
+      overflow: hidden;
+    }
+
+    .repo-card > summary.repo-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 18px;
+      cursor: pointer;
+      list-style: none;
+      user-select: none;
+    }
+
+    .repo-card > summary.repo-header::-webkit-details-marker { display: none; }
+
+    .repo-card > summary.repo-header::before {
+      content: "+";
+      flex-shrink: 0;
+      width: 18px;
+      height: 18px;
+      line-height: 16px;
+      text-align: center;
+      border-radius: 4px;
+      background: var(--bg);
+      color: var(--accent);
+      font-size: 14px;
+      font-weight: 700;
+      margin-right: 10px;
+    }
+
+    .repo-card[open] > summary.repo-header::before { content: "−"; }
+
+    .repo-card > summary.repo-header:hover { background: var(--bg); }
+
+    .repo-header-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex: 1;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .repo-name { font-size: 15px; font-weight: 700; }
+    .repo-meta { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+    .repo-badges { display: flex; gap: 6px; flex-wrap: wrap; flex-shrink: 0; }
+
+    .repo-body { padding: 0 18px 14px 46px; border-top: 1px solid var(--border); }
+
+    .repo-detail {
+      padding: 14px 0 12px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 12px;
+    }
+
+    .repo-detail-overview {
+      font-size: 13px;
+      color: var(--text);
+      line-height: 1.55;
+      margin-bottom: 12px;
+    }
+
+    .repo-detail-impact {
+      font-size: 12px;
+      color: var(--muted);
+      background: var(--bg);
+      padding: 10px 12px;
+      border-radius: 6px;
+      line-height: 1.5;
+      margin-top: 10px;
+    }
+
+    .repo-detail-impact strong { color: var(--text); }
+
+    .repo-tasks-label {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .repo-detail code {
+      font-size: 11px;
+      background: var(--bg);
+      padding: 1px 5px;
+      border-radius: 3px;
+    }
+
+    .badge {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+
+    .badge-lib { background: var(--purple-soft); color: var(--purple); }
+    .badge-svc { background: var(--accent-soft); color: var(--accent); }
+    .badge-infra { background: var(--orange-soft); color: var(--orange); }
+    .badge-new { background: var(--green-soft); color: var(--green); }
+    .badge-write { background: var(--red-soft); color: var(--red); }
+    .badge-read { background: var(--accent-soft); color: var(--accent); }
+
+    .task {
+      display: grid;
+      grid-template-columns: 28px 1fr auto;
+      gap: 10px;
+      align-items: start;
+      padding: 10px 0;
+      border-bottom: 1px solid #f0f2f5;
+    }
+
+    .task:last-child { border-bottom: none; }
+
+    .task input[type="checkbox"] {
+      margin-top: 3px;
+      accent-color: var(--green);
+      width: 16px;
+      height: 16px;
+      cursor: pointer;
+    }
+
+    .task.done .task-title { text-decoration: line-through; color: var(--muted); }
+
+    .task-title { font-weight: 600; font-size: 13px; }
+    .task-desc { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .task-files { font-size: 11px; color: var(--accent); margin-top: 4px; font-family: ui-monospace, monospace; }
+
+    .task-tags { display: flex; gap: 4px; flex-wrap: wrap; justify-content: flex-end; }
+
+    .tag {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 3px;
+      letter-spacing: 0.3px;
+    }
+
+    .tag-p0 { background: #eef0f3; color: #2b333d; }
+    .tag-p1 { background: var(--orange-soft); color: var(--orange); border: 1px dashed var(--orange); }
+    .tag-p2 { background: var(--green-soft); color: var(--green); }
+    .tag-p3 { background: var(--red-soft); color: var(--red); }
+    .tag-p4 { background: var(--purple-soft); color: var(--purple); }
+    .tag-p5 { background: #f5f0fb; color: var(--purple); border: 1px dashed #7a4fbf; }
+    .tag-p6 { background: #f5f0fb; color: var(--purple); border: 1px dashed #7a4fbf; }
+
+    .writers-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .writer-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .writer-card > summary {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 16px;
+      cursor: pointer;
+      list-style: none;
+      user-select: none;
+    }
+
+    .writer-card > summary::-webkit-details-marker { display: none; }
+
+    .writer-card > summary::before {
+      content: "+";
+      flex-shrink: 0;
+      width: 18px;
+      height: 18px;
+      line-height: 16px;
+      text-align: center;
+      border-radius: 4px;
+      background: var(--bg);
+      color: var(--accent);
+      font-size: 14px;
+      font-weight: 700;
+      margin-right: 4px;
+    }
+
+    .writer-card[open] > summary::before { content: "−"; }
+
+    .writer-card > summary:hover { background: var(--bg); }
+
+    .writer-summary-title {
+      font-size: 14px;
+      font-weight: 700;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .writer-summary-meta {
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: 500;
+      white-space: nowrap;
+    }
+
+    .writer-card-body {
+      padding: 0 16px 14px 38px;
+      border-top: 1px solid var(--border);
+    }
+
+    .writer-card ul { font-size: 12px; color: var(--muted); padding-left: 18px; margin: 0; }
+    .writer-card li { margin-bottom: 4px; line-height: 1.45; }
+
+    .writer-path {
+      border-top: 1px solid var(--border);
+      padding-top: 12px;
+      margin-top: 12px;
+    }
+
+    .writer-path:first-child { border-top: none; padding-top: 0; margin-top: 0; }
+
+    details.writer-path {
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0;
+      margin-top: 10px;
+      overflow: hidden;
+    }
+
+    details.writer-path > summary {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      cursor: pointer;
+      list-style: none;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--accent);
+      background: var(--bg);
+    }
+
+    details.writer-path > summary::-webkit-details-marker { display: none; }
+
+    details.writer-path > summary::before {
+      content: "+";
+      flex-shrink: 0;
+      width: 16px;
+      height: 16px;
+      line-height: 14px;
+      text-align: center;
+      border-radius: 3px;
+      background: var(--surface);
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    details.writer-path[open] > summary::before { content: "−"; }
+
+    .writer-path-body { padding: 10px 12px 12px; }
+
+    .writer-path-index {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--accent);
+      margin-bottom: 10px;
+    }
+
+    .writer-subsection { margin-bottom: 10px; }
+
+    .writer-sub-label {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+
+    .writer-data-list li strong { color: var(--text); font-weight: 600; }
+
+    .writer-files code, .writer-consumers code {
+      font-size: 11px;
+      background: var(--bg);
+      padding: 1px 5px;
+      border-radius: 3px;
+      color: var(--text);
+      word-break: break-all;
+    }
+
+    .writer-consumers li { list-style: none; padding-left: 0; margin-left: -18px; }
+    .writer-consumers .consumer-fields { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+    .writer-other { font-size: 11px; color: var(--orange); font-style: italic; }
+
+    .hld-links {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 24px;
+    }
+
+    .hld-links a {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--accent);
+      text-decoration: none;
+      padding: 6px 12px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--surface);
+    }
+
+    .hld-links a:hover { border-color: var(--accent); background: var(--accent-soft); }
+
+    .progress-bar {
+      height: 6px;
+      background: var(--border);
+      border-radius: 3px;
+      margin-top: 12px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--green);
+      border-radius: 3px;
+      transition: width 0.3s;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px;
+      color: var(--muted);
+    }
+
+    .qa-panel {
+      margin-bottom: 48px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .qa-panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 18px;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg);
+    }
+
+    .qa-panel-header h2 {
+      font-size: 16px;
+      font-weight: 700;
+      margin: 0;
+    }
+
+    .qa-panel-header .qa-total-badge {
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    .qa-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      padding: 12px 18px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+    }
+
+    .qa-search {
+      flex: 1;
+      min-width: 200px;
+      padding: 8px 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 13px;
+    }
+
+    .qa-search:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    .qa-tag-filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+
+    .qa-tag-pill {
+      padding: 4px 10px;
+      font-size: 11px;
+      font-weight: 600;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: var(--bg);
+      color: var(--muted);
+      cursor: pointer;
+    }
+
+    .qa-tag-pill:hover { border-color: var(--accent); color: var(--text); }
+    .qa-tag-pill.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+    .qa-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .qa-action-btn {
+      padding: 5px 10px;
+      font-size: 11px;
+      font-weight: 600;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--bg);
+      color: var(--muted);
+      cursor: pointer;
+    }
+
+    .qa-action-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+    .qa-result-count {
+      font-size: 11px;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .qa-section {
+      padding: 12px 18px 18px;
+      max-height: 70vh;
+      overflow-y: auto;
+    }
+
+    .qa-group { margin-bottom: 16px; }
+    .qa-group:last-child { margin-bottom: 0; }
+
+    .qa-group-title {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.9px;
+      color: var(--muted);
+      padding: 4px 0 8px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .qa-group-count {
+      font-weight: 500;
+      text-transform: none;
+      letter-spacing: 0;
+    }
+
+    .qa-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 6px;
+      overflow: hidden;
+    }
+
+    .qa-item.hidden { display: none; }
+
+    .qa-item summary {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 12px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      list-style: none;
+      user-select: none;
+    }
+
+    .qa-item summary::-webkit-details-marker { display: none; }
+
+    .qa-item summary::before {
+      content: "+";
+      flex-shrink: 0;
+      width: 18px;
+      height: 18px;
+      line-height: 16px;
+      text-align: center;
+      border-radius: 4px;
+      background: var(--bg);
+      color: var(--accent);
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .qa-item[open] summary::before { content: "−"; }
+
+    .qa-item summary:hover { background: var(--bg); }
+
+    .qa-summary-text { flex: 1; min-width: 0; }
+
+    .qa-item-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-top: 4px;
+    }
+
+    .qa-item-tag {
+      font-size: 10px;
+      font-weight: 600;
+      padding: 1px 6px;
+      border-radius: 3px;
+      background: var(--bg);
+      color: var(--muted);
+    }
+
+    .qa-answer {
+      padding: 0 14px 12px 42px;
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.55;
+      border-top: 1px solid #f0f2f5;
+      padding-top: 10px;
+      margin: 0 14px 12px 42px;
+    }
+
+    .qa-answer p { margin-bottom: 8px; }
+    .qa-answer p:last-child { margin-bottom: 0; }
+    .qa-answer code {
+      font-size: 12px;
+      background: var(--bg);
+      padding: 1px 5px;
+      border-radius: 3px;
+      color: var(--text);
+    }
+
+    .qa-highlight {
+      background: #fff3cd;
+      color: var(--text);
+      padding: 0 2px;
+      border-radius: 2px;
+    }
+
+    .qa-empty {
+      text-align: center;
+      padding: 32px 18px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .qa-empty strong { color: var(--text); display: block; margin-bottom: 4px; }
+
+    @media (max-width: 1100px) {
+      .layout { grid-template-columns: 1fr; }
+      .layout.sidebar-collapsed { grid-template-columns: 1fr; }
+      .sidebar-shell { width: 100% !important; }
+      aside {
+        position: static;
+        height: auto;
+        width: 100% !important;
+        opacity: 1 !important;
+        padding: 20px 16px !important;
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+        pointer-events: auto;
+      }
+      .sidebar-toggle { display: none; }
+      .stats { grid-template-columns: repeat(3, 1fr); }
+      .clusters { grid-template-columns: repeat(2, 1fr); }
+      .writers-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>ES 9.x Migration — Requirements Dashboard</h1>
+  <div class="plan-tabs" id="planTabs">
+    <button type="button" class="plan-tab active" data-plan="migration_v0">
+      migration_v0 <span class="tab-status tab-status-committed">HLD</span>
+    </button>
+    <button type="button" class="plan-tab" data-plan="migration_v1">
+      migration_v1 <span class="tab-status tab-status-draft">DRAFT</span>
+    </button>
+    <button type="button" class="plan-tab" data-plan="write_consolidation">
+      P1 Write consolidation <span class="tab-status tab-status-analysis">ANALYSIS</span>
+    </button>
+  </div>
+  <p id="planSubtitle">Consolidated change tracker · Target: ES 9.4.2 · HNSW / nested dense_vector</p>
+  <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+</header>
+
+<div class="layout" id="layout">
+  <div class="sidebar-shell" id="sidebarShell">
+    <aside id="sidebar">
+    <input type="text" class="search-box" id="searchBox" placeholder="Search tasks, files, repos…" />
+
+    <div class="filter-section" data-filter-group="phase">
+      <div class="filter-section-header">
+        <h3>Phase</h3>
+        <div class="filter-actions">
+          <button type="button" class="filter-action" data-action="all">All</button>
+          <span class="sep">·</span>
+          <button type="button" class="filter-action" data-action="none">None</button>
+        </div>
+      </div>
+      <div class="filter-group" id="phaseFilters"></div>
+    </div>
+
+    <div class="filter-section" data-filter-group="category">
+      <div class="filter-section-header">
+        <h3>Category</h3>
+        <div class="filter-actions">
+          <button type="button" class="filter-action" data-action="all">All</button>
+          <span class="sep">·</span>
+          <button type="button" class="filter-action" data-action="none">None</button>
+        </div>
+      </div>
+      <div class="filter-group" id="categoryFilters"></div>
+    </div>
+
+    <div class="filter-section" data-filter-group="role">
+      <div class="filter-section-header">
+        <h3>Role</h3>
+        <div class="filter-actions">
+          <button type="button" class="filter-action" data-action="all">All</button>
+          <span class="sep">·</span>
+          <button type="button" class="filter-action" data-action="none">None</button>
+        </div>
+      </div>
+      <div class="filter-group" id="roleFilters"></div>
+    </div>
+
+    <h3>Status</h3>
+    <div class="filter-group" id="statusFilters">
+      <label><input type="radio" name="status" value="all" checked /> All</label>
+      <label><input type="radio" name="status" value="pending" /> Pending</label>
+      <label><input type="radio" name="status" value="done" /> Done</label>
+    </div>
+
+    <div class="filter-section" data-filter-group="repo">
+      <div class="filter-section-header">
+        <h3>Repository</h3>
+        <div class="filter-actions">
+          <button type="button" class="filter-action" data-action="all">All</button>
+          <span class="sep">·</span>
+          <button type="button" class="filter-action" data-action="none">None</button>
+        </div>
+      </div>
+      <div class="filter-group" id="repoFilters"></div>
+    </div>
+    </aside>
+    <button type="button" class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle filter sidebar" aria-expanded="true" title="Collapse filters">
+      <span class="sidebar-toggle-icon" aria-hidden="true">‹</span>
+    </button>
+  </div>
+
+  <main>
+    <div class="plan-banner" id="planBanner"></div>
+
+    <div id="migrationView">
+    <div class="stats" id="stats"></div>
+
+    <div class="hld-links">
+      <a href="hld-01-architecture.svg" target="_blank">HLD — Architecture</a>
+      <a href="hld-02-roadmap.svg" target="_blank">HLD — Roadmap</a>
+      <a href="hld-03-migration-window.svg" target="_blank">HLD — Migration Window</a>
+      <a href="hld-04-dualwrite-flow.svg" target="_blank">HLD — Dual-Write Flow</a>
+    </div>
+
+    <div class="clusters" id="clusters"></div>
+
+    <div class="phases" id="phasePills"></div>
+
+    <div class="section-title" id="writersSectionTitle">Write Fragmentation (P1 draft — not confirmed)</div>
+    <p class="section-subtitle" id="writersSectionHint"></p>
+    <div class="writers-grid" id="writers"></div>
+
+    <div class="section-title" id="readersSectionTitle">Read Fragmentation · production on C1/C2</div>
+    <p class="section-subtitle" id="readersSectionHint"></p>
+    <div class="writers-grid" id="readers"></div>
+
+    <div class="section-title">Libraries</div>
+    <div id="libs"></div>
+
+    <div class="section-title">Services</div>
+    <div id="services"></div>
+
+    <div class="section-title">New / Infrastructure</div>
+    <div id="infra"></div>
+
+    <div class="empty-state" id="emptyState" style="display:none">
+      No tasks match the current filters.
+    </div>
+    </div>
+
+    <div id="consolidationView" style="display:none"></div>
+
+    <div class="qa-panel" id="qaPanel">
+      <div class="qa-panel-header">
+        <h2>Q&amp;A</h2>
+        <span class="qa-total-badge" id="qaTotalBadge"></span>
+      </div>
+      <div class="qa-toolbar">
+        <input type="text" class="qa-search" id="qaSearchBox" placeholder="Search questions and answers…" />
+        <div class="qa-tag-filters" id="qaTagFilters"></div>
+        <div class="qa-actions">
+          <button type="button" class="qa-action-btn" id="qaExpandAll">Expand all</button>
+          <button type="button" class="qa-action-btn" id="qaCollapseAll">Collapse all</button>
+          <span class="qa-result-count" id="qaResultCount"></span>
+        </div>
+      </div>
+      <div class="qa-section" id="qaSection"></div>
+      <div class="qa-empty" id="qaEmpty" style="display:none">
+        <strong>No matching questions</strong>
+        Try a different search term or clear the tag filter.
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+let activePlanId = localStorage.getItem("es9_active_plan") || "migration_v0";
+
+const WRITE_FRAGMENTATION = [
+  {
+    service: "wicandidateprofile-ms",
+    paths: [{
+      index: "workindia-candidate-feature · CandidateFeatureV3 · C1",
+      dataWritten: [
+        { label: "Full profile reindex", detail: "id, full_name, language, gender, city, qualification, skill/industry/location tags, geo_location, timestamps, salary (v2/v3), work_experience, assets, sector/role experience, text_search, inferred fields merge" },
+        { label: "Resume CDC", detail: "resume_data, resume_extracted_params, has_resume" },
+        { label: "Resume mapper", detail: "synced_resume_data, is_resume_parsed" },
+        { label: "Contact verification", detail: "otp_verified" },
+        { label: "Premium CDC", detail: "is_premium" },
+        { label: "Skill assessment", detail: "assessment_passed_skills" },
+        { label: "Audio", detail: "audio_data (quality, clarity, grammar, path, duration)" },
+        { label: "Activeness", detail: "last_active_time" },
+        { label: "Blacklist", detail: "blacklisted_bitset (OR merge)" },
+        { label: "Job exclusions (painless)", detail: "excluded_job_ids" },
+        { label: "Employer reporting (painless)", detail: "reported_employer_ids" },
+        { label: "FCM bulk (deprecated)", detail: "fcm_active_timestamp" },
+      ],
+      files: [
+        "common/utils/candidate/profiling/candidatefeaturetagging.py",
+        "common/utils/candidate/candidateupdateprofileparser.py",
+        "common/tasks.py",
+        "common/utils/candidate/contactverificationesupdatehelper.py",
+        "common/utils/candidate/candidatepremiumcdchandler.py",
+        "common/utils/candidate/candidatepassedskillessynchelper.py",
+        "common/utils/candidate/candidateaudioessynchelper.py",
+        "common/utils/elasticsearch/scriptparams/jobexclusionscriptparams.py",
+        "common/utils/elasticsearch/scriptparams/employerreportingscriptparams.py",
+      ],
+      consumers: [
+        { name: "CandidateGenerateFeatureTagConsumer", writes: "Full doc → add_to_search()" },
+        { name: "FastPartialCandidateGenerateFeatureTagConsumer", writes: "Partial full doc → fast_partial_add_to_search()" },
+        { name: "ResumeUpdateProcessingConsumer", writes: "resume_data, resume_extracted_params, has_resume" },
+        { name: "ResumeMapperConsumer", writes: "synced_resume_data" },
+        { name: "VerifiedContactConsumer", writes: "otp_verified" },
+        { name: "CandidatePremiumCDCStreamConsumer", writes: "is_premium" },
+        { name: "CandidateExcludedJobIdsCDCStreamConsumer", writes: "excluded_job_ids (painless)" },
+        { name: "CandidateEmployerReportMappingCDCStreamConsumer", writes: "reported_employer_ids (painless)" },
+        { name: "CandidateSkillPassedConsumer", writes: "assessment_passed_skills" },
+        { name: "CandidateAudioInESConsumer", writes: "audio_data" },
+        { name: "CandidateJobCallsActivenessConsumer", writes: "last_active_time" },
+        { name: "BlacklistedCandidateBitsetConsumer", writes: "blacklisted_bitset" },
+        { name: "BulkCandidateFCMActiveUpdateConsumer", writes: "fcm_active_timestamp (deprecated)" },
+      ],
+      otherTriggers: ["HTTP: CandidateUpdateProfileParser (sync profile update)", "Eligibility retry → add_to_search()"],
+    }],
+  },
+  {
+    service: "wi-candidateevents-ms",
+    paths: [{
+      index: "workindia-candidate-feature · CandidateFeatureV3 · C1",
+      dataWritten: [
+        { label: "job_activity_v2", detail: "Painless scripted bulk update — nested job_activity_v2[industry|rc_<rolecategory>][activity][date]; activity: tried_contacting_employer (prod)" },
+        { label: "last_app_open", detail: "bulk/single doc update — UTC datetime; deduped to one write per calendar day via Redis cache" },
+        { label: "intent_bucket", detail: "single doc update — T_3 bucket when candidate has no prior green-tap in t-3 window" },
+      ],
+      files: [
+        "events/helpers/candidatejobactivitytracker.py",
+        "events/helpers/candidateintentbuckethelper.py",
+        "events/pubsub/consumers/candidatetrackjobactivityconsumer.py",
+        "events/pubsub/consumers/candidatetriedcontactingemployerconsumer.py",
+        "events/pubsub/consumers/candidateappopenbulkconsumer.py",
+        "events/controllers/appopendatacontroller.py",
+        "api/apps.py",
+      ],
+      consumers: [
+        { name: "CandidateTrackJobActivityConsumer", writes: "job_activity_v2 via CandidateFeatureV3().bulk() + Painless script (batch 300)" },
+        { name: "CandidateTriedContactingEmployerConsumer", writes: "intent_bucket update; publishes track-job-activity events" },
+        { name: "CandidateAppOpenBulkConsumer", writes: "last_app_open bulk update (batch 1000, 15min flush)" },
+      ],
+      otherTriggers: [
+        "HTTP: POST /events/employer-contacted-tried/, /events/web/employer-contacted-tried/",
+        "HTTP: POST /events/app-open-data/ → Kafka → CandidateAppOpenBulkConsumer",
+        "Note: CandidateAppOpenConsumer exists but prod uses bulk consumer only",
+      ],
+    }],
+  },
+  {
+    service: "wiemployerviewcandidate-ms",
+    paths: [
+      {
+        index: "workindia-candidate-feature · CandidateFeatureV3 · C1",
+        dataWritten: [
+          { label: "Employer interactions", detail: "employer_interactions[] — employer_id, jobpost_id, type (unlock/contact), timestamp, meta (state, source, section)" },
+          { label: "Unlock count", detail: "unlock_count_t_7 (increment on unlock, bulk reset via cron)" },
+          { label: "Intent bucket", detail: "intent_bucket (t-3 / t-7 / t-14)" },
+        ],
+        files: [
+          "api/utils/employercandidateinteractionhelper.py",
+          "api/utils/candidate/systemapplyhelper.py",
+          "api/utils/employeraction/employerunlockedcandidate.py",
+          "api/utils/estask/candidatefeaturetasks.py",
+          "api/utils/estask/baseestask.py",
+        ],
+        consumers: [
+          { name: "InternalJobAppliedConsumer", writes: "employer_interactions (system apply bulk)" },
+          { name: "JobpostViewCandidateResponseConsumer", writes: "employer_interactions (apply/call/missed-call)" },
+          { name: "JobpostViewCandidateResponseConsumerV2", writes: "employer_interactions (same as v1)" },
+        ],
+        otherTriggers: ["HTTP: EmployerUnlockedCandidate (unlock before cache consumer)", "Cron: resetescandidateunlockcount, demotecandidateintentbucket"],
+      },
+      {
+        index: "workindia-job-post-view-candidate-status · JobPostViewCandidateStatus",
+        dataWritten: [
+          { label: "Per-jobpost status lists", detail: "candidates_talked, candidates_have_not_talked, candidates_interviewed, candidates_rejected, candidates_hired, candidates_called_for_interview, candidates_unlocked" },
+        ],
+        files: [
+          "api/utils/savecandidatestatushelper.py",
+          "api/relevancy/jobcandidateordergeneration.py",
+          "api/relevancy/v2/candidateesquerygenerator.py",
+        ],
+        consumers: [
+          { name: "SaveCandidateStatusConsumer", writes: "Full status doc rebuild per jobpost_id" },
+        ],
+      },
+      {
+        index: "JobPostViewCandidateFeature (view-candidate job tags)",
+        dataWritten: [
+          { label: "Job feature tags for VC", detail: "skill, compulsory_skill, gender, qualification, english, position, industry, role_category, geo_location, salary range, is_paid" },
+        ],
+        files: [
+          "api/profilling/jobpostfeaturetagging.py",
+          "api/profilling/jobpostviewcandidateparser.py",
+          "api/utils/employer/jobposttagshelper.py",
+        ],
+        consumers: [
+          { name: "JobPostFeatureTaggingConsumer", writes: "Full tag doc via JobPostFeatureTagging.add_to_search()" },
+        ],
+      },
+      {
+        index: "JobPostViewCandidateFav (legacy favourites)",
+        dataWritten: [
+          { label: "Favourites", detail: "id (jobpost_id), candidates[] (favourited candidate IDs)" },
+        ],
+        files: ["api/utils/employer/employercandidatefavouritehandler.py"],
+        consumers: [],
+        otherTriggers: ["HTTP only: CandidateFavouriteMarkController (no Kafka consumer)"],
+      },
+    ],
+  },
+  {
+    service: "wiemployerjobpost-ms",
+    paths: [{
+      index: "workindia-job-feature · JobFeatureV3 · C2",
+      dataWritten: [
+        { label: "Full job doc (save)", detail: "position, skill, industry, role, geo_location, salary (min/max/bucket), employer_id, text_search_string, experience_score, work_experience, assets, certifications, timestamps (live_timestamp, created_at), is_paid, priority, trust_factor, ranking stats" },
+        { label: "Partial update", detail: "trust_factor, connected_calls_ratio, call_overflow_ratio, daily_views, call_count, has_low_cc, openings, salary_bucket" },
+        { label: "Delete", detail: "Full doc removal on deactivate/reject/temp-deactivate" },
+      ],
+      files: [
+        "api/utils/job/jobfeaturetagging.py",
+        "api/utils/job/jobprofileparser.py",
+        "api/elasticmodels/jobfeaturev3.py",
+        "api/utils/jobpost/jobpostcrudhandlers/syncing.py",
+        "api/utils/jobpost/jobpostcrudhandlers/jobespartialupdate.py",
+        "api/utils/jobpost/jobpostmovetostatehelpers/jobpostmovetolivehelper.py",
+        "api/utils/jobpost/jobpostmovetostatehelpers/jobpostmovetodeactivatehelper.py",
+        "api/utils/jobpost/featuretagging/specificdetailsfeaturetaggingutil.py",
+      ],
+      consumers: [
+        { name: "JobPostCrudConsumer", writes: "Full upsert on ADD/EDIT/ACTIVATE; delete on DEACTIVATE/REJECT" },
+        { name: "JobPostPostVerificationConsumer", writes: "State transitions → JobSyncing → full upsert or delete" },
+        { name: "JobPostBulkDeactivateConsumer", writes: "Bulk deactivate → ES delete chain" },
+        { name: "DocumentAttemptConsumer", writes: "Doc approval/rejection → activate/deactivate → JobSyncing" },
+        { name: "EmployerExtendedPropertyChangeConsumer", writes: "Partial trust_factor update on live jobs" },
+        { name: "JobBulkAddOperationConsumer", writes: "Indirect via HTTP → CRUD → go-live upsert" },
+        { name: "JobBulkEditOperationConsumer", writes: "Indirect via HTTP → CRUD → re-index" },
+      ],
+      otherTriggers: ["Cron: syncjobstatscron (bulk ranking-field updates)"],
+    }],
+  },
+  {
+    service: "workindiaapi (shared)",
+    paths: [{
+      index: "workindia-candidate-feature · CandidateFeatureV3 · C1 (legacy)",
+      dataWritten: [
+        { label: "Full profile reindex (legacy)", detail: "id, full_name, language, gender, city, qualification, skill/industry/location tags, geo_location, timestamps, resume_data, text_search — smaller doc than profile-ms (no inferred-fields merge)" },
+        { label: "Partial resume", detail: "resume_data via update_partial_data_search()" },
+      ],
+      files: [
+        "Dependencies/workindiasharedmodules/sharedmodules/profilling/candidate/candidatefeaturetagging.py",
+        "Dependencies/workindiasharedmodules/sharedmodules/profilling/candidate/candidateprofileparser.py",
+        "api/tasks/candidatetask.py",
+        "api/utils/candidateeligibility/eligibilityanalysis.py",
+      ],
+      consumers: [],
+      otherTriggers: [
+        "SQS: generatefeaturetags / generatefeaturetagshigh workers",
+        "Celery: candidate_generate_feature_tags, update_queued_candidate_feature_tags_task",
+        "Celery: candidate_own_resume_post_upload_task (partial resume_data)",
+        "Note: new profile updates migrated to wicandidateprofile-ms via CANDIDATE_GENERATE_FEATURE_TAG Kafka topic",
+      ],
+    }],
+  },
+];
+
+const READ_FRAGMENTATION = [
+  {
+    service: "workindiajobs-ms",
+    paths: [
+      {
+        index: "workindia-job-feature · JobFeatureV3 · C2",
+        dataRead: [
+          { label: "Primary job relevancy search", detail: "search via wirelevancyadapter CandidateJobOrderGenerationES8 — job_category, company_name, skill, role, geo_location, salary, trust_factor, employer_id, timestamps, scoring fields" },
+          { label: "Similar / generic job search", detail: "GenericJobOrderGenerator — role_secondary_keywords, industry, salary ranges, geo distance, qualification filters" },
+          { label: "Filter aggregations", detail: "CandidateRelevancyAggsHandler — salary/distance/freshness/trust_factor buckets (limit=0 agg search)" },
+          { label: "City job counts", detail: "CityJobCountCacheHandler, CitySectorJobCountCacheHandler — agg on city.keyword, industry_constant.keyword" },
+          { label: "Retrieval model hydrate", detail: "RetrievalModelJobsHelper — batch search by vector-store job IDs" },
+          { label: "Job embeddings pipeline", detail: "JobEmbeddingHelper — role_secondary_keywords, qualification, geo_location, salary, openings, etc." },
+        ],
+        files: [
+          "jobs/util/candidaterelevancyhandler.py",
+          "jobs/util/candidaterelevancyhandlerv2.py",
+          "jobs/util/candidaterelevancyhandlerv3.py",
+          "jobs/util/candidaterelevancyhandlerv4.py",
+          "jobs/util/genericjobordergenerator.py",
+          "jobs/util/aggregations/candidaterelevancyaggshandler.py",
+          "jobs/util/cachehandlers/cityjobcountcachehandler.py",
+          "jobs/helpers/retrievalmodeljobshelper.py",
+          "jobs/helpers/retrievalembedding/jobembeddinghelper.py",
+          "jobs/helpers/recommendationenginehelper.py",
+        ],
+        consumers: [
+          { name: "RecommendationEngineRankingParamLayerConsumer", reads: "Job search for recommendation ranking layer" },
+          { name: "RecommendationEngineEmbeddingParamLayerConsumer", reads: "Job search for embedding param layer" },
+          { name: "FeaturePipelineSyncConsumerV2", reads: "Batch job docs for embedding pipeline" },
+          { name: "SaveCallDurationAiCallbackConsumer", reads: "Job fields for AI callback enrichment" },
+          { name: "DirectiveEngineAnalyzerConsumer", reads: "Job IDs for directive engine comparative analysis" },
+        ],
+        otherTriggers: [
+          "HTTP: MainListJobsView, RelevantJobsView (v1–v3), HomePageJoblistView, FreshJobsListView",
+          "HTTP: SimilarJobsView, CategoryJobsView, TopJobsView, FilterController",
+          "HTTP: GET /api/jobs/count/city-jobs/, off-product jobs, website jobs",
+          "Library: wirelevancyadapter CandidateJobOrderGenerationES8 (primary search executor)",
+        ],
+      },
+      {
+        index: "workindia-candidate-feature · CandidateFeatureV3 · C1",
+        dataRead: [
+          { label: "Candidate feature cache", detail: "get() — full doc minus resume/employer_interactions/job_activity; skill/role truncated to 25; used for relevancy tag building" },
+          { label: "Off-product jobs", detail: "job_activity_v2, employer_interactions" },
+          { label: "Candidate embeddings", detail: "qualification, position, geo_location, salary, experience, preferred_job_cities, etc." },
+          { label: "AI callback enrichment", detail: "full_name, languages_known" },
+        ],
+        files: [
+          "jobs/util/cachehandlers/candidatefeatureelasticcachehandler.py",
+          "jobs/helpers/candidateestaghelper.py",
+          "jobs/util/offproductjobutil.py",
+          "jobs/helpers/retrievalembedding/candidateembeddinghelper.py",
+          "jobs/util/aicallbackenrichment.py",
+        ],
+        consumers: [
+          { name: "CandidateFeatureElasticCacheUpdateConsumer", reads: "CandidateFeatureV3.get() → refresh Redis cache" },
+          { name: "CandidateJobRefreshConsumer", reads: "Cache refresh + relevancy context" },
+          { name: "CandidateRealtimeFeaturePipelineConsumerV2", reads: "Candidate doc for embedding pipeline" },
+          { name: "CandidateBackfillFeaturePipelineConsumer", reads: "Candidate doc backfill embeddings" },
+        ],
+        otherTriggers: [
+          "HTTP: nearly all authenticated candidate job-list APIs (via CandidateESTagHelper)",
+          "Indirect: wirelevancyadapter loads candidate tags on every job relevancy query",
+        ],
+      },
+    ],
+  },
+  {
+    service: "wi-candidateevents-ms",
+    paths: [{
+      index: "workindia-candidate-feature · CandidateFeatureV3 · C1",
+      dataRead: [
+        { label: "No active ES reads (today)", detail: "Write-only service — no search/get/mget in application code; CandidateESClusterAdapter read_nodes configured in apps.py but unused" },
+      ],
+      files: ["api/apps.py"],
+      consumers: [],
+      otherTriggers: ["Future read paths would use same CandidateFeatureV3 model on candidate-es-cluster"],
+    }],
+  },
+  {
+    service: "wiemployerviewcandidate-ms",
+    paths: [
+      {
+        index: "workindia-candidate-feature · CandidateFeatureV3 · C1",
+        dataRead: [
+          { label: "V3 candidate list (match/responses/unlocked/fav)", detail: "_source: qualification, gender, city, geo_location, work_industry, assessment_passed_skills, preferred_job_cities, audio_data, total_work_experience; filters on skill, salary, employer_interactions (nested), blacklisted_bitset, resume_data" },
+          { label: "Global database search", detail: "Same _source + global-DB ranking (distance, hot-leads RRC filters)" },
+          { label: "V2 / legacy tabs", detail: "search + scroll; job_activity on V2 path; terms-lookup side indices for status/fav/unlocked filters" },
+          { label: "Response candidates", detail: "scroll _id only; nested filter on employer_interactions (jobpost_id, type, meta.state, timestamp)" },
+          { label: "Tab counts", detail: "count on match filters; per-state response counts via employer_interactions nested queries" },
+          { label: "Hot leads hydrate", detail: "terms query on Redis candidate IDs → full list _source" },
+          { label: "Export enrichment", detail: "get() — role_category_experience" },
+        ],
+        files: [
+          "api/relevancy/v3/matchengine.py",
+          "api/relevancy/v3/querygenerator/match/candidatematchquerygenerator.py",
+          "api/relevancy/global_database/matchengine.py",
+          "api/relevancy/v2/candidateorder.py",
+          "api/relevancy/jobcandidateordergeneration.py",
+          "api/utils/customelasticmodels/candidatefeaturev2customquery.py",
+          "api/cachehandler/jobpostviewcandidateresponseselasticcachehandlerv2.py",
+          "api/utils/exportcandidatehelper.py",
+        ],
+        consumers: [
+          { name: "ExportCandidateConsumer", reads: "CandidateFeatureV3.get() for role_category_experience" },
+          { name: "MailExportCandidateConsumer", reads: "Same export enrichment path" },
+          { name: "UnlockExportCandidateConsumer", reads: "Same export enrichment path" },
+        ],
+        otherTriggers: [
+          "HTTP: GET /v3/candidates/, /v3/candidates/app/, /global-database/search/candidates/",
+          "HTTP: GET /search/, /matched/, /responses/, /unlocked/, /favourite/",
+          "HTTP: GET /view-candidate-count/, /internal/response-candidates/, /internal/get-hot-leads/",
+          "HTTP: POST /v3/export/ → async Kafka → consumer read",
+        ],
+      },
+      {
+        index: "workindia-job-post-view-candidate-status · side index · C1",
+        dataRead: [
+          { label: "Status filter (terms lookup)", detail: "candidates_talked, candidates_interviewed, candidates_rejected, candidates_hired, candidates_unlocked, etc. per jobpost_id" },
+          { label: "Status existence count", detail: "count by jobpost_id before applying status filters" },
+        ],
+        files: [
+          "api/relevancy/v3/querygenerator/match/query/jobpostlevelcandidatesquery.py",
+          "api/relevancy/v2/candidateesquerygenerator.py",
+          "api/cachehandler/jobpostmatchcandidatecountcachehandler.py",
+        ],
+        consumers: [],
+        otherTriggers: ["Embedded in candidate search queries (terms lookup during C1 search)"],
+      },
+      {
+        index: "workindia-location-matrix · LocationMatrixV2 · C1",
+        dataRead: [
+          { label: "Location proxy query", detail: "_source.name, _source.city (caller-supplied query)" },
+        ],
+        files: ["api/views/servecandidatequeries.py"],
+        consumers: [],
+        otherTriggers: ["HTTP: POST /internal/serve-candidate-feature-queries/ (LOCATION_MATRIX only)"],
+      },
+    ],
+  },
+  {
+    service: "wicandidateprofile-ms",
+    paths: [{
+      index: "workindia-candidate-feature · CandidateFeatureV3 · C1",
+      dataRead: [
+        { label: "Profile read / cache", detail: "get() — full candidate doc; cache strips resume_data, truncates skill/role; english, qualification, gender, otp_verified for partial updates" },
+        { label: "Eligibility / filter config", detail: "Existing tags via CandidateFeatureElasticCacheHandler before profile merge" },
+      ],
+      files: [
+        "common/cachehandlers/candidatefeatureelasticcachehandler.py",
+        "common/utils/candidate/profiling/candidatefeaturetagging.py",
+        "common/utils/contactverificationesupdatehelper.py",
+        "api/pubsub/consumers/blacklistedcadidatebitsetconsumer.py",
+      ],
+      consumers: [
+        { name: "VerifiedContactConsumer", reads: "Existing doc before otp_verified partial update" },
+        { name: "BlacklistedCandidateBitsetConsumer", reads: "Existing blacklisted_bitset for OR merge" },
+        { name: "CandidateExcludedJobIdsCDCStreamConsumer", reads: "Doc for painless script context" },
+        { name: "CandidateEmployerReportMappingCDCStreamConsumer", reads: "Doc for painless script context" },
+      ],
+      otherTriggers: [
+        "HTTP: profilecontroller (v2 profile API)",
+        "Profile flows: CandidateUpdateProfileParser, FilterConfigurationGenerator",
+      ],
+    },
+    {
+      index: "workindia-job-title-industry-map · JobTitleIndustryMapV2 · C2",
+      dataRead: [
+        { label: "Job title classification", detail: "search on stemming_words → class (industry); get existing mapping doc" },
+      ],
+      files: ["common/utils/prediction/jobtitleclassification.py"],
+      consumers: [],
+      otherTriggers: ["HTTP/profile: candidateupdateprofileparser (job-title → industry inference)"],
+    }],
+  },
+  {
+    service: "wiemployerjobpost-ms",
+    paths: [
+      {
+        index: "workindia-job-feature · JobFeatureV3 · C2",
+        dataRead: [
+          { label: "Existence check before partial update", detail: "search with ids filter — document _id only" },
+          { label: "Reconciliation cron", detail: "_source id for mongo vs ES parity check" },
+        ],
+        files: [
+          "api/utils/jobpost/jobpostcrudhandlers/jobespartialupdate.py",
+          "api/management/commands/reconcilejobsyncing.py",
+        ],
+        consumers: [
+          { name: "EmployerExtendedPropertyChangeConsumer", reads: "Job existence before trust_factor partial update" },
+        ],
+        otherTriggers: ["Cron: reconcilejobsyncing management command"],
+      },
+      {
+        index: "workindia-job-verification-repository-v2 · VerificationRepositoryV3",
+        dataRead: [
+          { label: "Verification repo state", detail: "get() — tag field (LIVE, FRAUD, NOT_PRESENT) by mobile/email/device/user id" },
+        ],
+        files: ["api/utils/verification/autoverificationeshelper.py"],
+        consumers: [
+          { name: "DocumentAttemptConsumer", reads: "Verification repo state on doc approval/rejection" },
+        ],
+        otherTriggers: ["HTTP: get_verification_repo_state in jobposts.py"],
+      },
+      {
+        index: "workindia-job-title-industry-map · JobTitleIndustryMapV2 · C2",
+        dataRead: [
+          { label: "Job title → industry", detail: "search stemming_words → class (top matches within score band)" },
+        ],
+        files: ["api/utils/textclassification.py", "api/utils/job/jobprofileparser.py"],
+        consumers: [],
+        otherTriggers: ["Job sync/tagging during JobProfileParser → add_to_search()"],
+      },
+    ],
+  },
+  {
+    service: "wiemployerservicingms",
+    paths: [{
+      index: "workindia-job-feature · JobFeatureV3 · C2 + CandidateFeatureV3 · C1",
+      dataRead: [
+        { label: "Job tags for boost matching", detail: "JobFeatureV3.get() — gender, qualification, skill, city, geo_location, salary, text_search, role_category" },
+        { label: "Candidate search (search_after)", detail: "CandidateFeatureV3.search() — _id + _score only; 1000-ID pages for servicing/boost" },
+      ],
+      files: [
+        "common/utils/servicingjobcandidateordergeneration.py",
+        "common/utils/relevantcandidateshelper.py",
+        "common/utils/paginateusingsearchafter.py",
+        "servicing/utils/starvedjobpostfreedbhelper.py",
+      ],
+      consumers: [
+        { name: "JobBoostingConsumer", reads: "Job tags + candidate search for boost targeting" },
+        { name: "BulkJobBoostingConsumer", reads: "Bulk boost candidate matching" },
+      ],
+      otherTriggers: [
+        "HTTP: boost.py (manual_boost, availability checks)",
+        "Cron: servicestarvedjobpost",
+      ],
+    }],
+  },
+  {
+    service: "workindiaapi (legacy)",
+    paths: [{
+      index: "workindia-candidate-feature + location-matrix + legacy indices",
+      dataRead: [
+        { label: "Candidate matching / alerts", detail: "CandidateFeatureV3 get/search/count — job alerts, ATS webhook, clustering v3 order generation" },
+        { label: "Location autocomplete", detail: "LocationMatrixV2 search — geo-distance lookup" },
+        { label: "Employer transaction summary", detail: "EmployerTransactionSummary search (Job Count cluster)" },
+      ],
+      files: [
+        "api/utils/employers/jobalertsutil.py",
+        "api/adapter/workindiaats.py",
+        "microservice/.../location/locationutil.py",
+        "microservice/.../employertransactionsummaryhelper.py",
+      ],
+      consumers: [],
+      otherTriggers: [
+        "Cron/tasks: job alert generation",
+        "HTTP: ATS webhook payload prep, payment wallet views",
+        "Adhoc: legacy JobFeatureV2 scroll (jobs sync scripts only)",
+      ],
+    }],
+  },
+];
+
+const CONSOLIDATION_ANALYSIS = {
+  why: {
+    q: "Why do we want to consolidate all consumers into one?",
+    a: [
+      "Today <strong>5 services</strong> run <strong>30+ independent write paths</strong> to the same Elasticsearch documents. Each path has its own consumer, retry logic, and failure mode — but they all touch the same <code>CandidateFeatureV3</code> / <code>JobFeatureV3</code> docs on C1/C2.",
+      "The original motivation for consolidation is twofold:",
+    ],
+    goals: [
+      { title: "Centralize ES write logic", detail: "Dual-write (C1+C3), MAU backfill on 404, Painless scripts, DLQ, and ordering rules live in one handler instead of being reimplemented or diverging across wicandidateprofile-ms, wi-candidateevents-ms, wiemployerviewcandidate-ms, etc." },
+      { title: "Single choke point to stop writes", detail: "For the P2 migration freeze, scale one consumer deployment to zero (or drain one Kafka topic) instead of coordinating scale-down across every service's consumers and HTTP sync paths." },
+    ],
+    alternatives: "These goals can also be met <strong>without</strong> merging consumers: dual-write in <code>elastictoolkit</code> / <code>wi-elasticsearchmodels</code> (adapter layer), an ES <code>index.blocks.write</code> flag at the cluster, or a shared adapter freeze flag. Consolidation is an architecture choice — not a prerequisite for ES 9 migration. See Approach comparison below.",
+  },
+  verdict: {
+    title: "Recommendation: do not block ES 9 migration on full consolidation",
+    body: "Consumer consolidation is a valuable <strong>long-term architecture goal</strong> but a <strong>poor gate for P2</strong>. The ES migration can ship with dual-write at the adapter layer (migration_v1) or phased per-service dual-write flags (migration_v0 alternative) while writers remain fragmented. Pursue consolidation as a <strong>parallel track</strong> starting after P0 library work, or as post-P4 cleanup — unless leadership explicitly accepts delaying the experiment for a 3–6 month writer refactor.",
+  },
+  pros: [
+    { title: "Single dual-write implementation", detail: "HLD-04 (C1→C3 partial, 404 backfill, MAU predicate, DLQ) lives in one handler — not duplicated across 5 services." },
+    { title: "Clean migration freeze", detail: "Scale one candidate consumer group to zero for P2; resume drains Kafka backlog to both clusters from a single choke point." },
+    { title: "Per-candidate ordering", detail: "Kafka partition by candidate_id serializes conflicting field updates (premium vs resume vs activity) — reduces silent last-write-wins races on C1 today." },
+    { title: "Canonical change cursor", detail: "Consumer can set a real updated_at on every write — unlocks future delta-sync and simpler drift detection." },
+    { title: "Operational clarity", detail: "One dashboard for ES write errors, lag, DLQ; easier on-call than 30+ paths across 5 repos." },
+  ],
+  cons: [
+    { title: "Large cross-team refactor", detail: "5 services, 30+ write paths, 13 consumers in profile-ms alone — each must stop direct ES and publish events with a stable schema." },
+    { title: "Blocks P2 if made mandatory", detail: "HLD P1 is DRAFT for a reason; making consolidation a gate delays C3 experiment, embeddings (P3), and kNN validation (P4)." },
+    { title: "HTTP sync semantics", detail: "Profile update HTTP paths today expect immediate ES consistency; async eventing changes candidate/employer UX unless request-reply added." },
+    { title: "Not literally one consumer", detail: "Jobs (C2+C4) and VC status indices need separate topics/handlers; jobpost-ms and view-candidate-ms still diverge." },
+    { title: "Painless + bulk migration risk", detail: "job_activity_v2 scripted bulk, exclusions, employer_interactions — high regression risk moving script assembly to new service." },
+    { title: "Legacy workindiaapi path", detail: "SQS/Celery feature-tag workers still write C1; must deprecate or bridge before consolidation is complete." },
+  ],
+  scope: [
+    { item: "Dual-write C1+C3 / C2+C4", inMigration: true, note: "Required for migration — can live in adapter layer without consolidation" },
+    { item: "P2 write freeze + _reindex", inMigration: true, note: "Required — works with fragmented writers (all scale to zero)" },
+    { item: "ES9 adapter + C3/C4 provisioning", inMigration: true, note: "P0 — independent of consumer count" },
+    { item: "Unified Kafka event schema", inMigration: false, note: "Consolidation-only — large design + rollout effort" },
+    { item: "Remove direct CandidateFeatureV3 calls from 5 services", inMigration: false, note: "Consolidation-only — each service refactor" },
+    { item: "Single consumer scale-to-zero for freeze", inMigration: false, note: "Nice-to-have; multi-writer freeze is proven approach in HLD" },
+    { item: "Canonical updated_at on every write", inMigration: false, note: "Optional benefit; not required for _reindex + dual-write" },
+  ],
+  approaches: [
+    {
+      name: "A — Full consolidation (P1 draft)",
+      recommended: false,
+      summary: "All writers publish events; 1–2 consumers own all ES I/O + dual-write.",
+      points: ["Best long-term write ordering", "Highest engineering cost", "Delays migration if gated on P2", "3–6+ month cross-repo program"],
+    },
+    {
+      name: "B — Adapter dual-write (migration_v1)",
+      recommended: true,
+      summary: "Keep fragmented writers; dual-write + read-fallback in elastictoolkit / models.",
+      points: ["No event schema migration", "Ships with existing consumer layout", "Dual-write logic duplicated per adapter call", "Freeze still stops all writers"],
+    },
+    {
+      name: "C — Phased per-service dual-write (migration_v0 alt)",
+      recommended: true,
+      summary: "Add C3/C4 flags per service/consumer; shadow dual-write pre-P2; all dual-write before resume.",
+      points: ["Incremental rollout (start wi-candidateevents-ms)", "No single-consumer gate", "30+ paths to flag and test", "Matches current HLD if P1 dropped"],
+    },
+  ],
+  newConsumer: {
+    title: "What the new consumer(s) must own",
+    items: [
+      "Kafka topics: candidate-es-changes (key=candidate_id), job-es-changes (key=jobpost_id) — possibly vc-status-changes",
+      "Event schema: operation (full_upsert | partial_update | scripted_bulk | delete), field_groups[], payload, source_service, idempotency_key",
+      "Handler registry: map field_group → ES operation (mirror today's 13 profile consumers + 3 activity + view-candidate paths)",
+      "Dual-write executor: C1 first → C3 partial → 404 GET C1 → MAU predicate → full index (HLD-04)",
+      "DLQ + retry + lag metrics; Flagsmith kill-switch per field_group",
+      "Post-write side effects: CandidateFeatureElasticCacheUpdate event, drift check hooks",
+      "Deployment: scale-to-zero hook for P2; backlog drain to both clusters on T4 resume",
+    ],
+  },
+  services: [
+    {
+      service: "wicandidateprofile-ms",
+      effort: "high",
+      today: "13 Kafka consumers + HTTP profile update — largest write surface to CandidateFeatureV3 (C1)",
+      changes: [
+        "Remove all CandidateFeatureV3().save / update / bulk / fast_partial_add_to_search from consumers and CandidateFeatureTagging",
+        "Publish CandidateESChangeEvent to unified topic from each CDC consumer and HTTP path",
+        "Move JobExclusionScript + EmployerReportingScript Painless assembly to consumer (or ship script_id + params in event)",
+        "Keep PG/profile logic in profile-ms; only ES I/O moves out",
+        "CandidateFeatureElasticCacheUpdateProducer — fire after consumer confirms write (or consume outbox from consumer)",
+        "Bump wi-elasticsearchmodels / elastictoolkit; remove elasticsearch 5.x direct imports",
+      ],
+      files: "common/utils/candidate/profiling/candidatefeaturetagging.py, api/pubsub/consumers/* (13), common/utils/elasticsearch/scriptparams/, Development/api/apps.py",
+      consumers: 13,
+      triggers: 2,
+    },
+    {
+      service: "wi-candidateevents-ms",
+      effort: "medium",
+      today: "3 Kafka consumers — job_activity_v2 (Painless bulk), last_app_open, intent_bucket",
+      changes: [
+        "CandidateTrackJobActivityConsumer → publish activity events; consumer runs bulk script",
+        "CandidateAppOpenBulkConsumer → publish app-open events; consumer batches last_app_open updates",
+        "CandidateTriedContactingEmployerConsumer → publish intent events; resolve intent_bucket merge with view-candidate-ms in consumer",
+        "HTTP controllers stay; they already publish to Kafka — change payload to unified schema",
+        "Remove CandidateFeatureV3 imports from helpers",
+      ],
+      files: "events/helpers/candidatejobactivitytracker.py, events/helpers/candidateintentbuckethelper.py, events/pubsub/consumers/*",
+      consumers: 3,
+      triggers: 3,
+    },
+    {
+      service: "wiemployerviewcandidate-ms",
+      effort: "high",
+      today: "3 Kafka consumers + HTTP/cron on 4 indices — candidate interactions + VC status docs",
+      changes: [
+        "employercandidateinteractionhelper.py — stop direct ES bulk; publish interaction events",
+        "InternalJobAppliedConsumer, JobpostViewCandidateResponseConsumer(V2) → unified topic",
+        "Cron: resetescandidateunlockcount, demotecandidateintentbucket → scheduled events or consumer cron",
+        "JobPostViewCandidateStatus full doc rebuild — likely separate handler (different index)",
+        "JobPostFeatureTaggingConsumer + favourites HTTP — may stay here or move to jobs handler",
+        "EmployerUnlockedCandidate HTTP — publish before cache consumer expects ES update",
+      ],
+      files: "api/utils/employercandidateinteractionhelper.py, api/utils/estask/, api/pubsub/consumers/*, api/utils/savecandidatestatushelper.py",
+      consumers: 5,
+      triggers: 3,
+    },
+    {
+      service: "wiemployerjobpost-ms",
+      effort: "medium",
+      today: "8 Kafka consumers + cron — JobFeatureV3 save/update/delete on C2",
+      changes: [
+        "JobFeatureTagging.save/update/delete → publish to job-es-changes topic (separate from candidate)",
+        "JobPostCrudConsumer chain, DocumentAttemptConsumer, EmployerExtendedPropertyChangeConsumer → events",
+        "Consumer on C2+C4 dual-write path (jobs cluster pair)",
+        "Consolidate local api/elasticmodels/jobfeaturev3.py with shared wi-elasticsearchmodels model",
+        "syncjobstatscron partial updates → batch events or dedicated ranking handler",
+      ],
+      files: "api/utils/job/jobfeaturetagging.py, api/utils/jobpost/jobpostcrudhandlers/syncing.py, api/pubsub/consumers/*",
+      consumers: 8,
+      triggers: 1,
+    },
+    {
+      service: "workindiaapi (legacy)",
+      effort: "low",
+      today: "SQS/Celery generatefeaturetags — legacy full/partial candidate writes (shrinking)",
+      changes: [
+        "Deprecate path: new profiles already route to wicandidateprofile-ms via CANDIDATE_GENERATE_FEATURE_TAG Kafka topic",
+        "If not deprecated: bridge Celery task → publish same unified event (do not duplicate ES logic)",
+        "Remove sharedmodules candidatefeaturetagging.py direct ES once traffic is zero",
+      ],
+      files: "Dependencies/workindiasharedmodules/.../candidatefeaturetagging.py, api/tasks/candidatetask.py",
+      consumers: 0,
+      triggers: 4,
+    },
+    {
+      service: "elastictoolkit-py + wi-elasticsearchmodels-py",
+      effort: "medium",
+      today: "Shared adapters used by all services for ES I/O today",
+      changes: [
+        "If consolidating: dual-write moves INTO consumer — adapters in libraries become consumer-internal (services stop configuring ES)",
+        "If NOT consolidating: DualWriteAdapter / cluster router in elastictoolkit (P1 task) used by every remaining direct writer",
+        "Event field enums in models package if schema owned centrally",
+        "ES9Adapter still required for C3/C4 regardless of consolidation choice",
+      ],
+      files: "elastictoolkit/adapters/, wielasticsearchmodels/adapters/, wielasticsearchmodels/configs/candidatefeaturev3fields.py",
+      consumers: 0,
+      triggers: 0,
+    },
+    {
+      service: "NEW: candidate-es-write-consumer",
+      effort: "high",
+      today: "Does not exist — proposed P1 draft",
+      changes: [
+        "New repo or module under wicandidateprofile-ms with dedicated consumer deployment",
+        "Subscribe candidate-es-changes; handler registry for all field groups",
+        "Implement HLD-04 dual-write, DLQ, drift hooks, freeze/resume lifecycle",
+        "Load tests: 13 former consumer throughput combined; Painless bulk batching parity",
+        "Flagsmith: per-field_group shadow mode before cutover",
+      ],
+      files: "new consumer service, Dockerfile, build/prod_values.yml, ops runbook",
+      consumers: 1,
+      triggers: 0,
+    },
+  ],
+};
+
+const PLANS = {
+  migration_v0: {
+    id: "migration_v0",
+    subtitle: "HLD committed path (P0, P2–P4) · P1 consumer consolidation is draft · 3M MAU cohort · dual-write · experiment reads on C3/C4",
+    bannerClass: "",
+    banner: {
+      title: "migration_v0 — HLD Committed Path",
+      summary: "Semantic matching experiment on 3M MAU. Production reads stay on C1/C2 until conditional P6 cutover.",
+      bullets: [
+        "P1 (DRAFT): Consolidate 5 writers → single Kafka consumer — not confirmed yet; alternative write paths under review",
+        "P2: Write freeze &lt;1hr → _reindex MAU cohort → verify → resume dual-write",
+        "P3: Embedding pipeline (~9.4M vectors) — critical path",
+        "P4: Experiment kNN reads on C3/C4 only — not production Consul",
+        "404 on C3 is write-path backfill, not a production read fallback",
+      ],
+    },
+    hldLinks: true,
+    phases: [
+      { id: "P0", label: "P0 Pre-flight", type: "committed", desc: "MAU field, quantization, provision C3/C4" },
+      { id: "P1", label: "P1 Consumer consolidation (DRAFT)", type: "draft", desc: "5 writers → single Kafka consumer — not confirmed" },
+      { id: "P2", label: "P2 Migration window", type: "committed", desc: "Freeze, _reindex 3M MAU, verify, resume" },
+      { id: "P3", label: "P3 Embeddings", type: "committed", desc: "~9.4M context vectors — critical path" },
+      { id: "P4", label: "P4 Experiment", type: "committed", desc: "kNN reads on C3/C4 (MAU cohort)" },
+      { id: "P5", label: "P5 Remaining ~44M", type: "conditional", desc: "Full corpus migration" },
+      { id: "P6", label: "P6 Production cutover", type: "conditional", desc: "Consul repoint, query parity, p99" },
+    ],
+    clusters: [
+      { id: "C1", name: "Candidate ES", ver: "8.10.0", role: "Source of record · 47.1M docs · all prod candidate reads", type: "old" },
+      { id: "C2", name: "Jobs ES", ver: "8.6.0", role: "Source of record · ~150K jobs · 300–400 q/s", type: "old" },
+      { id: "C3", name: "Candidate ES (experiment)", ver: "9.4.2", role: "workindia-candidate-feature-embedded · 3M MAU first", type: "new" },
+      { id: "C4", name: "Jobs ES (experiment)", ver: "9.4.2", role: "Job context vectors for Candidate→Job kNN", type: "new" },
+    ],
+    writers: WRITE_FRAGMENTATION,
+    readers: READ_FRAGMENTATION,
+    qa: [
+      {
+        id: "v0-qa-clusters",
+        category: "Architecture",
+        tags: ["clusters", "C1", "C2", "C3", "C4"],
+        q: "What are C1, C2, C3, and C4?",
+        a: "<p><strong>C1</strong> (ES 8.10.0) and <strong>C2</strong> (ES 8.6.0) are production source-of-record clusters — all prod reads stay here through P4. <strong>C3</strong> and <strong>C4</strong> (ES 9.4.2) are experiment clusters for semantic matching (HNSW / nested <code>dense_vector</code>). C3 hosts <code>workindia-candidate-feature-embedded</code>; C4 hosts job context vectors for Candidate→Job kNN.</p>",
+      },
+      {
+        id: "v0-qa-why-migrate",
+        category: "Architecture",
+        tags: ["migration", "ES9", "C1", "C2", "C3", "C4", "semantic", "vector", "kNN", "upgrade"],
+        q: "Why do we need to migrate Elasticsearch?",
+        a: "<p><strong>Short answer:</strong> today&rsquo;s production clusters (C1 8.10, C2 8.6) <em>cannot</em> run the semantic-matching product spec. ES 9.4.2 on new clusters (C3/C4) is a <strong>prerequisite for the experiment</strong>, not a routine version bump or an ops-only optimisation.</p><p><strong>1. Product driver — semantic matching</strong><br>The roadmap needs <strong>embedding-based job↔candidate relevance</strong>: store context vectors per candidate (~3.14 nested vectors each) and per job, then run <strong>filtered kNN</strong> (similarity + city/salary/skills filters) to improve match quality beyond keyword/BM25. That requires indexed <code>dense_vector</code> fields with HNSW-style ANN search and a quantization strategy (int8_hnsw / BBQ) so ~9.4M vectors fit realistic hardware.</p><p><strong>2. Hard version blockers on C1/C2 (verified)</strong><br>Production cannot adopt this mapping on the clusters we actually run:</p><ul><li><strong>C1 (8.10.0)</strong> rejects <code>int8_hnsw</code> index options and rejects <strong>indexed nested</strong> <code>dense_vector</code> — the shape the HLD needs for multiple context vectors per candidate doc.</li><li><strong>C2 (8.6.0)</strong> has the same categorical limits (older than C1).</li><li>Required capabilities landed <em>after</em> our versions: nested kNN in 8.11, int8_hnsw in 8.12; ES 9 adds mature BBQ defaults and Lucene 10 vector stack.</li></ul><p>A sizing doc that says &ldquo;ES 8.x with int8_hnsw&rdquo; is true for 8.x <em>in general</em>, but <strong>not for WorkIndia&rsquo;s pinned 8.10 / 8.6 clusters</strong>.</p><p><strong>3. What the migration actually does (v0 plan)</strong></p><ul><li><strong>Phase 1 — documents:</strong> copy the MAU cohort from C1→C3 (and jobs C2→C4) via freeze + <code>_reindex</code>, then dual-write so both stay current. Production <strong>reads stay on C1/C2</strong> through P4.</li><li><strong>Phase 2 — embeddings (P3):</strong> separate pipeline; <code>_reindex</code> copies <code>_source</code> only and <strong>never generates vectors</strong>. New index <code>workindia-candidate-feature-embedded</code> on C3 holds the vectors.</li><li><strong>Phase 3 — experiment (P4):</strong> kNN reads hit C3/C4 on a dedicated endpoint — not Consul production DNS.</li><li><strong>Phase 4 — production cutover (conditional P6):</strong> only after full corpus parity, query parity, and latency gates — repoint Consul from C1/C2 to C3/C4.</li></ul><p><strong>4. What this is <em>not</em></strong></p><ul><li><strong>Not required to keep today&rsquo;s search running</strong> — current job lists, employer search, and profile indexing continue on C1/C2 unchanged during the experiment.</li><li><strong>Not primarily about EOL/security</strong> — though running 9.4.2 long-term is desirable, the forcing function is the vector feature spec.</li><li><strong>Not blocked on P1 consumer consolidation</strong> — dual-write can ship at the adapter layer while writers remain fragmented.</li></ul><p><strong>5. Why not bolt vectors onto C1 in-place?</strong><br>Even a rolling upgrade of C1 to 8.12+ would still leave nested-vector mapping changes, reindex risk on 47M production docs, and no isolated experiment blast radius. The HLD provisions <strong>parallel C3/C4 clusters</strong> so semantic matching can be validated without touching production read paths.</p><p>See also: <em>What are HNSW, int8_hnsw, and BBQ?</em> · <em>What are C1, C2, C3, and C4?</em> · <em>Will production reads go down during migration?</em></p>",
+      },
+      {
+        id: "v0-qa-mau",
+        category: "Migration phases",
+        tags: ["P2", "P5", "MAU", "scope"],
+        q: "Why migrate 3M MAU first instead of all 47M candidates?",
+        a: "<p>The HLD scopes the initial experiment to ~3M monthly-active users to de-risk the migration window, reduce _reindex time, and validate dual-write + kNN recall before committing to the remaining ~44M docs (conditional P5).</p>",
+      },
+      {
+        id: "v0-qa-hnsw-bbq",
+        category: "Vector search",
+        tags: ["HNSW", "int8_hnsw", "BBQ", "bbq_hnsw", "dense_vector", "C3", "C4", "P0", "P3", "quantization", "kNN"],
+        q: "What are HNSW, int8_hnsw, and BBQ? Why are they required — and what are the trade-offs?",
+        a: "<p>These are Elasticsearch <code>dense_vector</code> <strong>index_options</strong> — they control how embedding vectors are stored and how fast approximate kNN search runs. They are the technical reason C3/C4 must be <strong>ES 9.4.2</strong>, not a tuning knob on today&rsquo;s C1/C2 clusters.</p><p><strong>HNSW</strong> (Hierarchical Navigable Small World) is a graph-based <em>approximate nearest neighbour</em> (ANN) algorithm. Instead of comparing a query vector against every document (brute force), ES builds a multi-layer navigable graph at index time and walks it at query time to find the top-<em>k</em> similar vectors quickly. Mapping shape: <code>index_options: { type: &quot;hnsw&quot; }</code> on an indexed <code>dense_vector</code> field.</p><p><strong>int8_hnsw</strong> = HNSW + <strong>scalar quantization</strong> (float32 → int8). Vectors are compressed ~4× in memory; search runs on quantized values with corrective scoring. In ES 9.1+, this is the <strong>default</strong> for <code>float</code> vectors with <strong>&lt; 384 dimensions</strong>. Arrived in ES 8.12 — after C1 (8.10.0).</p><p><strong>BBQ</strong> (Better Binary Quantization) = a stronger compression scheme, exposed as <code>bbq_hnsw</code> (HNSW on binary-quantized vectors, with oversampling for recall). Typical footprint reduction is up to <strong>~32×</strong> vs raw float32. In ES 9.1+, <code>bbq_hnsw</code> is the <strong>default</strong> for <code>float</code> vectors with <strong>≥ 384 dimensions</strong>. Related: <code>bbq_disk</code> (ES 9.2+, Enterprise) stores quantized vectors on disk to cut RAM further.</p><p><strong>Why we need them (WorkIndia context):</strong></p><ul><li><strong>Semantic matching experiment (P4)</strong> needs filtered kNN over <strong>nested context vectors</strong> (~3.14 per MAU candidate → ~9.4M vectors on C3; job vectors on C4). Brute-force similarity over millions of high-dimensional floats is not viable at production latency.</li><li><strong>C1 (8.10.0) and C2 (8.6.0) categorically cannot run this spec</strong> — verified by direct test: 8.10 rejects <code>int8_hnsw</code> (&ldquo;Unknown vector index options type&rdquo;) and rejects <strong>indexed nested</strong> <code>dense_vector</code>. Nested kNN landed in 8.11; int8_hnsw in 8.12 — both after the versions in production.</li><li><strong>Cluster sizing</strong> — without quantization, holding tens of millions of float vectors in RAM on a 3-node data tier is cost-prohibitive. Quantization is how the experiment fits realistic hardware.</li><li><strong>P0 gate</strong> — embedding model dimension + <code>index_options.type</code> must be chosen <em>before the first vector write</em>; ES treats them as <strong>immutable</strong>. Wrong choice ⇒ new index + re-embed (~9.4M vectors), not a settings change.</li></ul><p><strong>Advantages:</strong></p><ul><li><strong>Scale</strong> — sub-second approximate kNN over millions of vectors at experiment/production QPS.</li><li><strong>Cost</strong> — int8_hnsw (~4×) and bbq_hnsw (~32×) shrink heap pressure vs raw HNSW; enables fewer/larger cohorts per node.</li><li><strong>Relevance</strong> — semantic similarity (embeddings) captures meaning beyond keyword/BM25 match — the product driver for C3/C4.</li><li><strong>Filtered kNN</strong> — combine vector similarity with bool filters (city, salary band, etc.) on the same nested structure.</li></ul><p><strong>Disadvantages / risks:</strong></p><ul><li><strong>Approximate, not exact</strong> — ANN trades perfect recall for speed; quantization adds another accuracy layer. Must benchmark recall@k on real MAU traffic before trusting rankings (P4).</li><li><strong>Irreversible mapping choice</strong> — <code>index_options</code> locked after first indexed vector; model or quantization change = reindex + full re-embedding run.</li><li><strong>Dimension-dependent defaults</strong> — BBQ is tuned for ≥384-dim models; below that, int8_hnsw is usually safer (Elastic notes BBQ can add overhead with less accuracy gain on very low dims).</li><li><strong>Tuning surface</strong> — HNSW params (<code>m</code>, <code>ef_construction</code>, query <code>num_candidates</code>) affect index size, ingest time, and recall; needs load testing.</li><li><strong>Nested complexity</strong> — ~3.14 vectors/candidate increases index size and query planning vs a single vector/doc; mapping and kNN query DSL are more involved (P3/P4 library work).</li><li><strong>Upgrade dependency</strong> — not an optimisation on 8.x; it is a <em>prerequisite</em> for the vector spec on clusters WorkIndia actually runs.</li></ul><p><strong>Quick comparison:</strong></p><table style=&quot;width:100%;border-collapse:collapse;font-size:12px;margin:8px 0&quot;><thead><tr><th style=&quot;text-align:left;padding:4px 8px;border-bottom:1px solid var(--border)&quot;>Option</th><th style=&quot;text-align:left;padding:4px 8px;border-bottom:1px solid var(--border)&quot;>Compression</th><th style=&quot;text-align:left;padding:4px 8px;border-bottom:1px solid var(--border)&quot;>Typical use</th></tr></thead><tbody><tr><td style=&quot;padding:4px 8px&quot;><code>hnsw</code></td><td style=&quot;padding:4px 8px&quot;>none (~1×)</td><td style=&quot;padding:4px 8px&quot;>Highest accuracy; RAM-heavy</td></tr><tr><td style=&quot;padding:4px 8px&quot;><code>int8_hnsw</code></td><td style=&quot;padding:4px 8px&quot;>~4×</td><td style=&quot;padding:4px 8px&quot;>Default &lt;384 dims; good accuracy/cost balance</td></tr><tr><td style=&quot;padding:4px 8px&quot;><code>bbq_hnsw</code></td><td style=&quot;padding:4px 8px&quot;>up to ~32×</td><td style=&quot;padding:4px 8px&quot;>Default ≥384 dims; large-scale semantic search</td></tr></tbody></table><p>See also: <em>What are C1, C2, C3, and C4?</em> · P0 task: decide quantization before first write · P3: embedding model + dimensions.</p>",
+      },
+      {
+        id: "v0-qa-p1-draft",
+        category: "Write path",
+        tags: ["P1", "draft", "kafka", "consumer"],
+        q: "Is P1 (single Kafka consumer) confirmed?",
+        a: "<p><strong>No — P1 is marked DRAFT.</strong> Consolidating 5 direct ES writers into one consumer is the enabling change in the HLD, but alternative write paths are still under review. P0, P2–P4 remain the committed path regardless.</p>",
+      },
+      {
+        id: "v0-qa-read-downtime",
+        category: "Read path",
+        tags: ["reads", "production", "C1", "C2"],
+        q: "Will production reads go down during migration?",
+        a: "<p><strong>No.</strong> Production reads continue on C1/C2 through P4. C3/C4 are used only for the semantic-matching experiment. Production Consul/DNS cutover is conditional P6, after parity is proven.</p>",
+      },
+      {
+        id: "v0-qa-c3-404",
+        category: "Write path",
+        tags: ["C3", "dual-write", "backfill"],
+        q: "What happens on a 404 from C3?",
+        a: "<p>404 on C3 triggers a <strong>write-path read-through backfill</strong> from C1 (with MAU predicate) — not a production read fallback. Dual-write never uses <code>doc_as_upsert</code> on C3.</p>",
+      },
+      {
+        id: "v0-qa-libraries",
+        category: "Libraries",
+        tags: ["elasticquery-dsl", "elastictoolkit", "wi-elasticsearchmodels"],
+        q: "What is the three-library stack?",
+        a: "<p><strong>elasticquery-dsl-py</strong> — pure query JSON builder (no ES client); used on read/search paths.<br><strong>elastictoolkit-py</strong> — adapters, index helpers, directive engine; needs <code>Elasticsearch9Adapter</code> for C3/C4.<br><strong>wi-elasticsearchmodels-py</strong> — index models, cluster adapters, field enums (<code>CandidateFeatureV3</code>, <code>JobFeatureV3</code>).</p>",
+      },
+      {
+        id: "v0-qa-elastictoolkit-vs-wielastictoolkit",
+        category: "Libraries",
+        tags: ["elastictoolkit", "wielastictoolkit", "wi-elasticsearchmodels", "legacy", "adapter"],
+        q: "What is the difference between elastictoolkit-py and wi-elastictoolkit-py? Which is used where?",
+        a: "<p>Both are internal PyPI packages that wrap Elasticsearch clients (adapters + index helpers). They share the same <em>role</em> but <strong>elastictoolkit-py is the current canonical library</strong>; <strong>wi-elastictoolkit-py</strong> (<code>import wielastictoolkit</code>) is the <strong>older predecessor</strong> being phased out.</p><p><strong>Package names vs Python imports:</strong></p><ul><li><code>elastictoolkit-py</code> → <code>import elastictoolkit</code> (repo: elastictoolkit-py, HEAD <strong>0.8.0</strong>)</li><li><code>wi-elastictoolkit-py</code> → <code>import wielastictoolkit</code> (older package, still pinned transitively)</li></ul><p><strong>Inside wi-elasticsearchmodels-py today (split migration):</strong></p><ul><li><strong>elastictoolkit</strong> — <code>JobFeatureV3</code>, <code>JobsESClusterAdapter</code> (C2 job writes/reads)</li><li><strong>wielastictoolkit</strong> — <code>CandidateFeatureV3</code>, <code>JobPostViewCandidateStatus</code>, <code>CandidateESClusterAdapter</code> (C1 candidate writes/reads), plus older ES5 models (location matrix, verification, job count indices)</li></ul><p>So <strong>all C1 candidate feature I/O still runs through wielastictoolkit</strong> under the hood, even when services only call <code>CandidateFeatureV3()</code>. C2 job feature I/O uses elastictoolkit. <code>wi-elasticsearchmodels</code> setup.py lists <strong>both</strong> as dependencies until the migration off wielastictoolkit is complete (P1 task: <code>wem-wielastictoolkit</code>).</p><p><strong>Where services touch each:</strong></p><ul><li><strong>wicandidateprofile-ms</strong>, <strong>wi-candidateevents-ms</strong> — pin <code>wi-elastictoolkit-py</code> / models; writes hit <code>CandidateFeatureV3</code> → wielastictoolkit adapter → C1</li><li><strong>workindiajobs-ms</strong> — <code>JobFeatureV3</code> / <code>CandidateFeatureV3</code> via models; directive/relevancy paths import <code>elastictoolkit</code> directly (often stale 0.5.0 pin)</li><li><strong>wiemployerviewcandidate-ms</strong> — <code>elastictoolkit.queryutils</code> directive engine for search; model I/O via wi-elasticsearchmodels</li><li><strong>wiemployerjobpost-ms</strong> — partly bypasses both via local <code>wielasticsearchadapter</code> + duplicate <code>api/elasticmodels/jobfeaturev3.py</code> (legacy — must unify)</li></ul><p><strong>Even older (not either toolkit):</strong> <code>wielasticsearchadapter</code> in jobpost-ms; raw <code>elasticsearch</code> / <code>elasticsearch5</code> clients in some services.</p><p><strong>ES 9 migration implication:</strong> <code>Elasticsearch9Adapter</code> and dual-write routing land in <strong>elastictoolkit-py</strong>. Candidate C1 path must migrate <code>CandidateFeatureV3</code> + <code>CandidateESClusterAdapter</code> from wielastictoolkit → elastictoolkit before C3 dual-write is implemented once. See also: <em>What is the three-library stack?</em></p>",
+      },
+      {
+        id: "v0-qa-writers",
+        category: "Write path",
+        tags: ["services", "fragmentation"],
+        q: "Which services write directly to Elasticsearch today?",
+        a: "<p>Five write surfaces: <strong>wicandidateprofile-ms</strong> (primary candidate writer, 13 Kafka consumers), <strong>wi-candidateevents-ms</strong> (job_activity_v2, last_app_open, intent_bucket — 3 Kafka consumers), <strong>wiemployerviewcandidate-ms</strong> (employer interactions, status, VC job tags), <strong>wiemployerjobpost-ms</strong> (job feature save/update/delete), and <strong>workindiaapi</strong> (legacy SQS/Celery path). See Write Fragmentation above.</p>",
+      },
+      {
+        id: "v0-qa-p6",
+        category: "Migration phases",
+        tags: ["P6", "cutover", "consul"],
+        q: "When does production cutover to ES 9 happen?",
+        a: "<p>Conditional <strong>P6</strong> — only after P4 experiment metrics, query parity, and p99 latency are acceptable. Consul repoint with alias in place of raw index name; dual-writes stay on during cutover.</p>",
+      },
+      {
+        id: "v0-qa-dualwrite-phased",
+        category: "Write path",
+        tags: ["dual-write", "consumer", "P1", "P2", "rollout", "phased"],
+        q: "Do we need dual-write for all consumers across all repos at once, or can we roll out one by one?",
+        a: "<p><strong>Phased rollout before the freeze — yes, recommended.</strong> <strong>At resume after the freeze — all active writers must dual-write together.</strong></p><p><strong>Phase A — shadow dual-write (pre-P2, no freeze):</strong> Enable dual-write on <em>one</em> writer path at a time. Deploy to prod, monitor C1 vs C3 doc parity for that field group, error rate, latency, DLQ. C1 remains source of truth; C3 is a shadow. Repeat for the next consumer/service.</p><p><strong>Suggested order:</strong> (1) <code>wi-candidateevents-ms</code> (isolated fields: last_app_open, job_activity_v2), (2) simple partial CDC consumers in <code>wicandidateprofile-ms</code>, (3) full reindex / premium / resume, (4) <code>wiemployerviewcandidate-ms</code> employer_interactions, (5) <code>wiemployerjobpost-ms</code> job writes to C2+C4 separately.</p><p><strong>Phase B — migration window (P2 freeze + _reindex):</strong> All writers stop regardless of phased progress. <code>_reindex</code> gives C3 a point-in-time baseline.</p><p><strong>Phase C — resume (T4):</strong> <strong>Cannot resume one-by-one.</strong> Every writer that restarts must dual-write to C1+C3 (and C2+C4 for jobs). Kafka backlog replay must target both clusters from all consumers including <code>CandidateTrackJobActivityConsumer</code> and <code>CandidateAppOpenBulkConsumer</code>.</p><p><strong>P1 single consumer (draft):</strong> migrating writers <em>into</em> the unified consumer can also be phased, but the P2 freeze should not start until <em>all</em> candidate write paths dual-write — whether via one consumer or fragmented adapters.</p>",
+      },
+      {
+        id: "v0-qa-dualwrite-before-freeze",
+        category: "Migration phases",
+        tags: ["P2", "dual-write", "freeze", "consumer", "C1", "C3"],
+        q: "Do we need consumers ready with dual-write before we freeze writes and start C1→C3 migration?",
+        a: "<p><strong>Not before the freeze starts</strong> — but <strong>yes before you resume writes</strong> after the copy.</p><p><strong>During the migration window (P2):</strong> all ES writers stop (or scale to zero). Kafka buffers updates. <code>_reindex</code> copies the MAU cohort from C1→C3 with no live writes to either cluster. Dual-write is intentionally <em>off</em> during this window.</p><p><strong>Before T4 resume:</strong> the dual-write path must be implemented, tested behind a feature flag, and ready to drain the Kafka backlog to <strong>both</strong> C1 and C3. If you resume with C1-only writes, C3 diverges immediately after the copy.</p><p><strong>P1 (draft):</strong> if the single unified consumer is adopted, it should ship with dual-write logic before the P2 window — but it does not need to be the active production writer until resume. Alternative: keep existing fragmented writers and add dual-write at the adapter/tagging layer before resume.</p><p><strong>Prerequisite checklist before freeze:</strong> C3 provisioned + mapping verified, Kafka retention &gt; freeze window, C1 snapshot, _reindex scripts tested — dual-write code merged but not necessarily live.</p>",
+      },
+      {
+        id: "v0-qa-last-update-field",
+        category: "Data model",
+        tags: ["timestamp", "MAU", "P0", "P2", "candidate", "jobs", "drift"],
+        q: "Which field tells us the last timestamp a document was updated?",
+        a: "<p><strong>There is no single application field that reliably reflects &ldquo;last ES write&rdquo; on every update.</strong> Five services write different field groups to the same candidate doc, and most partial-update paths do <em>not</em> touch a global cursor field. This is why the HLD uses a write freeze + <code>_reindex</code> rather than a live delta-sync on <code>timestamp</code>.</p><p><strong>CandidateFeatureV3 (C1) — field-by-field:</strong></p><ul><li><code>timestamp</code> — set to <code>datetime.utcnow()</code> only on <strong>full profile reindex</strong> (<code>candidatefeaturetagging.py</code> <code>add_to_search</code> / fast-partial paths). <strong>Not</strong> updated by partial CDC consumers (premium, resume, exclusions, audio, etc.) or by <code>wi-candidateevents-ms</code> / <code>wiemployerviewcandidate-ms</code> activity writes.</li><li><code>last_active_time</code> — updated only by <code>CandidateJobCallsActivenessConsumer</code> (call/activeness signal).</li><li><code>last_app_open</code> — updated only by <code>wi-candidateevents-ms</code> <code>CandidateAppOpenBulkConsumer</code>.</li><li><code>last_seen</code> — copied from Postgres on full reindex; profile-ms also updates PG <code>last_seen</code> on HTTP profile update.</li><li><code>fcm_active_timestamp</code> — deprecated FCM bulk path only.</li><li><code>employer_interactions[].timestamp</code>, <code>job_activity_v2</code> nested dates — per-event activity, not doc-level last-modified.</li></ul><p><strong>MAU cohort (P0 decision — not yet locked):</strong> HLD shortlist is <code>last_active_time</code> / <code>last_seen</code> / <code>last_app_open</code> — whichever best matches the 3M MAU definition. <strong>Do not use <code>timestamp</code></strong> for cohort selection; it misses candidates whose only recent activity is app-open, employer contact, or partial CDC.</p><p><strong>JobFeatureV3 (C2):</strong> full save sets <code>timestamp</code> (utcnow), <code>live_timestamp</code>, and <code>created_at</code>. Partial ranking/trust_factor cron updates may not touch <code>timestamp</code>. P5 batch partitioning uses immutable keys <code>created_at</code> / <code>_id</code> — never <code>timestamp</code>.</p><p><strong>ES-native (not in _source):</strong> <code>_seq_no</code> / <code>_primary_term</code> advance on every index operation and can support post-freeze delta copy — but they cannot define the MAU cohort and are not exposed in application queries today.</p><p>See also: <em>Why do we need to know when a document was last updated?</em></p>",
+      },
+      {
+        id: "v0-qa-last-update-why",
+        category: "Data model",
+        tags: ["timestamp", "MAU", "P0", "P2", "P4", "P5", "freeze", "dual-write"],
+        q: "Why do we need to find out when an ES document was last updated?",
+        a: "<p>We are <strong>not</strong> trying to build a general &ldquo;last modified&rdquo; audit trail for every doc. We need a <strong>reliable way to answer three migration questions</strong> — and discovering that no single field answers all of them is itself a key finding.</p><p><strong>1. Define the 3M MAU cohort (P0 → P2 → P4)</strong><br>The experiment copies and tests on <em>recently active</em> candidates first, not all 47M. Something must filter C1 → &ldquo;is this candidate in the MAU set?&rdquo; That filter is an <strong>activity timestamp field</strong> (<code>last_active_time</code>, <code>last_seen</code>, or <code>last_app_open</code> — P0 decision). Wrong field = wrong cohort size, wrong experiment population, wrong _reindex query.</p><p><strong>2. Scope dual-write backfill on C3 (HLD-04)</strong><br>When a partial write hits C3 and gets 404, the write path may GET the full doc from C1 and index into C3 — but only if the candidate passes the <strong>MAU predicate</strong>. That predicate uses the same activity field. Non-MAU dormant docs stay C1-only until P5.</p><p><strong>3. Choose copy strategy: freeze vs live delta-sync</strong><br>If every write bumped one canonical <code>updated_at</code>, you could theoretically copy only docs changed since T0 without freezing all writers. <strong>We cannot</strong> — fragmented writers skip <code>timestamp</code> on most partial updates. That gap is why P2 uses a <strong>write freeze + point-in-time _reindex</strong> instead of chasing a change cursor. (<code>_seq_no</code> is ES-internal and helps post-freeze catch-up, not MAU selection.)</p><p><strong>What it is <em>not</em> for in v0:</strong></p><ul><li><strong>Production read routing</strong> — prod reads stay on C1/C2 through P4; 404 backfill is write-path only.</li><li><strong>P5 batch keys</strong> — remaining ~44M are partitioned by immutable <code>created_at</code> / <code>_id</code>, not last-activity timestamp.</li><li><strong>Relevancy ranking</strong> — job freshness uses <code>live_timestamp</code> on jobs; candidate relevancy does not depend on a global doc <code>timestamp</code>.</li></ul><p><strong>Bottom line:</strong> the investigation exists to lock the <strong>MAU definition</strong>, size the migration window, and justify the freeze — not to add a new <code>updated_at</code> field (though P1 consumer consolidation could introduce one going forward). See: <em>Which field tells us the last timestamp a document was updated?</em></p>",
+      },
+    ],
+    data: null,
+  },
+
+  migration_v1: {
+    id: "migration_v1",
+    subtitle: "Draft alternative · full-cluster copy · read-fallback pattern · under review",
+    bannerClass: "draft",
+    banner: {
+      title: "migration_v1 — Draft Alternative Plan",
+      summary: "Simplified mental model: freeze all writes, bulk-copy C1/C2 → C3/C4, resume with dual-write, serve reads from C3/C4 with C1/C2 fallback. Differs from v0 on scope, consumer consolidation, and read strategy.",
+      bullets: [
+        "Freeze writes from all consumers (~1hr) — Kafka buffers updates",
+        "Full copy C1→C3 and C2→C4 (not MAU-cohort-first)",
+        "Resume writes with dual-write to both cluster pairs",
+        "Reads: try C3/C4 first; on miss GET from C1/C2 and backfill C3/C4",
+        "Open questions: production read impact, no single-consumer gate, full 47M copy window",
+      ],
+    },
+    hldLinks: false,
+    phases: [
+      { id: "V1-1", label: "V1-1 Freeze & copy", type: "committed", desc: "Stop all writers; _reindex full C1/C2 → C3/C4" },
+      { id: "V1-2", label: "V1-2 Resume dual-write", type: "committed", desc: "Restart consumers; dual-write; drain Kafka" },
+      { id: "V1-3", label: "V1-3 Read routing", type: "committed", desc: "C3/C4 primary reads with C1/C2 fallback + backfill" },
+      { id: "V1-4", label: "V1-4 Embeddings", type: "committed", desc: "Vector generation after base copy" },
+      { id: "V1-5", label: "V1-5 Cutover", type: "conditional", desc: "Consul repoint when parity proven" },
+    ],
+    clusters: [
+      { id: "C1", name: "Candidate ES", ver: "8.10.0", role: "Fallback read source · dual-write target", type: "old" },
+      { id: "C2", name: "Jobs ES", ver: "8.6.0", role: "Fallback read source · dual-write target", type: "old" },
+      { id: "C3", name: "Candidate ES", ver: "9.4.2", role: "Primary read target · full 47M copy", type: "new" },
+      { id: "C4", name: "Jobs ES", ver: "9.4.2", role: "Primary read target · full job corpus", type: "new" },
+    ],
+    writers: WRITE_FRAGMENTATION,
+    readers: READ_FRAGMENTATION,
+    qa: [
+      {
+        id: "v1-qa-vs-v0",
+        category: "Plan comparison",
+        tags: ["migration_v0", "migration_v1"],
+        q: "How does migration_v1 differ from migration_v0?",
+        a: "<p><strong>v0 (HLD):</strong> 3M MAU cohort first, optional P1 consumer consolidation, experiment reads on C3/C4 only, production reads on C1/C2 until P6.<br><strong>v1 (draft):</strong> Full 47M copy upfront, freeze all writers, dual-write on resume, production reads try C3/C4 first with C1/C2 fallback + backfill.</p>",
+      },
+      {
+        id: "v1-qa-consumer",
+        category: "Write path",
+        tags: ["P1", "kafka", "consumer"],
+        q: "Does v1 require a single Kafka consumer?",
+        a: "<p><strong>No.</strong> v1 keeps existing multi-writer fragmentation and adds dual-write + read-fallback routing at the adapter layer. No consumer consolidation gate.</p>",
+      },
+      {
+        id: "v1-qa-fallback",
+        category: "Read path",
+        tags: ["fallback", "C3", "C4", "backfill"],
+        q: "What is the read-fallback pattern in v1?",
+        a: "<p>Reads target C3/C4 first. On miss or cluster error, fetch from C1/C2 and backfill C3/C4. This differs from v0 where production reads never touch C3/C4 until P6, and 404 backfill is write-path only.</p>",
+      },
+      {
+        id: "v1-qa-freeze",
+        category: "Operations",
+        tags: ["freeze", "reindex", "kafka"],
+        q: "How long is the write freeze in v1?",
+        a: "<p>Freeze must cover the full _reindex of C1→C3 (47M docs) and C2→C4. Kafka retention must exceed the entire freeze + copy window — significantly longer than v0's &lt;1hr MAU cohort window.</p>",
+      },
+      {
+        id: "v1-qa-risks",
+        category: "Risks",
+        tags: ["risks", "latency", "parity"],
+        q: "What are the open risks in v1?",
+        a: "<p>Production read latency impact from fallback paths, longer freeze window, no single-consumer simplification of write ordering, and full-corpus copy before any experiment validation.</p>",
+      },
+    ],
+    data: null,
+  },
+
+  write_consolidation: {
+    id: "write_consolidation",
+    viewType: "consolidation",
+    subtitle: "Decision analysis · consolidate 5 fragmented ES writers → 1 (or 2) Kafka consumers · P1 draft",
+    bannerClass: "draft",
+    banner: {
+      title: "P1 — Single Write Consumer Consolidation",
+      summary: "Should we route all Elasticsearch writes through one consumer before/during the ES 9 migration? This tab maps required changes, trade-offs, and a scope recommendation.",
+      bullets: [
+        "Today: 5 services · 30+ write paths · 2 clusters (C1 candidate, C2 jobs)",
+        "Consolidation centralizes dual-write, freeze, and ordering — but is <strong>not</strong> required to ship ES 9",
+        "Recommended: ship migration with adapter-layer or per-service dual-write; treat consolidation as a parallel / post-migration track unless leadership explicitly gates P2 on it",
+        "If pursued: expect 2 consumers minimum (candidate C1+C3 vs jobs C2+C4), not literally one binary for everything",
+      ],
+    },
+    hldLinks: false,
+    phases: [],
+    clusters: [],
+    writers: WRITE_FRAGMENTATION,
+    readers: [],
+    qa: [
+      {
+        id: "cons-qa-why",
+        category: "Motivation",
+        tags: ["P1", "freeze", "dual-write", "fragmentation"],
+        q: "Why do we want to consolidate all consumers into one?",
+        a: "<p>Today <strong>5 services</strong> run <strong>30+ independent write paths</strong> to the same Elasticsearch documents — each with its own Kafka consumer or HTTP trigger, but all mutating the same <code>CandidateFeatureV3</code> / <code>JobFeatureV3</code> indices.</p><p><strong>Two core motivations:</strong></p><ol><li><strong>Centralize ES write logic</strong> — dual-write (C1+C3), MAU backfill on 404, Painless scripts, DLQ, and per-field ordering rules live in <em>one</em> handler instead of diverging across repos.</li><li><strong>Single choke point to stop writes</strong> — for the P2 migration freeze, scale one consumer to zero (or drain one topic) instead of coordinating shutdown across every service's consumers and sync HTTP paths.</li></ol><p><strong>Important:</strong> both goals can be achieved without consolidation — adapter-layer dual-write in <code>elastictoolkit</code>, ES <code>index.blocks.write</code>, or a shared adapter freeze flag. Consolidation trades a large cross-service refactor for cleaner long-term ops; it is <strong>not required</strong> to ship ES 9.</p>",
+      },
+      {
+        id: "cons-qa-one-or-two",
+        category: "Architecture",
+        tags: ["consumer", "jobs", "candidate"],
+        q: "Is it really one consumer for everything?",
+        a: "<p><strong>Practically, no — expect two write consumers minimum.</strong> Candidate writes (C1+C3, <code>CandidateFeatureV3</code>, partition key <code>candidate_id</code>) and job writes (C2+C4, <code>JobFeatureV3</code>, partition key <code>jobpost_id</code>) have different clusters, indices, dual-write rules, and failure modes. A single process <em>could</em> host both handlers, but they should be separate Kafka consumer groups / topics. VC-only indices (<code>JobPostViewCandidateStatus</code>, favourites) may need a third handler or stay on view-candidate-ms short-term.</p>",
+      },
+      {
+        id: "cons-qa-sync-http",
+        category: "Services",
+        tags: ["latency", "HTTP", "kafka"],
+        q: "What happens to synchronous HTTP profile updates?",
+        a: "<p>Today <code>CandidateUpdateProfileParser</code> can write ES synchronously on HTTP. After consolidation, options are: (1) <strong>async</strong> — HTTP publishes event, client reads eventually consistent ES (breaking change); (2) <strong>outbox</strong> — HTTP waits on consumer ack via request-reply or short poll (latency + complexity); (3) <strong>hybrid cutover</strong> — HTTP keeps direct write until consumer proven, then switch (longest migration). This is a major product/SLA decision independent of ES version.</p>",
+      },
+      {
+        id: "cons-qa-vs-adapter",
+        category: "Migration scope",
+        tags: ["dual-write", "adapter", "P2"],
+        q: "How does consolidation compare to adapter-layer dual-write (migration_v1)?",
+        a: "<p><strong>Adapter dual-write</strong> keeps each service's consumers but adds C1+C3 / C2+C4 routing in <code>elastictoolkit</code> / <code>wi-elasticsearchmodels</code>. Freeze still stops all writers, but no event schema migration. <strong>Consumer consolidation</strong> moves ES I/O to one place — cleaner freeze and dual-write logic, but requires every writer to stop calling ES and publish events first. v0 HLD lists consolidation as optional P1; v1 explicitly skips it.</p>",
+      },
+      {
+        id: "cons-qa-painful",
+        category: "Implementation",
+        tags: ["painless", "ordering", "intent_bucket"],
+        q: "What are the hardest pieces to migrate?",
+        a: "<p><strong>Painless scripted bulk</strong> (<code>job_activity_v2</code>, exclusions, employer reporting) — script params and batching logic must move intact. <strong>Field ownership conflicts</strong> — <code>intent_bucket</code> written by both <code>wi-candidateevents-ms</code> and <code>wiemployerviewcandidate-ms</code>; consumer must define merge rules. <strong>Per-candidate ordering</strong> — events for the same <code>candidate_id</code> must land in one partition; cross-field races today are masked by last-write-wins on C1. <strong>Cache invalidation</strong> — <code>CandidateFeatureElasticCacheUpdateConsumer</code> in jobs-ms expects ES writes to have happened; event contract must trigger cache refresh.</p>",
+      },
+    ],
+    data: null,
+  },
+};
+
+const MIGRATION_V0_DATA = [
+  {
+    repo: "elasticquery-dsl-py",
+    category: "library",
+    role: "query",
+    pinned: "1.1.0",
+    summary: "Low-level ES query JSON builder — no client dependency",
+    tasks: [
+      { id: "eqdsl-knn-bbq", phase: "P3", title: "Extend KnnQuery for ES 9 vector options", desc: "Support nested kNN filters, BBQ / int8_hnsw index_options in query payloads if needed by experiment.", files: "elasticquerydsl/filter.py" },
+      { id: "eqdsl-nested-knn", phase: "P4", title: "Nested dense_vector query helpers", desc: "Helpers for filtered kNN on nested context vectors (~3.14 per candidate).", files: "elasticquerydsl/filter.py, tests/test_filter.py" },
+      { id: "eqdsl-publish", phase: "P4", title: "Publish new version to internal PyPI", desc: "Bump version; jobs-ms and experiment service pin updated version.", files: "setup.py, CHANGELOG.md" },
+    ],
+  },
+  {
+    repo: "elastictoolkit-py",
+    category: "library",
+    role: "adapter",
+    pinned: "0.8.0",
+    summary: "ES client adapters + directive query engine",
+    tasks: [
+      { id: "et-es9-adapter", phase: "P0", title: "Add Elasticsearch9Adapter + Elasticsearch9Index", desc: "Wrap elasticsearch9 Python client; mirror Elasticsearch8Adapter API (index, get, update, search, bulk, scroll, mget, msearch).", files: "elastictoolkit/adapters/elasticsearch9adapter.py, elastictoolkit/indexes/elasticsearch9index.py" },
+      { id: "et-es9-dep", phase: "P0", title: "Add elasticsearch9 dependency", desc: "Add elasticsearch9>=9.x to setup.py alongside elasticsearch8 (dual support during migration).", files: "setup.py, requirements.txt" },
+      { id: "et-dual-write", phase: "P1", title: "Dual-write adapter or routing layer", desc: "Write C1 first, then C3; 404 → GET from C1 → MAU predicate → full index. Never doc_as_upsert on C3. DLQ + retry.", files: "elastictoolkit/adapters/ (new DualWriteAdapter or cluster router)" },
+      { id: "et-read-routing", phase: "P4", title: "Experiment read client routing", desc: "Separate READ adapter config for C3/C4 — not via Consul production DNS.", files: "elastictoolkit/adapters/baseelasticsearchadapter.py" },
+      { id: "et-publish", phase: "P1", title: "Publish elastictoolkit with ES9 support", desc: "Coordinate wi-elasticsearchmodels bump.", files: "setup.py, CHANGELOG.md" },
+    ],
+  },
+  {
+    repo: "wi-elasticsearchmodels-py",
+    category: "library",
+    role: "models",
+    pinned: "1.1.1",
+    summary: "Shared index models, cluster adapters, field enums",
+    tasks: [
+      { id: "wem-cluster-enum", phase: "P0", title: "Add C3/C4 cluster constants", desc: "CANDIDATE_ES_EMBEDDED_CLUSTER, JOBS_ES_EMBEDDED_CLUSTER (or similar) in WIElasticSearchCluster.", files: "wielasticsearchmodels/constants/cluster.py" },
+      { id: "wem-index-enum", phase: "P0", title: "Add embedded index constant", desc: "workindia-candidate-feature-embedded index name in WIElasticsearchIndex.", files: "wielasticsearchmodels/constants/index.py" },
+      { id: "wem-c3-adapter", phase: "P0", title: "CandidateEmbeddedESClusterAdapter (ES9)", desc: "Points to C3; configured via settings, not Consul prod DNS.", files: "wielasticsearchmodels/adapters/" },
+      { id: "wem-c4-adapter", phase: "P0", title: "JobsEmbeddedESClusterAdapter (ES9)", desc: "Points to C4 for job context vectors.", files: "wielasticsearchmodels/adapters/" },
+      { id: "wem-embedded-model", phase: "P0", title: "CandidateFeatureEmbedded model", desc: "New index model with dense_vector mapping fields; index_options immutable — decide quantization before first write.", files: "wielasticsearchmodels/models/" },
+      { id: "wem-wielastictoolkit", phase: "P1", title: "Migrate remaining models off wielastictoolkit", desc: "CandidateFeatureV3 still imports wielastictoolkit; unify on elastictoolkit.", files: "wielasticsearchmodels/models/candidatefeaturev3.py" },
+      { id: "wem-field-enums", phase: "P3", title: "Embedding field enums + mapping spec", desc: "CandidateFeatureEmbeddedFields for context vectors nested structure.", files: "wielasticsearchmodels/configs/" },
+      { id: "wem-publish", phase: "P1", title: "Publish models package", desc: "All services bump wi-elasticsearchmodels-py version.", files: "setup.py, CHANGELOG.md" },
+    ],
+  },
+  {
+    repo: "wicandidateprofile-ms",
+    category: "service",
+    role: "write",
+    pinned: "models 0.6.0 · wi-elastictoolkit 0.8.0",
+    summary: "Primary candidate ES writer — largest write surface",
+    tasks: [
+      { id: "cp-p1-kafka", phase: "P1", title: "Stop direct ES writes → publish to Kafka", desc: "Remove CandidateFeatureV3().update/save/bulk from consumers; emit change events to unified topic partitioned by candidate_id.", files: "candidatefeaturetagging.py, api/pubsub/consumers/*, *esupdate* helpers" },
+      { id: "cp-p1-scripts", phase: "P1", title: "Migrate Painless script params to consumer", desc: "JobExclusionScript, EmployerReportingScript partial updates flow through single consumer.", files: "common/utils/elasticsearch/scriptparams/" },
+      { id: "cp-deps", phase: "P1", title: "Bump ES library pins", desc: "wi-elasticsearchmodels-py, elastictoolkit-py; remove legacy elasticsearch==5.5.3 where possible.", files: "requirements/*.txt" },
+      { id: "cp-legacy-client", phase: "P2", title: "Remove mixed elasticsearch5/8 direct imports", desc: "candidatefeaturetagging.py imports both elasticsearch and elasticsearch8 exceptions.", files: "candidate/profiling/candidatefeaturetagging.py" },
+      { id: "cp-adapter-config", phase: "P2", title: "Configure C3 adapter at startup (flag-gated)", desc: "apps.py _configure_elasticsearch_adapters for embedded cluster when dual-write enabled.", files: "Development/api/apps.py, settings/*.py" },
+      { id: "cp-cache", phase: "P2", title: "Review cache invalidation on dual-write", desc: "CandidateFeatureElasticCacheHandler invalidates on write — ensure consistent with C1 reads.", files: "candidatefeatureelasticcachehandler.py" },
+    ],
+  },
+  {
+    repo: "wi-candidateevents-ms",
+    category: "service",
+    role: "write",
+    pinned: "models 1.1.0 · wi-elastictoolkit 0.8.0",
+    summary: "Candidate activity ES writer — job_activity_v2, last_app_open, intent_bucket",
+    tasks: [
+      { id: "ce-dualwrite", phase: "P2", title: "Dual-write on C1+C3 for all ES writers", desc: "CandidateTrackJobActivityConsumer bulk script, CandidateAppOpenBulkConsumer, intent_bucket update — all must target both clusters before T4 resume.", files: "events/helpers/candidatejobactivitytracker.py, events/helpers/candidateintentbuckethelper.py, events/pubsub/consumers/*" },
+      { id: "ce-phased", phase: "P2", title: "Phased shadow dual-write (recommended first)", desc: "Good early candidate for Phase A rollout — isolated fields, bulk script path; monitor C3 parity before heavier writers.", files: "events/helpers/candidatejobactivitytracker.py" },
+      { id: "ce-p1-kafka", phase: "P1", title: "Route ES writes through unified consumer (if P1 adopted)", desc: "Stop direct CandidateFeatureV3().bulk/update from track-job-activity and app-open consumers.", files: "events/pubsub/consumers/candidatetrackjobactivityconsumer.py, candidateappopenbulkconsumer.py" },
+      { id: "ce-adapter", phase: "P2", title: "Configure C3 adapter in apps.py", desc: "CandidateESClusterAdapter.configure() — add embedded cluster when dual-write flag enabled.", files: "api/apps.py, settings/*.py" },
+      { id: "ce-dead-code", phase: "P2", title: "Remove legacy ES5 bulk payload dead code", desc: "_create_bulk_payload() references ES5 index/type — only ES8 path is active.", files: "events/helpers/candidatejobactivitytracker.py" },
+      { id: "ce-freeze", phase: "P2", title: "Include in P2 write freeze", desc: "Scale down CandidateTrackJobActivityConsumer, CandidateTriedContactingEmployerConsumer, CandidateAppOpenBulkConsumer during migration window.", files: "build/prod_values.yml, management commands" },
+    ],
+  },
+  {
+    repo: "wiemployerviewcandidate-ms",
+    category: "service",
+    role: "write",
+    pinned: "models 0.6.0 · elastictoolkit 0.5.0",
+    summary: "Candidate ES writer — employer interaction fields",
+    tasks: [
+      { id: "evc-p1-kafka", phase: "P1", title: "Route ES writes through Kafka", desc: "employercandidateinteractionhelper.py bulk/update → unified consumer topic.", files: "api/utils/employercandidateinteractionhelper.py, api/utils/estask/" },
+      { id: "evc-read", phase: "P4", title: "Candidate relevancy queries — query parity", desc: "Uses elasticquery-dsl + directive patterns for employer candidate search; validate against C3 if experiment extends.", files: "api/relevancy/v2/candidateesquerygenerator.py" },
+      { id: "evc-deps", phase: "P1", title: "Bump library pins + remove elasticsearch 5.x", desc: "wi-elasticsearchmodels, elastictoolkit, elasticquery-dsl; base.txt elasticsearch>=5.", files: "requirements/*.txt" },
+      { id: "evc-adapter", phase: "P2", title: "Adapter configuration for C3 (if needed)", desc: "apps.py cluster adapter setup.", files: "api/apps.py, settings/*.py" },
+    ],
+  },
+  {
+    repo: "wiemployerjobpost-ms",
+    category: "service",
+    role: "write",
+    pinned: "models 0.7.1 · wielasticsearchadapter 0.2.0",
+    summary: "Job ES writer — job feature save/update on go-live",
+    tasks: [
+      { id: "jp-p1-kafka", phase: "P1", title: "Route job ES writes through Kafka", desc: "jobfeaturetagging.py save/update/delete → unified consumer or jobs-specific dual-write path.", files: "api/utils/job/jobfeaturetagging.py" },
+      { id: "jp-local-model", phase: "P1", title: "Consolidate local JobFeatureV3 with shared model", desc: "Uses api/elasticmodels/jobfeaturev3.py (wielasticsearchadapter) alongside wielasticsearchmodels — unify.", files: "api/elasticmodels/jobfeaturev3.py" },
+      { id: "jp-deps", phase: "P1", title: "Bump pins; remove elasticsearch 5.x", desc: "requirements base.txt elasticsearch>=5; upgrade wi-elasticsearchmodels.", files: "requirements/*.txt" },
+      { id: "jp-c4", phase: "P3", title: "Job context vector writes to C4", desc: "When embedding pipeline adds job vectors, wire writes to C4 embedded index.", files: "api/utils/job/jobfeaturetagging.py" },
+    ],
+  },
+  {
+    repo: "workindiajobs-ms",
+    category: "service",
+    role: "read",
+    pinned: "models 0.9.0 · elastictoolkit 0.5.0",
+    summary: "Primary job ES reader — relevancy engine, main list search",
+    tasks: [
+      { id: "jobs-deps", phase: "P1", title: "Bump elastictoolkit + models pins", desc: "Currently on elastictoolkit 0.5.0 vs library HEAD 0.8.0.", files: "app/requirements/*.txt" },
+      { id: "jobs-legacy", phase: "P2", title: "Remove direct elasticsearch 6.x client usage", desc: "autocomplete controllers, management commands use raw Elasticsearch client.", files: "controllers/autocompletedatacontroller.py, management/commands/sync*" },
+      { id: "jobs-prod-reads", phase: "P4", title: "Keep production reads on C2", desc: "No Consul change during P0–P4; JOBS_CLUSTER stays on C2.", files: "settings/*.py" },
+      { id: "jobs-experiment", phase: "P4", title: "New experiment endpoint for C3/C4 kNN", desc: "Separate endpoint (not Consul); semantic matching on MAU cohort. May use KnnQuery + new directive engine.", files: "jobs/helpers/retrievalembedding/, new experiment view" },
+      { id: "jobs-parity", phase: "P6", title: "Full query parity testing", desc: "Directive engines, nested queries, synonyms, painless scripts — compare C2 vs C4.", files: "jobs/relevancyengine/" },
+      { id: "jobs-cutover", phase: "P6", title: "Consul/DNS repoint to C4", desc: "Only after 100% migrated + p99 ≤ baseline.", files: "settings/*.py, Consul KV" },
+    ],
+  },
+  {
+    repo: "wiemployerservicingms",
+    category: "service",
+    role: "read",
+    pinned: "models 0.2.0",
+    summary: "Reads candidate + job features for employer servicing flows",
+    tasks: [
+      { id: "esvc-deps", phase: "P1", title: "Bump wi-elasticsearchmodels (0.2.0 → latest)", desc: "Very stale pin.", files: "requirements/*.txt" },
+      { id: "esvc-read", phase: "P4", title: "Validate read paths unchanged during experiment", desc: "JobFeatureV3().get, candidate search via elasticsearchquerygenerationhelper.", files: "servicingjobcandidateordergeneration.py, relevantcandidateshelper.py" },
+      { id: "esvc-cutover", phase: "P6", title: "Adapter config for production cutover", desc: "When Consul repoints, update apps.py adapter configure.", files: "api/apps.py" },
+    ],
+  },
+  {
+    repo: "wirelevancyadapter (external)",
+    category: "library",
+    role: "query",
+    pinned: "external PyPI",
+    summary: "CandidateJobOrderGenerationES8 — query building + execute() for jobs-ms",
+    tasks: [
+      { id: "wra-es9", phase: "P2", title: "ES9 model compatibility", desc: "set_es_model(JobFeatureV3()) path must work with updated models package.", files: "relevancyjobadapter.py" },
+      { id: "wra-score", phase: "P4", title: "function_score query parity on ES 9", desc: "get_score_query() wrapping must produce valid ES 9 queries.", files: "CandidateJobOrderGenerationES8" },
+    ],
+  },
+  {
+    repo: "NEW: single-write-consumer",
+    category: "infra",
+    role: "write",
+    pinned: "new service",
+    summary: "P1 draft — unified Kafka consumer (not confirmed); only writer to C1 and C3 if adopted",
+    tasks: [
+      { id: "swc-create", phase: "P1", title: "Create unified Kafka consumer service", desc: "Consumes candidate change topic; owns all field-group writes. Behind Flagsmith feature flag.", files: "new repo or wicandidateprofile-ms consumer" },
+      { id: "swc-dualwrite", phase: "P2", title: "Implement dual-write flow per HLD-04", desc: "C1 first → C3 partial → 404 read-through backfill with MAU predicate. DLQ + retry. No doc_as_upsert.", files: "consumer handler" },
+      { id: "swc-freeze", phase: "P2", title: "Support scale-to-zero during migration window", desc: "T1 freeze, T4 resume, T5 drain Kafka backlog to both clusters.", files: "deployment config" },
+      { id: "swc-drift", phase: "P2", title: "Daily drift check job", desc: "Count parity + sampled _source diff between C1 and C3 for MAU cohort.", files: "cron / management command" },
+      { id: "swc-reindex", phase: "P2", title: "Orchestrate _reindex scripts", desc: "Remote _reindex C1→C3 for MAU cohort; parallel streams; refresh_interval=-1 during copy.", files: "ops scripts" },
+    ],
+  },
+  {
+    repo: "NEW: embedding-pipeline",
+    category: "infra",
+    role: "write",
+    pinned: "new service",
+    summary: "P3 critical path — ~9.4M context vectors",
+    tasks: [
+      { id: "emb-model", phase: "P3", title: "Select embedding model + dimensions", desc: "Must match dense_vector mapping index_options (immutable after first write).", files: "design doc" },
+      { id: "emb-batch", phase: "P3", title: "Batch embed 3M MAU candidates", desc: "~3.14 context vectors per candidate → ~9.4M vectors total.", files: "pipeline service" },
+      { id: "emb-jobs-c4", phase: "P3", title: "Job context vectors to C4", desc: "Required for Candidate→Job kNN recall.", files: "pipeline service" },
+      { id: "emb-reembed", phase: "P3", title: "Wire re-embedding on document change", desc: "Triggered by single consumer on relevant field updates.", files: "consumer integration" },
+    ],
+  },
+  {
+    repo: "Infrastructure / Ops",
+    category: "infra",
+    role: "infra",
+    pinned: "ES 9.4.2",
+    summary: "Cluster provisioning, Consul, Kafka, monitoring",
+    tasks: [
+      { id: "ops-c3", phase: "P0", title: "Provision C3 cluster", desc: "1 master + 2 coordinators + 3 data nodes; replicas=2; index pre-created with mapping + analyzers + dense_vector index_options.", files: "Terraform / ansible" },
+      { id: "ops-c4", phase: "P0", title: "Provision C4 cluster", desc: "Jobs ES 9.4.2 for job context vectors.", files: "Terraform / ansible" },
+      { id: "ops-consul", phase: "P0", title: "C3/C4 endpoints in Consul (non-prod DNS)", desc: "Experiment reads use explicit endpoints, NOT production Consul flip.", files: "Consul KV" },
+      { id: "ops-kafka", phase: "P0", title: "Verify Kafka retention > freeze window", desc: "Retention must exceed planned freeze + margin.", files: "Kafka topic config" },
+      { id: "ops-snapshot", phase: "P2", title: "C1 snapshot + test-restore before window", desc: "Rollback target intact; C1 never modified.", files: "ops runbook" },
+      { id: "ops-consul-p6", phase: "P6", title: "Production Consul/DNS repoint", desc: "Alias in place of raw index name; dual-writes stay on during cutover.", files: "Consul KV" },
+    ],
+  },
+];
+
+const MIGRATION_V1_DATA = [
+  {
+    repo: "wi-elasticsearchmodels-py",
+    category: "library",
+    role: "read-write",
+    pinned: "1.1.1+",
+    summary: "Dual-cluster adapters + read-fallback routing layer",
+    tasks: [
+      { id: "v1-wiem-dual", phase: "V1-2", title: "Dual-write adapter (C1+C3, C2+C4)", desc: "Every write goes to old + new cluster; no doc_as_upsert on C3.", files: "adapters/, baseelasticsearchadapter.py" },
+      { id: "v1-wiem-fallback", phase: "V1-3", title: "Read-fallback: C3 miss → GET C1 → backfill C3", desc: "Production read path tries C3 first; 404 triggers C1 fetch + async/index backfill to C3.", files: "adapters/candidateesclusteradapter.py" },
+      { id: "v1-wiem-clusters", phase: "V1-1", title: "Register C3/C4 in WIElasticSearchCluster", desc: "Consul keys for experiment + fallback routing.", files: "constants/cluster.py" },
+    ],
+  },
+  {
+    repo: "elastictoolkit-py",
+    category: "library",
+    role: "read-write",
+    pinned: "0.8.0+",
+    summary: "Elasticsearch9Adapter + read-through helper",
+    tasks: [
+      { id: "v1-etk-es9", phase: "V1-1", title: "Elasticsearch9Adapter", desc: "ES 9.4.2 client wrapper for C3/C4.", files: "adapters/elasticsearch9adapter.py" },
+      { id: "v1-etk-fallback", phase: "V1-3", title: "ReadThroughFallback mixin", desc: "Shared get-with-fallback + backfill for index operations.", files: "adapters/baseelasticsearchadapter.py" },
+    ],
+  },
+  {
+    repo: "wicandidateprofile-ms",
+    category: "service",
+    role: "write",
+    pinned: "wi-elasticsearchmodels 0.6.0→",
+    summary: "Dual-write on resume; freeze during full copy",
+    tasks: [
+      { id: "v1-wcp-freeze", phase: "V1-1", title: "Consumer pause / write freeze hook", desc: "Stop all candidate ES writers during migration window.", files: "CDC consumers, apps.py" },
+      { id: "v1-wcp-dual", phase: "V1-2", title: "Dual-write CandidateFeatureV3", desc: "On resume, write to C1 and C3 on every update.", files: "candidatefeaturetagging.py" },
+    ],
+  },
+  {
+    repo: "wi-candidateevents-ms",
+    category: "service",
+    role: "write",
+    pinned: "models 1.1.0 · wi-elastictoolkit 0.8.0",
+    summary: "Activity ES writer — dual-write job_activity_v2, last_app_open, intent_bucket on resume",
+    tasks: [
+      { id: "v1-ce-freeze", phase: "V1-1", title: "Pause activity consumers during copy", desc: "CandidateTrackJobActivityConsumer, CandidateAppOpenBulkConsumer, CandidateTriedContactingEmployerConsumer scale-to-zero.", files: "events/pubsub/consumers/*, build/prod_values.yml" },
+      { id: "v1-ce-dual", phase: "V1-2", title: "Dual-write all 3 ES flows", desc: "Painless bulk (job_activity_v2), bulk last_app_open, intent_bucket update → C1+C3.", files: "events/helpers/candidatejobactivitytracker.py, candidateintentbuckethelper.py" },
+    ],
+  },
+  {
+    repo: "workindiajobs-ms",
+    category: "service",
+    role: "read",
+    pinned: "elastictoolkit 0.5.0→",
+    summary: "Primary reads on C4 with C2 fallback",
+    tasks: [
+      { id: "v1-wij-read", phase: "V1-3", title: "JobFeatureV3 search on C4 primary", desc: "CandidateRelevancyHandler routes search to C4; fallback to C2 on cluster error.", files: "candidaterelevancyhandler.py" },
+      { id: "v1-wij-backfill", phase: "V1-3", title: "Miss backfill on read path", desc: "Document miss on C4 → fetch from C2 → index to C4.", files: "joblistgenerators/" },
+    ],
+  },
+  {
+    repo: "Infrastructure / Ops",
+    category: "infra",
+    role: "infra",
+    pinned: "ES 9.4.2",
+    summary: "Full-cluster copy window + monitoring",
+    tasks: [
+      { id: "v1-ops-copy", phase: "V1-1", title: "Full _reindex C1→C3 (47M docs)", desc: "Longer window than v0 MAU cohort; refresh_interval=-1; parallel slices.", files: "ops runbook" },
+      { id: "v1-ops-copy-jobs", phase: "V1-1", title: "Full _reindex C2→C4", desc: "Complete job corpus copy before resume.", files: "ops runbook" },
+      { id: "v1-ops-kafka", phase: "V1-1", title: "Kafka retention > full copy duration", desc: "Must buffer all writes for entire freeze + copy window.", files: "Kafka topic config" },
+      { id: "v1-ops-parity", phase: "V1-2", title: "Post-resume count + sample parity", desc: "Verify C1/C3 and C2/C4 after dual-write resume.", files: "cron / management command" },
+      { id: "v1-ops-cutover", phase: "V1-5", title: "Consul production cutover", desc: "Repoint when read-fallback metrics show stable parity.", files: "Consul KV" },
+    ],
+  },
+];
+
+const REPO_DETAILS_V0 = {
+  "elasticquery-dsl-py": {
+    overview: "Pure Python library that builds Elasticsearch query JSON — no ES client dependency. Produces dict payloads for bool, match, function_score, kNN, nested, and aggregation queries.",
+    responsibilities: [
+      { label: "Query primitives", detail: "MatchQuery, BoolQuery, TermsQuery, RangeQuery, GeoDistanceQuery, NestedQuery, KnnQuery, FunctionScoreQuery, etc." },
+      { label: "No I/O", detail: "Never talks to Elasticsearch directly — consumed by elastictoolkit directive engine and services that pass JSON to adapters" },
+      { label: "ES 9 scope", detail: "Extend KnnQuery for nested dense_vector, BBQ/int8_hnsw index_options, filtered kNN for P4 experiment" },
+    ],
+    keyFiles: ["elasticquerydsl/filter.py", "elasticquerydsl/query.py", "elasticquerydsl/aggregation.py", "tests/test_filter.py"],
+    usedBy: ["elastictoolkit-py (directive engine to_dsl())", "workindiajobs-ms relevancy engine", "wiemployerviewcandidate-ms query generators"],
+    migrationImpact: "Read-path only. Changes needed for P3–P4 kNN experiment queries on C3/C4. No write-path involvement.",
+  },
+  "elastictoolkit-py": {
+    overview: "High-level Elasticsearch toolkit — client adapters (ES8 today), index wrappers, and the declarative directive engine that converts filter configs into elasticquery-dsl JSON.",
+    responsibilities: [
+      { label: "Elasticsearch8Adapter", detail: "Wraps elasticsearch8 Python client — search, get, update, bulk, scroll, mget used by all services via wi-elasticsearchmodels" },
+      { label: "Directive engine", detail: "NonContextualSearchDirectiveEngine, filter directives → elasticquery-dsl → execute on index model" },
+      { label: "ES 9 adapter (P0)", detail: "New Elasticsearch9Adapter + Elasticsearch9Index mirroring ES8 API for C3/C4 clusters" },
+      { label: "Dual-write layer (P1 draft)", detail: "Route writes C1→C3 with 404 read-through backfill; separate experiment read client for P4" },
+    ],
+    keyFiles: [
+      "elastictoolkit/adapters/elasticsearch8adapter.py",
+      "elastictoolkit/adapters/baseelasticsearchadapter.py",
+      "elastictoolkit/adapters/elasticsearch9adapter.py (new)",
+      "elastictoolkit/indexes/elasticsearch8index.py",
+      "elastictoolkit/directives/",
+    ],
+    usedBy: ["wi-elasticsearchmodels-py (via index models)", "workindiajobs-ms (pinned 0.5.0 → HEAD 0.8.0)", "wi-candidateevents-ms (0.8.0)", "wiemployerviewcandidate-ms"],
+    migrationImpact: "Central adapter layer for ES 9. Every service bumping models/elastictoolkit depends on ES9 adapter + dual-write routing landing here first.",
+  },
+  "wi-elasticsearchmodels-py": {
+    overview: "Shared index models, cluster adapter registry, and field enums. Single source of truth for index names, cluster IDs, and CandidateFeatureV3 / JobFeatureV3 model classes.",
+    responsibilities: [
+      { label: "WIElasticSearchCluster", detail: "Logical cluster enum — candidate-es-cluster, jobs-es-cluster; needs C3/C4 embedded cluster entries" },
+      { label: "Index models", detail: "CandidateFeatureV3, JobFeatureV3 — bind index name + cluster adapter; used for all get/search/update/save" },
+      { label: "Cluster adapters", detail: "CandidateESClusterAdapter, JobsESClusterAdapter — singleton client cache keyed by cluster enum" },
+      { label: "Embedded models (P0)", detail: "CandidateFeatureEmbedded with dense_vector mapping; C3/C4 adapters not on production Consul DNS" },
+    ],
+    keyFiles: [
+      "wielasticsearchmodels/constants/cluster.py",
+      "wielasticsearchmodels/constants/index.py",
+      "wielasticsearchmodels/models/candidatefeaturev3.py",
+      "wielasticsearchmodels/models/jobfeaturev3.py",
+      "wielasticsearchmodels/adapters/candidateesclusteradapter.py",
+      "wielasticsearchmodels/adapters/jobsesclusteradapter.py",
+    ],
+    usedBy: ["All ES-touching microservices", "wicandidateprofile-ms (0.6.0)", "wi-candidateevents-ms (1.1.0)", "workindiajobs-ms (0.9.0)", "wiemployerjobpost-ms (0.7.1)"],
+    migrationImpact: "Every service pins this package. C3/C4 cluster constants, embedded index model, and adapter wiring are blocking dependencies for P0 onward.",
+  },
+  "wicandidateprofile-ms": {
+    overview: "Canonical candidate profiling service — largest ES write surface. Owns CandidateFeatureTagging, 13 Kafka CDC consumers, and the modern full-profile reindex path.",
+    responsibilities: [
+      { label: "Primary writer", detail: "CandidateFeatureV3 save/update/bulk on C1 — profile, resume, premium, audio, exclusions, employer reporting" },
+      { label: "CDC consumers", detail: "13 Kafka consumers for partial field updates (resume, premium, blacklist, skill passed, etc.)" },
+      { label: "P1 draft change", detail: "Stop direct ES writes → publish to unified Kafka topic (not confirmed)" },
+      { label: "Dual-write target", detail: "P2: flag-gated C3 adapter in apps.py; cache invalidation must stay consistent with C1 reads" },
+    ],
+    keyFiles: [
+      "common/utils/candidate/profiling/candidatefeaturetagging.py",
+      "common/cachehandlers/candidatefeatureelasticcachehandler.py",
+      "api/pubsub/consumers/* (13 consumers)",
+      "Development/api/apps.py",
+    ],
+    usedBy: ["All candidate profile updates (replaced legacy workindiaapi SQS path)", "Downstream read: workindiajobs-ms via C1 cache"],
+    migrationImpact: "Highest-risk write fragmentation source. Legacy elasticsearch==5.5.3 mixed with elasticsearch8 in same file. P1 consumer consolidation would centralize all candidate writes here or new consumer service.",
+  },
+  "wi-candidateevents-ms": {
+    overview: "Candidate event ingestion service — write-only ES indexer for activity signals on CandidateFeatureV3. Modern library pins (models 1.1.0, elastictoolkit 0.8.0). Three production write flows via Kafka after HTTP event capture.",
+    responsibilities: [
+      { label: "job_activity_v2", detail: "Painless scripted bulk update via CandidateTrackJobActivityConsumer — batches of 300, tried_contacting_employer activity" },
+      { label: "last_app_open", detail: "CandidateAppOpenBulkConsumer — bulk doc update, deduped per calendar day" },
+      { label: "intent_bucket", detail: "CandidateTriedContactingEmployerConsumer — T_3 intent bucket (overlaps field with wiemployerviewcandidate-ms cron path)" },
+      { label: "No ES reads", detail: "Write-only today — adapter read_nodes configured but unused" },
+    ],
+    keyFiles: [
+      "events/helpers/candidatejobactivitytracker.py",
+      "events/helpers/candidateintentbuckethelper.py",
+      "events/pubsub/consumers/candidatetrackjobactivityconsumer.py",
+      "events/pubsub/consumers/candidatetriedcontactingemployerconsumer.py",
+      "events/pubsub/consumers/candidateappopenbulkconsumer.py",
+      "api/apps.py",
+    ],
+    usedBy: ["HTTP: /events/employer-contacted-tried/, /events/app-open-data/", "Downstream read: wiemployerviewcandidate-ms / workindiajobs-ms consume job_activity_v2, last_app_open, intent_bucket on C1"],
+    migrationImpact: "Good candidate for early phased dual-write (isolated fields, bulk script). Must dual-write all 3 flows before P2 resume. Include all 3 Kafka consumers in write freeze.",
+  },
+  "wiemployerviewcandidate-ms": {
+    overview: "Employer view-candidate service — writes employer interaction fields to C1 and is the primary candidate search reader for employer-facing list/search APIs.",
+    responsibilities: [
+      { label: "ES writes", detail: "employer_interactions, unlock_count_t_7, intent_bucket on CandidateFeatureV3; status doc on JobPostViewCandidateStatus" },
+      { label: "ES reads", detail: "V3 matchengine search/scroll/count on C1 — matched, responses, unlocked, global DB search; 19+ read paths" },
+      { label: "Query stack", detail: "elasticquery-dsl + custom CandidateFeatureV2CustomQuery + directive engine (global search)" },
+      { label: "P1 draft", detail: "Route writes through Kafka instead of direct employercandidateinteractionhelper.py ES calls" },
+    ],
+    keyFiles: [
+      "api/utils/employercandidateinteractionhelper.py",
+      "api/relevancy/v3/matchengine.py",
+      "api/relevancy/global_database/matchengine.py",
+      "api/utils/customelasticmodels/candidatefeaturev2customquery.py",
+    ],
+    usedBy: ["Employer app candidate list tabs", "Global database search", "Export flows (3 Kafka consumers read ES)"],
+    migrationImpact: "Both read and write on C1. Stale pins (elastictoolkit 0.5.0, models 0.6.0). P4 may need C3 query parity if experiment extends to employer search.",
+  },
+  "wiemployerjobpost-ms": {
+    overview: "Job post lifecycle service — owns JobFeatureTagging and all job feature ES writes on go-live, deactivate, and partial updates.",
+    responsibilities: [
+      { label: "Job ES writes", detail: "JobFeatureV3 save/update/delete on C2 via JobPostCrudConsumer chain and JobSyncing" },
+      { label: "Partial updates", detail: "trust_factor via EmployerExtendedPropertyChangeConsumer; ranking stats via cron" },
+      { label: "Local model debt", detail: "api/elasticmodels/jobfeaturev3.py duplicates wi-elasticsearchmodels — uses legacy wielasticsearchadapter" },
+      { label: "C4 vectors (P3)", detail: "Job context vectors to C4 when embedding pipeline lands" },
+    ],
+    keyFiles: [
+      "api/utils/job/jobfeaturetagging.py",
+      "api/utils/job/jobprofileparser.py",
+      "api/utils/jobpost/jobpostcrudhandlers/syncing.py",
+      "api/pubsub/consumers/jobpostcrudconsumer.py",
+    ],
+    usedBy: ["All live job indexing", "workindiajobs-ms reads indexed jobs from C2"],
+    migrationImpact: "Job write path to C2. elasticsearch 5.x still in requirements. Must unify on shared JobFeatureV3 model before dual-write to C4.",
+  },
+  "workindiajobs-ms": {
+    overview: "Primary candidate job-list service — highest ES read QPS (~300–400 q/s on C2). Relevancy via wirelevancyadapter + elastictoolkit directive engine.",
+    responsibilities: [
+      { label: "Job relevancy", detail: "CandidateRelevancyHandler V1–V4 → CandidateJobOrderGenerationES8 → JobFeatureV3.search on C2" },
+      { label: "Candidate tags", detail: "CandidateFeatureElasticCacheHandler → CandidateFeatureV3.get on C1 for every relevancy query" },
+      { label: "Experiment (P4)", detail: "New kNN endpoint on C3/C4 — NOT production Consul; semantic matching on MAU cohort" },
+      { label: "Production reads", detail: "C2 stays source of truth through P4; P6 Consul cutover only after parity" },
+    ],
+    keyFiles: [
+      "jobs/util/candidaterelevancyhandler.py",
+      "jobs/joblistgenerators/candidatejoblistgenerator.py",
+      "jobs/util/cachehandlers/candidatefeatureelasticcachehandler.py",
+      "jobs/relevancyengine/",
+      "jobs/helpers/retrievalembedding/",
+    ],
+    usedBy: ["MainListJobsView, RelevantJobsView, Homepage, Fresh jobs, Similar jobs, Filter aggs — all candidate-facing job APIs"],
+    migrationImpact: "Largest read consumer. elastictoolkit 0.5.0 vs HEAD 0.8.0 gap. P4 experiment is net-new read path; P6 requires full directive engine + function_score parity on ES 9.",
+  },
+  "wiemployerservicingms": {
+    overview: "Employer servicing / job boost service — reads job tags and searches candidates for boost targeting and starved job post flows.",
+    responsibilities: [
+      { label: "Job read", detail: "JobFeatureV3.get() — gender, skill, geo, salary tags for matching" },
+      { label: "Candidate search", detail: "CandidateFeatureV3.search with search_after pagination — _id + _score only, 1000-ID pages" },
+      { label: "Stale deps", detail: "wi-elasticsearchmodels 0.2.0 — very behind HEAD 1.1.1" },
+    ],
+    keyFiles: [
+      "common/utils/servicingjobcandidateordergeneration.py",
+      "common/utils/relevantcandidateshelper.py",
+      "common/utils/paginateusingsearchafter.py",
+    ],
+    usedBy: ["JobBoostingConsumer", "BulkJobBoostingConsumer", "boost.py HTTP", "servicestarvedjobpost cron"],
+    migrationImpact: "Low-traffic read path but stale library pins. Must validate reads unchanged during P0–P4 experiment; adapter config update at P6 cutover.",
+  },
+  "wirelevancyadapter (external)": {
+    overview: "External PyPI package — CandidateJobOrderGenerationES8 executes relevancy queries built from candidate tags against JobFeatureV3 index model.",
+    responsibilities: [
+      { label: "Query execution", detail: "set_es_model(JobFeatureV3()) → builds function_score + filter query → adapter.search()" },
+      { label: "Candidate param loading", detail: "Loads candidate feature tags from C1 as input to job matching scoring" },
+      { label: "ES 9 parity", detail: "get_score_query() wrapping must produce valid ES 9 queries for P4/P6" },
+    ],
+    keyFiles: ["relevancyjobadapter.py", "CandidateJobOrderGenerationES8"],
+    usedBy: ["workindiajobs-ms (all primary relevancy handlers)", "CategoryHelperV2", "PopularSearchController"],
+    migrationImpact: "External dependency — must publish ES9-compatible version coordinated with elastictoolkit + models bumps. Not in this monorepo.",
+  },
+  "NEW: single-write-consumer": {
+    overview: "Proposed unified Kafka consumer (P1 DRAFT — not confirmed) that would become the sole writer to C1 and C3, replacing 5 fragmented direct ES writers.",
+    responsibilities: [
+      { label: "Consumer consolidation", detail: "Single topic partitioned by candidate_id; owns all field-group writes from profile-ms, candidateevents-ms, view-candidate-ms, jobpost-ms" },
+      { label: "Dual-write flow", detail: "HLD-04: C1 first → C3 partial → 404 read-through backfill with MAU predicate" },
+      { label: "Migration window", detail: "Scale-to-zero during freeze; resume + drain Kafka backlog to both clusters" },
+      { label: "Drift detection", detail: "Daily count parity + sampled _source diff C1 vs C3 for MAU cohort" },
+    ],
+    keyFiles: ["new repo or wicandidateprofile-ms consumer module", "consumer handler", "ops _reindex scripts"],
+    usedBy: ["Would replace direct writes in wicandidateprofile-ms, wi-candidateevents-ms, wiemployerviewcandidate-ms, wiemployerjobpost-ms, workindiaapi"],
+    migrationImpact: "Enabling change for P1 — unblocks ordered dual-write. Status: DRAFT, alternative write paths under review.",
+  },
+  "NEW: embedding-pipeline": {
+    overview: "New service for P3 critical path — batch and realtime embedding of ~9.4M context vectors for semantic matching experiment.",
+    responsibilities: [
+      { label: "Candidate vectors", detail: "~3.14 context vectors per MAU candidate → ~9.4M dense_vectors on C3" },
+      { label: "Job vectors", detail: "Job context vectors to C4 for Candidate→Job kNN recall" },
+      { label: "Model selection", detail: "Embedding model + dimensions must match index_options (immutable after first write)" },
+      { label: "Re-embedding", detail: "Triggered on document field changes via consumer integration" },
+    ],
+    keyFiles: ["pipeline service (new)", "design doc", "consumer integration hooks"],
+    usedBy: ["P4 kNN experiment reads on C3/C4", "workindiajobs-ms experiment endpoint"],
+    migrationImpact: "P3 blocks P4 experiment. Quantization (BBQ/int8_hnsw) decision is irreversible once index receives first vector write.",
+  },
+  "Infrastructure / Ops": {
+    overview: "Cluster provisioning, Consul KV, Kafka retention, snapshots, and production cutover runbooks for C3/C4 ES 9.4.2 clusters.",
+    responsibilities: [
+      { label: "C3 provisioning", detail: "1 master + 2 coordinators + 3 data nodes; replicas=2; pre-created mapping with dense_vector index_options" },
+      { label: "C4 provisioning", detail: "Jobs ES 9.4.2 for job context vectors" },
+      { label: "Consul (P0)", detail: "C3/C4 non-prod DNS — experiment reads use explicit endpoints, NOT production flip" },
+      { label: "Migration window (P2)", detail: "C1 snapshot + test-restore; Kafka retention > freeze; _reindex MAU cohort" },
+      { label: "Cutover (P6)", detail: "Production Consul/DNS repoint with index alias; dual-writes stay on during cutover" },
+    ],
+    keyFiles: ["Terraform / ansible", "Consul KV", "Kafka topic config", "ops runbook"],
+    usedBy: ["All services depending on C3/C4 endpoints", "Embedding pipeline", "Drift check cron"],
+    migrationImpact: "C3/C4 must exist before any P0 library work can be integration-tested. Kafka retention sizing depends on freeze window duration.",
+  },
+};
+
+const REPO_DETAILS_V1 = {
+  "wi-elasticsearchmodels-py": {
+    overview: "Central adapter and model package — in v1 owns dual-write routing and read-fallback (C3 primary, C1 backfill) at the adapter layer instead of consumer consolidation.",
+    responsibilities: [
+      { label: "Dual-write adapters", detail: "Every write to C1+C3 and C2+C4; no doc_as_upsert on C3" },
+      { label: "Read-fallback", detail: "C3 miss → GET C1 → backfill C3 on production read path (differs from v0)" },
+      { label: "Cluster registry", detail: "C3/C4 in WIElasticSearchCluster with Consul keys for primary + fallback routing" },
+    ],
+    keyFiles: ["wielasticsearchmodels/adapters/", "wielasticsearchmodels/constants/cluster.py"],
+    usedBy: ["All services — adapter layer change propagates everywhere"],
+    migrationImpact: "v1 avoids P1 consumer consolidation by pushing complexity into shared adapters. Read-fallback on production path is main risk vs v0.",
+  },
+  "elastictoolkit-py": {
+    overview: "ES9 client adapter + ReadThroughFallback mixin for v1's primary-read-with-fallback pattern on C3/C4.",
+    responsibilities: [
+      { label: "Elasticsearch9Adapter", detail: "ES 9.4.2 client wrapper for C3/C4 primary clusters" },
+      { label: "ReadThroughFallback", detail: "Shared get-with-fallback + backfill mixin on baseelasticsearchadapter" },
+    ],
+    keyFiles: ["elastictoolkit/adapters/elasticsearch9adapter.py", "elastictoolkit/adapters/baseelasticsearchadapter.py"],
+    usedBy: ["wi-elasticsearchmodels index models", "workindiajobs-ms read routing"],
+    migrationImpact: "Read-fallback logic lives here — production read latency impact must be measured before V1-5 cutover.",
+  },
+  "wicandidateprofile-ms": {
+    overview: "Candidate write service — v1 freezes all consumers during full 47M copy, then resumes with dual-write to C1+C3.",
+    responsibilities: [
+      { label: "Write freeze (V1-1)", detail: "Pause all 13 Kafka consumers during full _reindex window" },
+      { label: "Dual-write resume (V1-2)", detail: "CandidateFeatureTagging writes to both C1 and C3 on every update" },
+    ],
+    keyFiles: ["candidatefeaturetagging.py", "api/pubsub/consumers/*", "api/apps.py"],
+    usedBy: ["All candidate profile CDC paths"],
+    migrationImpact: "No consumer consolidation — keeps fragmented write surface but adds dual-write at tagging layer.",
+  },
+  "wi-candidateevents-ms": {
+    overview: "Candidate activity writer — v1 freezes 3 Kafka consumers during full copy, then dual-writes job_activity_v2, last_app_open, and intent_bucket to C1+C3.",
+    responsibilities: [
+      { label: "Write freeze (V1-1)", detail: "Pause CandidateTrackJobActivityConsumer, CandidateAppOpenBulkConsumer, CandidateTriedContactingEmployerConsumer" },
+      { label: "Dual-write resume (V1-2)", detail: "Painless bulk script + doc updates target both C1 and C3" },
+      { label: "intent_bucket overlap", detail: "Same field written by wiemployerviewcandidate-ms cron — both must dual-write before resume" },
+    ],
+    keyFiles: ["events/helpers/candidatejobactivitytracker.py", "events/pubsub/consumers/*", "api/apps.py"],
+    usedBy: ["HTTP event capture → Kafka → ES", "Downstream reads: workindiajobs-ms, wiemployerviewcandidate-ms"],
+    migrationImpact: "Modern library pins — good early dual-write candidate. Bulk Painless path needs C3 script parity validation.",
+  },
+  "workindiajobs-ms": {
+    overview: "Primary job read service — v1 routes production reads to C4 first with C2 fallback and miss backfill.",
+    responsibilities: [
+      { label: "C4 primary reads", detail: "CandidateRelevancyHandler → JobFeatureV3.search on C4" },
+      { label: "C2 fallback", detail: "Cluster error or miss → fetch from C2 → index backfill to C4" },
+    ],
+    keyFiles: ["jobs/util/candidaterelevancyhandler.py", "jobs/joblistgenerators/"],
+    usedBy: ["All candidate job-list APIs — production traffic affected unlike v0 P4 experiment-only reads"],
+    migrationImpact: "Production read path changes in V1-3 — highest user-facing risk in v1 plan.",
+  },
+  "Infrastructure / Ops": {
+    overview: "v1 ops scope — full 47M candidate copy + full job corpus copy; longer freeze window and Kafka retention requirements.",
+    responsibilities: [
+      { label: "Full copy", detail: "_reindex entire C1→C3 (47M) and C2→C4 — not MAU cohort" },
+      { label: "Kafka retention", detail: "Must buffer all writes for entire freeze + full copy duration" },
+      { label: "Parity checks", detail: "Post-resume count + sample diff on both cluster pairs" },
+    ],
+    keyFiles: ["ops runbook", "Kafka topic config", "Consul KV"],
+    usedBy: ["All writers during freeze", "Dual-write services on resume"],
+    migrationImpact: "Significantly longer freeze than v0 (&lt;1hr MAU window). Rollback plan must account for full corpus copy in progress.",
+  },
+};
+
+function getRepoDetail(repo) {
+  if (activePlanId === "migration_v1" && REPO_DETAILS_V1[repo]) return REPO_DETAILS_V1[repo];
+  return REPO_DETAILS_V0[repo] || REPO_DETAILS_V1[repo] || null;
+}
+
+PLANS.migration_v0.data = MIGRATION_V0_DATA;
+PLANS.migration_v1.data = MIGRATION_V1_DATA;
+
+const STORAGE_KEY_PREFIX = "es9_migration_task_status";
+
+function getPlan() { return PLANS[activePlanId] || PLANS.migration_v0; }
+function storageKey() { return `${STORAGE_KEY_PREFIX}_${activePlanId}`; }
+
+function loadStatus() {
+  try {
+    let s = JSON.parse(localStorage.getItem(storageKey()) || "{}");
+    if (activePlanId === "migration_v0" && !Object.keys(s).length) {
+      const legacy = localStorage.getItem("es9_migration_task_status");
+      if (legacy) s = JSON.parse(legacy);
+    }
+    return s;
+  } catch { return {}; }
+}
+
+function saveStatus(s) {
+  localStorage.setItem(storageKey(), JSON.stringify(s));
+}
+
+let status = loadStatus();
+let filters = { phases: new Set(), categories: new Set(), roles: new Set(), repos: new Set(), status: "all", search: "", activePhase: null };
+let filtersInitialized = false;
+
+function planData() { return getPlan().data || []; }
+function planPhases() { return getPlan().phases || []; }
+
+function allTasks() {
+  return planData().flatMap(d => d.tasks.map(t => ({ ...t, repo: d.repo, category: d.category, role: d.role })));
+}
+
+function resetFilters() {
+  filters = { phases: new Set(), categories: new Set(), roles: new Set(), repos: new Set(), status: "all", search: "", activePhase: null };
+  document.getElementById("searchBox").value = "";
+  document.querySelector('#statusFilters input[value="all"]').checked = true;
+}
+
+function setFilterGroupAll(containerId, filterSet, selectAll) {
+  const container = document.getElementById(containerId);
+  container.querySelectorAll('input[type="checkbox"]').forEach(inp => {
+    inp.checked = selectAll;
+    if (selectAll) filterSet.add(inp.value);
+    else filterSet.delete(inp.value);
+  });
+  render();
+}
+
+function appendCheckboxFilter(containerEl, filterSet, value, labelText, checked) {
+  const label = document.createElement("label");
+  label.innerHTML = `<input type="checkbox" value="${value}" ${checked ? "checked" : ""} /> ${labelText}`;
+  label.querySelector("input").addEventListener("change", e => {
+    if (e.target.checked) filterSet.add(value);
+    else filterSet.delete(value);
+    render();
+  });
+  containerEl.appendChild(label);
+  if (checked) filterSet.add(value);
+}
+
+function rebuildFilterUI() {
+  const phaseEl = document.getElementById("phaseFilters");
+  const catEl = document.getElementById("categoryFilters");
+  const roleEl = document.getElementById("roleFilters");
+  const repoEl = document.getElementById("repoFilters");
+  phaseEl.innerHTML = "";
+  catEl.innerHTML = "";
+  roleEl.innerHTML = "";
+  repoEl.innerHTML = "";
+
+  const prevPhases = new Set(filters.phases);
+  const prevCats = new Set(filters.categories);
+  const prevRoles = new Set(filters.roles);
+  const prevRepos = new Set(filters.repos);
+  filters.phases.clear();
+  filters.categories.clear();
+  filters.roles.clear();
+  filters.repos.clear();
+
+  planPhases().forEach(p => {
+    const checked = !prevPhases.size || prevPhases.has(p.id);
+    appendCheckboxFilter(phaseEl, filters.phases, p.id, p.id, checked);
+  });
+
+  [...new Set(planData().map(d => d.category))].forEach(c => {
+    const checked = !prevCats.size || prevCats.has(c);
+    appendCheckboxFilter(catEl, filters.categories, c, c, checked);
+  });
+
+  [...new Set(planData().map(d => d.role))].forEach(r => {
+    const checked = !prevRoles.size || prevRoles.has(r);
+    appendCheckboxFilter(roleEl, filters.roles, r, r, checked);
+  });
+
+  planData().forEach(d => {
+    const checked = !prevRepos.size || prevRepos.has(d.repo);
+    appendCheckboxFilter(repoEl, filters.repos, d.repo, d.repo, checked);
+  });
+}
+
+function initFilterBulkActions() {
+  const groupMap = {
+    phase: ["phaseFilters", () => filters.phases],
+    category: ["categoryFilters", () => filters.categories],
+    role: ["roleFilters", () => filters.roles],
+    repo: ["repoFilters", () => filters.repos],
+  };
+
+  document.querySelector("aside").addEventListener("click", e => {
+    const btn = e.target.closest(".filter-action");
+    if (!btn) return;
+    const section = btn.closest(".filter-section");
+    const groupKey = section?.dataset.filterGroup;
+    const entry = groupMap[groupKey];
+    if (!entry) return;
+    const [containerId, getSet] = entry;
+    setFilterGroupAll(containerId, getSet(), btn.dataset.action === "all");
+  });
+}
+
+function initFilters() {
+  if (filtersInitialized) return;
+  filtersInitialized = true;
+  rebuildFilterUI();
+  initFilterBulkActions();
+
+  document.querySelectorAll("#statusFilters input").forEach(inp => {
+    inp.addEventListener("change", e => { filters.status = e.target.value; render(); });
+  });
+
+  document.getElementById("searchBox").addEventListener("input", e => {
+    filters.search = e.target.value.toLowerCase();
+    render();
+  });
+}
+
+function renderPlanBanner() {
+  const plan = getPlan();
+  const b = plan.banner;
+  document.getElementById("planBanner").className = `plan-banner ${plan.bannerClass || ""}`.trim();
+  document.getElementById("planBanner").innerHTML = `
+    <h2>${b.title}</h2>
+    <p>${b.summary}</p>
+    <ul>${b.bullets.map(li => `<li>${li}</li>`).join("")}</ul>
+  `;
+  document.getElementById("planSubtitle").textContent = plan.subtitle;
+  document.querySelector(".hld-links").style.display = plan.hldLinks ? "flex" : "none";
+}
+
+function switchPlan(planId) {
+  if (!PLANS[planId] || planId === activePlanId) return;
+  activePlanId = planId;
+  localStorage.setItem("es9_active_plan", planId);
+  status = loadStatus();
+  openFragments.write.services.clear();
+  openFragments.write.paths.clear();
+  openFragments.read.services.clear();
+  openFragments.read.paths.clear();
+  openRepoCards.clear();
+  resetQaFilter();
+  resetFilters();
+  rebuildFilterUI();
+  document.querySelectorAll(".plan-tab").forEach(tab => {
+    tab.classList.toggle("active", tab.dataset.plan === planId);
+  });
+  render();
+}
+
+function initPlanTabs() {
+  document.querySelectorAll(".plan-tab").forEach(tab => {
+    tab.classList.toggle("active", tab.dataset.plan === activePlanId);
+    tab.addEventListener("click", () => switchPlan(tab.dataset.plan));
+  });
+}
+
+function renderClusters() {
+  document.getElementById("clusters").innerHTML = getPlan().clusters.map(c => `
+    <div class="cluster ${c.type}">
+      <h4>${c.id} — ${c.name}</h4>
+      <div class="ver">ES ${c.ver}</div>
+      <div class="role">${c.role}</div>
+    </div>
+  `).join("");
+}
+
+function renderPhasePills() {
+  const el = document.getElementById("phasePills");
+  const phases = planPhases();
+  el.innerHTML = `<span class="phase-pill ${!filters.activePhase ? 'active' : ''}" data-phase="">All phases</span>` +
+    phases.map(p => `<span class="phase-pill ${p.type} ${filters.activePhase === p.id ? 'active' : ''}" data-phase="${p.id}" title="${p.desc}">${p.label}</span>`).join("");
+  el.querySelectorAll(".phase-pill").forEach(pill => {
+    pill.addEventListener("click", () => {
+      const ph = pill.dataset.phase;
+      filters.activePhase = ph || null;
+      render();
+    });
+  });
+}
+
+let openFragments = {
+  write: { services: new Set(), paths: new Set() },
+  read: { services: new Set(), paths: new Set() },
+};
+
+function fragmentMeta(w, kind) {
+  const consumers = w.paths.reduce((n, p) => n + (p.consumers?.length || 0), 0);
+  const triggers = w.paths.reduce((n, p) => n + (p.otherTriggers?.length || 0), 0);
+  const idxCount = w.paths.length;
+  const pathTotal = consumers + triggers;
+  const pathWord = kind === "read" ? "read" : "write";
+  const idxLabel = idxCount === 1 ? "1 ES index" : `${idxCount} ES indices`;
+  const pathLabel = pathTotal === 1 ? `1 ${pathWord} path` : `${pathTotal} ${pathWord} paths`;
+  const parts = [];
+  if (consumers) parts.push(`${consumers} Kafka consumer${consumers === 1 ? "" : "s"}`);
+  if (triggers) parts.push(`${triggers} HTTP/cron/other`);
+  const breakdown = parts.length ? ` — ${parts.join(" + ")}` : "";
+  const title = [
+    `${idxCount} distinct Elasticsearch index${idxCount === 1 ? "" : "es"} this service touches.`,
+    `${pathTotal} code path${pathTotal === 1 ? "" : "s"} that initiate ${pathWord}s:`,
+    consumers ? `${consumers} Kafka consumer(s)` : null,
+    triggers ? `${triggers} HTTP / cron / library trigger(s)` : null,
+    "Expand the card to see fields, files, and each path.",
+  ].filter(Boolean).join(" ");
+  return { text: `${idxLabel} · ${pathLabel}${breakdown}`, title };
+}
+
+function fragmentPathId(kind, service, path) {
+  return `${kind}::${service}::${path.index}`;
+}
+
+function saveFragmentOpenState(kind) {
+  const state = openFragments[kind];
+  document.querySelectorAll(`.fragment-card[data-fragment="${kind}"][data-service]`).forEach(el => {
+    if (el.open) state.services.add(el.dataset.service);
+    else state.services.delete(el.dataset.service);
+  });
+  document.querySelectorAll(`.fragment-path[data-fragment="${kind}"][data-path-id]`).forEach(el => {
+    if (el.open) state.paths.add(el.dataset.pathId);
+    else state.paths.delete(el.dataset.pathId);
+  });
+}
+
+function renderFragmentPathContent(path, kind) {
+  const dataList = path.dataRead || path.dataWritten || [];
+  const dataLabel = kind === "read" ? "Data read" : "Data written";
+  const entryLabel = kind === "read" ? "Consumers & triggers" : "Kafka consumers";
+  const dataHtml = dataList.map(d =>
+    `<li><strong>${d.label}</strong>: ${d.detail}</li>`
+  ).join("");
+  const filesHtml = path.files.map(f => `<li><code>${f}</code></li>`).join("");
+  const consumersHtml = path.consumers?.length
+    ? path.consumers.map(c =>
+        `<li><code>${c.name}</code><div class="consumer-fields">→ ${c.reads || c.writes}</div></li>`
+      ).join("")
+    : "";
+  const otherHtml = path.otherTriggers?.length
+    ? `<div class="writer-subsection"><div class="writer-sub-label">${kind === "read" ? "HTTP / cron / library" : "Other triggers"}</div><ul>${path.otherTriggers.map(t => `<li class="writer-other">${t}</li>`).join("")}</ul></div>`
+    : "";
+  const emptyEntry = !path.consumers?.length && !path.otherTriggers?.length
+    ? `<li class="writer-other">No entry points documented</li>`
+    : "";
+
+  return `
+      <div class="writer-subsection">
+        <div class="writer-sub-label">${dataLabel}</div>
+        <ul class="writer-data-list">${dataHtml}</ul>
+      </div>
+      <div class="writer-subsection writer-files">
+        <div class="writer-sub-label">Files</div>
+        <ul>${filesHtml}</ul>
+      </div>
+      <div class="writer-subsection writer-consumers">
+        <div class="writer-sub-label">${entryLabel}</div>
+        <ul>${consumersHtml}${emptyEntry}</ul>
+      </div>
+      ${otherHtml}`;
+}
+
+function renderFragmentPath(path, service, nested, kind) {
+  const content = renderFragmentPathContent(path, kind);
+  const pathId = fragmentPathId(kind, service, path);
+  const state = openFragments[kind];
+
+  if (nested) {
+    const open = state.paths.has(pathId) ? "open" : "";
+    return `
+    <details class="writer-path fragment-path" data-fragment="${kind}" data-path-id="${pathId}" ${open}>
+      <summary>${path.index}</summary>
+      <div class="writer-path-body">${content}</div>
+    </details>`;
+  }
+
+  return `
+    <div class="writer-path">
+      <div class="writer-path-index">${path.index}</div>
+      ${content}
+    </div>`;
+}
+
+function renderFragmentation(kind, containerId, titleId, getTitle, data, badgeClass, badgeLabel) {
+  saveFragmentOpenState(kind);
+  const state = openFragments[kind];
+
+  const titleEl = document.getElementById(titleId);
+  if (titleEl) titleEl.textContent = getTitle();
+
+  document.getElementById(containerId).innerHTML = data.map(w => {
+    const nested = w.paths.length > 1;
+    const open = state.services.has(w.service) ? "open" : "";
+    const meta = fragmentMeta(w, kind);
+    return `
+    <details class="writer-card fragment-card" data-fragment="${kind}" data-service="${w.service}" ${open}>
+      <summary>
+        <span class="writer-summary-title">${w.service} <span class="badge ${badgeClass}">${badgeLabel}</span></span>
+        <span class="writer-summary-meta" title="${meta.title.replace(/"/g, "&quot;")}">${meta.text}</span>
+      </summary>
+      <div class="writer-card-body">
+        ${w.paths.map(p => renderFragmentPath(p, w.service, nested, kind)).join("")}
+      </div>
+    </details>`;
+  }).join("");
+}
+
+function renderWriters() {
+  const hint = document.getElementById("writersSectionHint");
+  if (hint) {
+    hint.innerHTML = "<strong>ES indices</strong> — how many distinct Elasticsearch indexes this service writes to (e.g. candidate feature vs job-post status). <strong>Write paths</strong> — Kafka consumers plus HTTP, cron, or other triggers that call ES; the breakdown in parentheses shows the split. Expand a card for field groups, files, and each index.";
+  }
+  renderFragmentation(
+    "write",
+    "writers",
+    "writersSectionTitle",
+    () => {
+      if (activePlanId === "migration_v1") return "Write Sources (freeze during V1-1)";
+      const p1 = planPhases().find(p => p.id === "P1");
+      return p1?.type === "draft"
+        ? "Write Fragmentation (P1 draft — not confirmed)"
+        : "Write Fragmentation (P1 target)";
+    },
+    getPlan().writers,
+    "badge-write",
+    "WRITER"
+  );
+}
+
+function renderReaders() {
+  const hint = document.getElementById("readersSectionHint");
+  if (hint) {
+    hint.innerHTML = "<strong>ES indices</strong> — how many distinct Elasticsearch indexes this service reads from. <strong>Read paths</strong> — Kafka consumers plus HTTP, cron, or library calls that issue search/get/mget; the breakdown in parentheses shows the split. Expand a card for fields queried, files, and each index.";
+  }
+  renderFragmentation(
+    "read",
+    "readers",
+    "readersSectionTitle",
+    () => activePlanId === "migration_v1"
+      ? "Read Fragmentation · v1 routes C3/C4 primary with C1/C2 fallback"
+      : "Read Fragmentation · production on C1/C2 through P4",
+    getPlan().readers,
+    "badge-read",
+    "READER"
+  );
+}
+
+function taskVisible(task, repoData) {
+  if (filters.activePhase && task.phase !== filters.activePhase) return false;
+  if (!filters.phases.has(task.phase)) return false;
+  if (!filters.categories.has(repoData.category)) return false;
+  if (!filters.roles.has(repoData.role)) return false;
+  if (!filters.repos.has(repoData.repo)) return false;
+  const done = !!status[task.id];
+  if (filters.status === "pending" && done) return false;
+  if (filters.status === "done" && !done) return false;
+  if (filters.search) {
+    const detail = getRepoDetail(repoData.repo);
+    const detailHay = detail
+      ? `${detail.overview} ${detail.migrationImpact} ${detail.responsibilities?.map(r => r.detail).join(" ")} ${detail.keyFiles?.join(" ")} ${detail.usedBy?.join(" ")}`
+      : "";
+    const hay = `${task.title} ${task.desc} ${task.files} ${repoData.repo} ${task.phase} ${repoData.summary} ${detailHay}`.toLowerCase();
+    if (!hay.includes(filters.search)) return false;
+  }
+  return true;
+}
+
+let openRepoCards = new Set();
+
+function saveRepoOpenState() {
+  document.querySelectorAll(".repo-card[data-repo]").forEach(el => {
+    if (el.open) openRepoCards.add(el.dataset.repo);
+    else openRepoCards.delete(el.dataset.repo);
+  });
+}
+
+function renderRepoDetail(repo) {
+  const d = getRepoDetail(repo);
+  if (!d) return "";
+
+  const respHtml = d.responsibilities?.map(r =>
+    `<li><strong>${r.label}</strong>: ${r.detail}</li>`
+  ).join("") || "";
+
+  return `
+    <div class="repo-detail">
+      <div class="repo-detail-overview">${d.overview}</div>
+      ${respHtml ? `<div class="writer-subsection"><div class="writer-sub-label">Responsibilities</div><ul class="writer-data-list">${respHtml}</ul></div>` : ""}
+      ${d.keyFiles?.length ? `<div class="writer-subsection writer-files"><div class="writer-sub-label">Key files</div><ul>${d.keyFiles.map(f => `<li><code>${f}</code></li>`).join("")}</ul></div>` : ""}
+      ${d.usedBy?.length ? `<div class="writer-subsection"><div class="writer-sub-label">Used by</div><ul>${d.usedBy.map(u => `<li>${u}</li>`).join("")}</ul></div>` : ""}
+      ${d.migrationImpact ? `<div class="repo-detail-impact"><strong>Migration impact:</strong> ${d.migrationImpact}</div>` : ""}
+    </div>`;
+}
+
+function renderRepoCard(repoData) {
+  const visibleTasks = repoData.tasks.filter(t => taskVisible(t, repoData));
+  if (!visibleTasks.length) return "";
+
+  const doneCount = visibleTasks.filter(t => status[t.id]).length;
+  const roleBadge = repoData.role === "write" ? "badge-write" : repoData.role === "read" ? "badge-read" : "";
+  const catBadge = { library: "badge-lib", service: "badge-svc", infra: "badge-new" }[repoData.category] || "badge-infra";
+  const open = openRepoCards.has(repoData.repo) ? "open" : "";
+  const detail = getRepoDetail(repoData.repo);
+  const hasDetail = !!detail;
+
+  return `
+    <details class="repo-card" data-repo="${repoData.repo}" ${open}>
+      <summary class="repo-header">
+        <div class="repo-header-inner">
+          <div>
+            <div class="repo-name">${repoData.repo}</div>
+            <div class="repo-meta">${repoData.summary} · pinned: ${repoData.pinned}${hasDetail ? " · click to expand" : ""}</div>
+          </div>
+          <div class="repo-badges">
+            <span class="badge ${catBadge}">${repoData.category}</span>
+            <span class="badge ${roleBadge}">${repoData.role}</span>
+            <span class="badge" style="background:#eef0f3;color:#2b333d">${doneCount}/${visibleTasks.length}</span>
+          </div>
+        </div>
+      </summary>
+      <div class="repo-body">
+        ${renderRepoDetail(repoData.repo)}
+        <div class="repo-tasks-label">Migration tasks</div>
+        ${visibleTasks.map(t => {
+          const phaseMeta = planPhases().find(p => p.id === t.phase);
+          const draftTag = phaseMeta?.type === "draft" ? " draft" : "";
+          return `
+          <div class="task ${status[t.id] ? 'done' : ''}" data-id="${t.id}">
+            <input type="checkbox" ${status[t.id] ? 'checked' : ''} />
+            <div>
+              <div class="task-title">${t.title}</div>
+              <div class="task-desc">${t.desc}</div>
+              <div class="task-files">${t.files}</div>
+            </div>
+            <div class="task-tags"><span class="tag tag-${t.phase.toLowerCase()}${draftTag}">${t.phase}${phaseMeta?.type === "draft" ? " · draft" : ""}</span></div>
+          </div>`;
+        }).join("")}
+      </div>
+    </details>
+  `;
+}
+
+function renderStats() {
+  if (isConsolidationView()) return;
+  const data = planData();
+  const tasks = allTasks();
+  const done = tasks.filter(t => status[t.id]).length;
+  document.getElementById("stats").innerHTML = `
+    <div class="stat"><div class="num">${data.length}</div><div class="lbl">Repositories</div></div>
+    <div class="stat"><div class="num">${tasks.length}</div><div class="lbl">Total tasks</div></div>
+    <div class="stat"><div class="num" style="color:var(--green)">${done}</div><div class="lbl">Completed</div></div>
+    <div class="stat"><div class="num" style="color:var(--orange)">${tasks.length - done}</div><div class="lbl">Pending</div></div>
+    <div class="stat"><div class="num">${Math.round(done / tasks.length * 100) || 0}%</div><div class="lbl">Progress</div></div>
+  `;
+  document.getElementById("progressFill").style.width = `${(done / tasks.length * 100) || 0}%`;
+}
+
+function bindCheckboxes() {
+  document.querySelectorAll(".task input[type=checkbox]").forEach(cb => {
+    cb.addEventListener("change", e => {
+      const id = e.target.closest(".task").dataset.id;
+      status[id] = e.target.checked;
+      saveStatus(status);
+      render();
+    });
+  });
+}
+
+function stripHtml(html) {
+  const tmp = document.createElement("div");
+  tmp.innerHTML = html;
+  return tmp.textContent || "";
+}
+
+function highlightPlain(text, query) {
+  if (!query) return text;
+  const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return text.replace(new RegExp(`(${escaped})`, "gi"), '<mark class="qa-highlight">$1</mark>');
+}
+
+let qaFilter = { search: "", tag: "all" };
+let openQaItems = new Set();
+let qaControlsInitialized = false;
+
+function getQaItems() {
+  return (getPlan().qa || []).map((item, i) => ({
+    ...item,
+    id: item.id || `qa-${i}`,
+    category: item.category || "General",
+    tags: item.tags || [],
+  }));
+}
+
+function getAllQaTags(items) {
+  const tags = new Set();
+  items.forEach(item => item.tags.forEach(t => tags.add(t)));
+  return [...tags].sort();
+}
+
+function qaMatchesFilter(item) {
+  const q = qaFilter.search.toLowerCase().trim();
+  if (qaFilter.tag !== "all" && !item.tags.includes(qaFilter.tag)) return false;
+  if (!q) return true;
+  const hay = `${item.q} ${stripHtml(item.a)} ${item.category} ${item.tags.join(" ")}`.toLowerCase();
+  return hay.includes(q);
+}
+
+function saveQaOpenState() {
+  document.querySelectorAll(".qa-item[data-qa-id]").forEach(el => {
+    if (el.open) openQaItems.add(el.dataset.qaId);
+    else openQaItems.delete(el.dataset.qaId);
+  });
+}
+
+function renderQaTagFilters(items) {
+  const tags = getAllQaTags(items);
+  const el = document.getElementById("qaTagFilters");
+  el.innerHTML = `<button type="button" class="qa-tag-pill ${qaFilter.tag === "all" ? "active" : ""}" data-tag="all">All</button>` +
+    tags.map(t => `<button type="button" class="qa-tag-pill ${qaFilter.tag === t ? "active" : ""}" data-tag="${t}">${t}</button>`).join("");
+}
+
+function renderQaItem(item, query) {
+  const autoOpen = query && qaMatchesFilter(item);
+  const open = openQaItems.has(item.id) || autoOpen ? "open" : "";
+  const qHtml = highlightPlain(item.q, query);
+  const tagsHtml = item.tags.map(t =>
+    `<span class="qa-item-tag">${highlightPlain(t, query)}</span>`
+  ).join("");
+
+  return `
+    <details class="qa-item" data-qa-id="${item.id}" ${open}>
+      <summary>
+        <div class="qa-summary-text">
+          <div>${qHtml}</div>
+          ${tagsHtml ? `<div class="qa-item-tags">${tagsHtml}</div>` : ""}
+        </div>
+      </summary>
+      <div class="qa-answer">${item.a}</div>
+    </details>`;
+}
+
+function renderQa() {
+  const items = getQaItems();
+  const query = qaFilter.search.trim();
+  const filtered = items.filter(qaMatchesFilter);
+
+  const grouped = {};
+  filtered.forEach(item => {
+    if (!grouped[item.category]) grouped[item.category] = [];
+    grouped[item.category].push(item);
+  });
+
+  const categoryOrder = [...new Set(items.map(i => i.category))];
+  const sortedCategories = categoryOrder.filter(c => grouped[c]);
+
+  document.getElementById("qaTotalBadge").textContent = `${items.length} questions`;
+  document.getElementById("qaResultCount").textContent = query || qaFilter.tag !== "all"
+    ? `${filtered.length} of ${items.length}`
+    : `${items.length} total`;
+
+  if (!filtered.length) {
+    document.getElementById("qaSection").innerHTML = "";
+    document.getElementById("qaEmpty").style.display = "block";
+    return;
+  }
+
+  document.getElementById("qaEmpty").style.display = "none";
+  document.getElementById("qaSection").innerHTML = sortedCategories.map(cat => `
+    <div class="qa-group">
+      <div class="qa-group-title">
+        ${cat}
+        <span class="qa-group-count">${grouped[cat].length}</span>
+      </div>
+      ${grouped[cat].map(item => renderQaItem(item, query)).join("")}
+    </div>
+  `).join("");
+
+  renderQaTagFilters(items);
+}
+
+function initQaControls() {
+  if (qaControlsInitialized) return;
+  qaControlsInitialized = true;
+
+  document.getElementById("qaSearchBox").addEventListener("input", e => {
+    saveQaOpenState();
+    qaFilter.search = e.target.value;
+    renderQa();
+  });
+
+  document.getElementById("qaTagFilters").addEventListener("click", e => {
+    const pill = e.target.closest(".qa-tag-pill");
+    if (!pill) return;
+    saveQaOpenState();
+    qaFilter.tag = pill.dataset.tag;
+    renderQa();
+  });
+
+  document.getElementById("qaExpandAll").addEventListener("click", () => {
+    document.querySelectorAll(".qa-item[data-qa-id]").forEach(el => {
+      el.open = true;
+      openQaItems.add(el.dataset.qaId);
+    });
+  });
+
+  document.getElementById("qaCollapseAll").addEventListener("click", () => {
+    document.querySelectorAll(".qa-item[data-qa-id]").forEach(el => {
+      el.open = false;
+      openQaItems.delete(el.dataset.qaId);
+    });
+  });
+
+  document.getElementById("qaSection").addEventListener("toggle", e => {
+    const item = e.target.closest(".qa-item[data-qa-id]");
+    if (!item || e.target !== item) return;
+    if (item.open) openQaItems.add(item.dataset.qaId);
+    else openQaItems.delete(item.dataset.qaId);
+  }, true);
+}
+
+function isConsolidationView() {
+  return getPlan().viewType === "consolidation";
+}
+
+function setViewMode() {
+  const consolidation = isConsolidationView();
+  document.getElementById("migrationView").style.display = consolidation ? "none" : "block";
+  document.getElementById("consolidationView").style.display = consolidation ? "block" : "none";
+  document.getElementById("layout").classList.toggle("consolidation-mode", consolidation);
+  const progressBar = document.querySelector("header .progress-bar");
+  if (progressBar) progressBar.style.display = consolidation ? "none" : "block";
+}
+
+function renderConsolidation() {
+  const c = CONSOLIDATION_ANALYSIS;
+  const totalConsumers = c.services.reduce((n, s) => n + (s.consumers || 0), 0);
+  const totalTriggers = c.services.reduce((n, s) => n + (s.triggers || 0), 0);
+
+  const prosHtml = c.pros.map(p => `<li><strong>${p.title}</strong> — ${p.detail}</li>`).join("");
+  const consHtml = c.cons.map(p => `<li><strong>${p.title}</strong> — ${p.detail}</li>`).join("");
+
+  const scopeHtml = c.scope.map(row => `
+    <tr>
+      <td>${row.item}</td>
+      <td><span class="cons-badge ${row.inMigration ? "in-scope" : "defer"}">${row.inMigration ? "In ES migration" : "Defer / optional"}</span></td>
+      <td>${row.note}</td>
+    </tr>
+  `).join("");
+
+  const approachesHtml = c.approaches.map(a => `
+    <div class="cons-compare-card ${a.recommended ? "recommended" : ""}">
+      <h4>${a.name}${a.recommended ? " ✓" : ""}</h4>
+      <p>${a.summary}</p>
+      <ul>${a.points.map(p => `<li>${p}</li>`).join("")}</ul>
+    </div>
+  `).join("");
+
+  const servicesHtml = c.services.map(s => `
+    <details class="cons-service-card">
+      <summary>
+        ${s.service}
+        <span class="cons-effort ${s.effort}">${s.effort} effort</span>
+        ${s.consumers ? `<span class="writer-summary-meta">${s.consumers} consumer${s.consumers === 1 ? "" : "s"}${s.triggers ? ` + ${s.triggers} triggers` : ""}</span>` : ""}
+      </summary>
+      <div class="cons-service-body">
+        <p><strong>Today:</strong> ${s.today}</p>
+        <h5>Required changes</h5>
+        <ul>${s.changes.map(ch => `<li>${ch}</li>`).join("")}</ul>
+        <h5>Key files</h5>
+        <p><code>${s.files}</code></p>
+      </div>
+    </details>
+  `).join("");
+
+  const newConsumerHtml = c.newConsumer.items.map(i => `<li>${i}</li>`).join("");
+
+  const fragSummary = WRITE_FRAGMENTATION.map(w => {
+    const meta = fragmentMeta(w, "write");
+    return `<li><strong>${w.service}</strong> — ${meta.text}</li>`;
+  }).join("");
+
+  document.getElementById("consolidationView").innerHTML = `
+    <div class="consolidation-why">
+      <h3>${c.why.q}</h3>
+      <p>${c.why.a[0]}</p>
+      <p>${c.why.a[1]}</p>
+      <ul>${c.why.goals.map(g => `<li><strong>${g.title}</strong> — ${g.detail}</li>`).join("")}</ul>
+      <p>${c.why.alternatives}</p>
+    </div>
+
+    <div class="consolidation-verdict recommend-defer">
+      <h3>${c.verdict.title}</h3>
+      <p>${c.verdict.body}</p>
+    </div>
+
+    <div class="section-title">Approach comparison</div>
+    <p class="section-subtitle">Three ways to handle dual-write for the ES migration. Consolidation is optional; adapter or phased dual-write can ship P0–P4 without it.</p>
+    <div class="cons-compare">${approachesHtml}</div>
+
+    <div class="cons-pros-cons">
+      <div class="cons-box pros">
+        <h4>Advantages</h4>
+        <ul>${prosHtml}</ul>
+      </div>
+      <div class="cons-box cons">
+        <h4>Disadvantages</h4>
+        <ul>${consHtml}</ul>
+      </div>
+    </div>
+
+    <div class="section-title">In scope of ES migration?</div>
+    <table class="cons-scope-table">
+      <thead><tr><th>Work item</th><th>Scope</th><th>Notes</th></tr></thead>
+      <tbody>${scopeHtml}</tbody>
+    </table>
+
+    <div class="section-title">Target architecture (if consolidation proceeds)</div>
+    <div class="cons-flow">[wicandidateprofile-ms] 13 consumers ──┐
+[wi-candidateevents-ms] 3 consumers ──┼──► candidate-es-changes (key=candidate_id)
+[wiemployerviewcandidate-ms] 3+ paths ─┘         │
+[workindiaapi] Celery/SQS (legacy) ──────────────┘         ▼
+                                    ┌── candidate-es-write-consumer ──► C1 + C3 dual-write
+                                    │         (HLD-04, DLQ, MAU backfill)
+[wiemployerjobpost-ms] 8 consumers ─┼── job-es-changes (key=jobpost_id)
+                                    └── job-es-write-consumer ──────► C2 + C4 dual-write
+
+Today: ${WRITE_FRAGMENTATION.length} services · ~${totalConsumers} Kafka consumers · ~${totalTriggers} HTTP/cron triggers → direct ES</div>
+
+    <div class="section-title">${c.newConsumer.title}</div>
+    <ul class="writer-data-list" style="font-size:12.5px;color:var(--muted);padding-left:20px;margin-bottom:24px">${newConsumerHtml}</ul>
+
+    <div class="section-title">Per-service changes required</div>
+    <p class="section-subtitle">What each microservice and library must change to stop writing ES directly and publish to the unified consumer instead.</p>
+    ${servicesHtml}
+
+    <div class="section-title">Current write fragmentation (baseline)</div>
+    <p class="section-subtitle">What consolidation would absorb — same data as migration_v0 Write Fragmentation.</p>
+    <ul style="font-size:12.5px;color:var(--muted);padding-left:20px;margin-bottom:8px">${fragSummary}</ul>
+  `;
+}
+
+function resetQaFilter() {
+  qaFilter = { search: "", tag: "all" };
+  openQaItems.clear();
+  const searchBox = document.getElementById("qaSearchBox");
+  if (searchBox) searchBox.value = "";
+}
+
+function render() {
+  setViewMode();
+  renderPlanBanner();
+
+  if (isConsolidationView()) {
+    renderConsolidation();
+    saveQaOpenState();
+    renderQa();
+    bindCheckboxes();
+    return;
+  }
+
+  renderStats();
+  renderClusters();
+  renderPhasePills();
+  renderWriters();
+  renderReaders();
+
+  const data = planData();
+  const libs = data.filter(d => d.category === "library");
+  const services = data.filter(d => d.category === "service");
+  const infra = data.filter(d => d.category === "infra");
+
+  saveRepoOpenState();
+  const libHtml = libs.map(renderRepoCard).join("");
+  const svcHtml = services.map(renderRepoCard).join("");
+  const infraHtml = infra.map(renderRepoCard).join("");
+
+  document.getElementById("libs").innerHTML = libHtml;
+  document.getElementById("services").innerHTML = svcHtml;
+  document.getElementById("infra").innerHTML = infraHtml;
+
+  const anyVisible = libHtml + svcHtml + infraHtml;
+  document.getElementById("emptyState").style.display = anyVisible ? "none" : "block";
+
+  saveQaOpenState();
+  renderQa();
+  bindCheckboxes();
+}
+
+function initSidebar() {
+  const layout = document.getElementById("layout");
+  const toggle = document.getElementById("sidebarToggle");
+  const icon = toggle.querySelector(".sidebar-toggle-icon");
+
+  function setCollapsed(collapsed) {
+    layout.classList.toggle("sidebar-collapsed", collapsed);
+    toggle.setAttribute("aria-expanded", String(!collapsed));
+    icon.textContent = collapsed ? "›" : "‹";
+    toggle.title = collapsed ? "Expand filters" : "Collapse filters";
+    localStorage.setItem("es9_sidebar_collapsed", collapsed ? "1" : "0");
+  }
+
+  if (localStorage.getItem("es9_sidebar_collapsed") === "1") setCollapsed(true);
+
+  toggle.addEventListener("click", () => {
+    setCollapsed(layout.classList.contains("sidebar-collapsed") ? false : true);
+  });
+}
+
+initPlanTabs();
+initFilters();
+initQaControls();
+initSidebar();
+render();
+</script>
+</body>
+</html>

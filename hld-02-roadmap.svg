@@ -1,0 +1,155 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1700 900" width="1700" height="900" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">
+<defs>
+<marker id="rA" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#5A6B7B"/></marker>
+<marker id="rR" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#C0392B"/></marker>
+</defs>
+<rect width="1700" height="900" fill="#FFFFFF"/>
+
+<text x="50" y="50" font-size="29" font-weight="700" fill="#16324F">Execution Roadmap — Committed Path and the Conditional Branch</text>
+<text x="50" y="78" font-size="15.5" fill="#5A6B7B">P0–P4 deliver a running semantic-matching experiment on the 3M MAU cohort · migrating the remaining ~44M and moving production reads are separate, conditional decisions</text>
+<line x1="50" y1="93" x2="1650" y2="93" stroke="#E3E8EE" stroke-width="2"/>
+
+<rect x="55" y="112" width="945" height="26" rx="5" fill="#E4F5EA" stroke="#37A05F" stroke-width="1.5"/>
+<text x="527" y="130" font-size="13" font-weight="700" fill="#14562F" text-anchor="middle">COMMITTED — delivers the experiment</text>
+<rect x="1160" y="112" width="485" height="26" rx="5" fill="#F5F0FB" stroke="#7A4FBF" stroke-width="1.5" stroke-dasharray="6 4"/>
+<text x="1402" y="130" font-size="13" font-weight="700" fill="#3D2A63" text-anchor="middle">CONDITIONAL — only if the experiment succeeds</text>
+
+<!-- PHASES -->
+<rect x="55" y="152" width="180" height="132" rx="8" fill="#EEF0F3" stroke="#8A93A0" stroke-width="1.5"/>
+<text x="145" y="176" font-size="15" font-weight="700" fill="#2B333D" text-anchor="middle">P0</text>
+<text x="145" y="195" font-size="12.5" font-weight="700" fill="#2B333D" text-anchor="middle">Pre-flight</text>
+<text x="145" y="215" font-size="11.5" fill="#5A6B7B" text-anchor="middle">confirm MAU field</text>
+<text x="145" y="231" font-size="11.5" fill="#5A6B7B" text-anchor="middle">decide quantization</text>
+<text x="145" y="247" font-size="11.5" fill="#5A6B7B" text-anchor="middle">provision C3, pre-create</text>
+<text x="145" y="263" font-size="11.5" fill="#5A6B7B" text-anchor="middle">index, measure rate</text>
+
+<rect x="243" y="152" width="180" height="132" rx="8" fill="#E7E2F5" stroke="#7A4FBF" stroke-width="2.5"/>
+<text x="333" y="176" font-size="15" font-weight="700" fill="#3D2A63" text-anchor="middle">P1 ★</text>
+<text x="333" y="195" font-size="12.5" font-weight="700" fill="#3D2A63" text-anchor="middle">Consumer consolidation</text>
+<text x="333" y="215" font-size="11.5" fill="#4A3A73" text-anchor="middle">3–4 writers → ONE</text>
+<text x="333" y="231" font-size="11.5" fill="#4A3A73" text-anchor="middle">then dual-write, miss</text>
+<text x="333" y="247" font-size="11.5" fill="#4A3A73" text-anchor="middle">handling, DLQ —</text>
+<text x="333" y="263" font-size="11.5" fill="#4A3A73" text-anchor="middle">behind a flag</text>
+
+<rect x="431" y="152" width="180" height="132" rx="8" fill="#E4F5EA" stroke="#37A05F" stroke-width="2"/>
+<text x="521" y="176" font-size="15" font-weight="700" fill="#14562F" text-anchor="middle">P2</text>
+<text x="521" y="195" font-size="12.5" font-weight="700" fill="#14562F" text-anchor="middle">Migration window</text>
+<text x="521" y="215" font-size="11.5" fill="#1E6B3E" text-anchor="middle">deploy dark → freeze</text>
+<text x="521" y="231" font-size="11.5" fill="#1E6B3E" text-anchor="middle">→ flip flag → _reindex</text>
+<text x="521" y="247" font-size="11.5" fill="#1E6B3E" text-anchor="middle">3M → verify → resume</text>
+<text x="521" y="263" font-size="11.5" font-style="italic" fill="#1E6B3E" text-anchor="middle">freeze &lt; 1 hour</text>
+
+<rect x="619" y="152" width="180" height="132" rx="8" fill="#FDECEA" stroke="#C0392B" stroke-width="2.5"/>
+<text x="709" y="176" font-size="15" font-weight="700" fill="#8E2A20" text-anchor="middle">P3 ★</text>
+<text x="709" y="195" font-size="12.5" font-weight="700" fill="#8E2A20" text-anchor="middle">Embedding pipeline</text>
+<text x="709" y="215" font-size="11.5" fill="#96372C" text-anchor="middle">model, inference,</text>
+<text x="709" y="231" font-size="11.5" fill="#96372C" text-anchor="middle">embed ~9.4M vectors,</text>
+<text x="709" y="247" font-size="11.5" fill="#96372C" text-anchor="middle">wire re-embedding</text>
+<text x="709" y="263" font-size="11.5" font-weight="700" fill="#8E2A20" text-anchor="middle">CRITICAL PATH</text>
+
+<rect x="807" y="152" width="180" height="132" rx="8" fill="#F3EEFB" stroke="#7A4FBF" stroke-width="2"/>
+<text x="897" y="176" font-size="15" font-weight="700" fill="#3D2A63" text-anchor="middle">P4</text>
+<text x="897" y="195" font-size="12.5" font-weight="700" fill="#3D2A63" text-anchor="middle">Experiment</text>
+<text x="897" y="215" font-size="11.5" fill="#4A3A73" text-anchor="middle">semantic matching on</text>
+<text x="897" y="231" font-size="11.5" fill="#4A3A73" text-anchor="middle">the MAU cohort</text>
+<text x="897" y="247" font-size="11.5" fill="#4A3A73" text-anchor="middle">cohort stays current via</text>
+<text x="897" y="263" font-size="11.5" fill="#4A3A73" text-anchor="middle">read-through backfill</text>
+
+<!-- GATE -->
+<path fill="#FDF6EC" stroke="#E0912A" stroke-width="2.5" d="M1075,152 L1150,218 L1075,284 L1000,218 Z"/>
+<text x="1075" y="206" font-size="12.5" font-weight="700" fill="#8A5A00" text-anchor="middle">Experiment</text>
+<text x="1075" y="224" font-size="12.5" font-weight="700" fill="#8A5A00" text-anchor="middle">succeeds?</text>
+<text x="1075" y="242" font-size="11" fill="#7A5520" text-anchor="middle">business decision</text>
+
+<!-- CONDITIONAL -->
+<rect x="1160" y="152" width="235" height="132" rx="8" fill="#F5F0FB" stroke="#7A4FBF" stroke-width="1.8" stroke-dasharray="6 4"/>
+<text x="1277" y="176" font-size="15" font-weight="700" fill="#3D2A63" text-anchor="middle">P5</text>
+<text x="1277" y="195" font-size="12.5" font-weight="700" fill="#3D2A63" text-anchor="middle">Remaining ~44M</text>
+<text x="1277" y="215" font-size="11.5" fill="#4A3A73" text-anchor="middle">batches partitioned by an IMMUTABLE</text>
+<text x="1277" y="231" font-size="11.5" fill="#4A3A73" text-anchor="middle">key (created_at / _id) — never timestamp</text>
+<text x="1277" y="249" font-size="11.5" fill="#4A3A73" text-anchor="middle">batches shrink: dual-write already</text>
+<text x="1277" y="265" font-size="11.5" fill="#4A3A73" text-anchor="middle">migrated everyone recently active</text>
+
+<rect x="1408" y="152" width="237" height="132" rx="8" fill="#F5F0FB" stroke="#7A4FBF" stroke-width="1.8" stroke-dasharray="6 4"/>
+<text x="1526" y="176" font-size="15" font-weight="700" fill="#3D2A63" text-anchor="middle">P6</text>
+<text x="1526" y="195" font-size="12.5" font-weight="700" fill="#3D2A63" text-anchor="middle">Production cutover</text>
+<text x="1526" y="215" font-size="11.5" fill="#4A3A73" text-anchor="middle">needs 100% migrated + ID-set diff</text>
+<text x="1526" y="231" font-size="11.5" fill="#4A3A73" text-anchor="middle">+ full query parity + p99 ≤ baseline</text>
+<text x="1526" y="249" font-size="11.5" fill="#4A3A73" text-anchor="middle">+ alias replacing raw index name</text>
+<text x="1526" y="265" font-size="11.5" fill="#4A3A73" text-anchor="middle">Consul/DNS repoint · dual-writes stay on</text>
+
+<!-- FLOW ARROWS -->
+<path fill="none" d="M235,218 L241,218" stroke="#5A6B7B" stroke-width="2" marker-end="url(#rA)"/>
+<path fill="none" d="M423,218 L429,218" stroke="#5A6B7B" stroke-width="2" marker-end="url(#rA)"/>
+<path fill="none" d="M611,218 L617,218" stroke="#5A6B7B" stroke-width="2" marker-end="url(#rA)"/>
+<path fill="none" d="M799,218 L805,218" stroke="#5A6B7B" stroke-width="2" marker-end="url(#rA)"/>
+<path fill="none" d="M987,218 L997,218" stroke="#5A6B7B" stroke-width="2" marker-end="url(#rA)"/>
+<path fill="none" d="M1150,218 L1157,218" stroke="#7A4FBF" stroke-width="2" marker-end="url(#rA)"/>
+<path fill="none" d="M1395,218 L1405,218" stroke="#7A4FBF" stroke-width="2" marker-end="url(#rA)"/>
+<text x="1154" y="208" font-size="10.5" font-weight="700" fill="#3D2A63">yes</text>
+<path fill="none" d="M1075,286 L1075,320" stroke="#C0392B" stroke-width="2" marker-end="url(#rR)"/>
+<text x="1085" y="312" font-size="11" font-weight="700" fill="#8E2A20">no → stop; C1 unaffected, C3 deleted or left dormant</text>
+
+<!-- C3 STATE ROW -->
+<text x="55" y="368" font-size="12.5" font-weight="700" fill="#16324F" letter-spacing="1.2">STATE OF C3</text>
+<rect x="55" y="380" width="180" height="52" rx="6" fill="#F6F8FB" stroke="#DDE3EA" stroke-width="1.4"/>
+<text x="145" y="402" font-size="12" fill="#5A6B7B" text-anchor="middle">does not exist</text>
+<text x="145" y="420" font-size="12" fill="#5A6B7B" text-anchor="middle">→ provisioned, empty</text>
+<rect x="243" y="380" width="180" height="52" rx="6" fill="#F6F8FB" stroke="#DDE3EA" stroke-width="1.4"/>
+<text x="333" y="410" font-size="12" fill="#5A6B7B" text-anchor="middle">empty</text>
+<rect x="431" y="380" width="180" height="52" rx="6" fill="#E4F5EA" stroke="#37A05F" stroke-width="1.4"/>
+<text x="521" y="402" font-size="12" font-weight="700" fill="#14562F" text-anchor="middle">3M documents</text>
+<text x="521" y="420" font-size="11.5" fill="#1E6B3E" text-anchor="middle">no vectors yet</text>
+<rect x="619" y="380" width="180" height="52" rx="6" fill="#E4F5EA" stroke="#37A05F" stroke-width="1.4"/>
+<text x="709" y="402" font-size="12" font-weight="700" fill="#14562F" text-anchor="middle">3M docs + vectors</text>
+<text x="709" y="420" font-size="11.5" fill="#1E6B3E" text-anchor="middle">~9.4M context vectors</text>
+<rect x="807" y="380" width="180" height="52" rx="6" fill="#E4F5EA" stroke="#37A05F" stroke-width="1.4"/>
+<text x="897" y="402" font-size="12" font-weight="700" fill="#14562F" text-anchor="middle">grows toward ~4M</text>
+<text x="897" y="420" font-size="11.5" fill="#1E6B3E" text-anchor="middle">returners join via backfill</text>
+<rect x="1160" y="380" width="235" height="52" rx="6" fill="#F5F0FB" stroke="#7A4FBF" stroke-width="1.4" stroke-dasharray="5 3"/>
+<text x="1277" y="410" font-size="12" fill="#4A3A73" text-anchor="middle">→ 47.1M (full corpus)</text>
+<rect x="1408" y="380" width="237" height="52" rx="6" fill="#F5F0FB" stroke="#7A4FBF" stroke-width="1.4" stroke-dasharray="5 3"/>
+<text x="1526" y="410" font-size="12" fill="#4A3A73" text-anchor="middle">47.1M · serves production</text>
+
+<!-- READ PATH BANDS -->
+<text x="55" y="472" font-size="12.5" font-weight="700" fill="#16324F" letter-spacing="1.2">READ PATHS</text>
+<rect x="55" y="484" width="1350" height="40" rx="7" fill="#E8F5EE" stroke="#2E8B57" stroke-width="1.8"/>
+<text x="730" y="509" font-size="13.5" font-weight="700" fill="#1B5E3A" text-anchor="middle">PRODUCTION READS STAY ON C1 / C2 (8.x) — unchanged, zero impact, for this entire span</text>
+<rect x="1408" y="484" width="237" height="40" rx="7" fill="#F3EEFB" stroke="#7A4FBF" stroke-width="1.8"/>
+<text x="1526" y="509" font-size="12.5" font-weight="700" fill="#3D2A63" text-anchor="middle">PRODUCTION ON C3 / C4</text>
+
+<rect x="807" y="532" width="588" height="38" rx="7" fill="#F3EEFB" stroke="#7A4FBF" stroke-width="1.8" stroke-dasharray="7 4"/>
+<text x="1101" y="556" font-size="13" font-weight="700" fill="#3D2A63" text-anchor="middle">EXPERIMENT kNN READS ON C3 — scoped to the MAU cohort, which is 100% present</text>
+
+<rect x="431" y="578" width="964" height="38" rx="7" fill="#EEF4FB" stroke="#2E6DB4" stroke-width="1.8"/>
+<text x="913" y="602" font-size="13" font-weight="700" fill="#1C4E85" text-anchor="middle">DUAL-WRITE ACTIVE — single consumer writes C1 and C3 on every change, with read-through backfill on miss</text>
+
+<!-- NOTES -->
+<text x="55" y="662" font-size="12.5" font-weight="700" fill="#16324F" letter-spacing="1.2">WHAT DECIDES THE TIMELINE</text>
+
+<rect x="55" y="676" width="512" height="106" rx="9" fill="#FDECEA" stroke="#C0392B" stroke-width="1.5"/>
+<text x="75" y="700" font-size="13" font-weight="700" fill="#8E2A20">The document copy is not the constraint</text>
+<text x="75" y="721" font-size="12" fill="#96372C">At rig throughput (6,532 roots/sec, 3 streams) 3M documents copy in</text>
+<text x="75" y="739" font-size="12" fill="#96372C">~8 minutes. Even 10× slower in production the freeze is under an hour.</text>
+<text x="75" y="757" font-size="12" fill="#96372C">P1 (consolidation) and P3 (embeddings) dominate the schedule — plan the</text>
+<text x="75" y="774" font-size="12" fill="#96372C">programme around those, not around the migration window.</text>
+
+<rect x="587" y="676" width="512" height="106" rx="9" fill="#FDF6EC" stroke="#E0912A" stroke-width="1.5"/>
+<text x="607" y="700" font-size="13" font-weight="700" fill="#8A5A00">Three P0 decisions are blocking</text>
+<text x="607" y="721" font-size="12" fill="#7A5520">1. Which field defines MAU (last_active_time / last_seen / last_app_open)</text>
+<text x="607" y="739" font-size="12" fill="#7A5520">2. Whether any writer issues deletes (reindex never carries deletions)</text>
+<text x="607" y="757" font-size="12" fill="#7A5520">3. dense_vector index_options — IMMUTABLE once the first vector is written;</text>
+<text x="607" y="774" font-size="12" fill="#7A5520">    getting it wrong costs a re-embedding run, not a settings change</text>
+
+<rect x="1119" y="676" width="526" height="106" rx="9" fill="#F6F8FB" stroke="#DDE3EA" stroke-width="1.5"/>
+<text x="1139" y="700" font-size="13" font-weight="700" fill="#16324F">Every rollback in the committed path is cheap</text>
+<text x="1139" y="721" font-size="12" fill="#5A6B7B">C1 is never modified. Before the parity gate: delete the C3 index and restart</text>
+<text x="1139" y="739" font-size="12" fill="#5A6B7B">the consumer — Kafka replays the buffered window. After resume: flip the</text>
+<text x="1139" y="757" font-size="12" fill="#5A6B7B">dual-write flag off. No scenario in P0–P4 requires a restore, because C3</text>
+<text x="1139" y="774" font-size="12" fill="#5A6B7B">carries no production traffic at any point.</text>
+
+<rect x="55" y="796" width="1590" height="82" rx="9" fill="#EEF4FB" stroke="#2E6DB4" stroke-width="1.6"/>
+<text x="75" y="821" font-size="13" font-weight="700" fill="#1C4E85">SCOPE NOTE — the Jobs cluster needs the same treatment</text>
+<text x="75" y="843" font-size="12.5" fill="#2A5C93">C2 runs 8.6.0, older than C1, so it carries the identical blockers. Job context vectors are required for Candidate → Job kNN recall, so C4 must be provisioned during P3.</text>
+<text x="75" y="861" font-size="12.5" fill="#2A5C93">The sizing document's "0 nodes / ~$0" for Jobs measures incremental RAM and disk on an already-capable cluster — it does not cover standing up a new 9.x cluster.</text>
+</svg>
