@@ -6,7 +6,7 @@ Interactive requirements tracker for the Elasticsearch **8.x → 9.4.2** migrati
 
 Open **[index.html](./index.html)** in a browser, or use GitHub Pages (if enabled):
 
-**Live:** https://workindia-private.github.io/es-9-migration-dashboard/
+**Live:** https://wi-rajeev-ranjan.github.io/es-9-migration-dashboard/
 
 ## Contents
 
