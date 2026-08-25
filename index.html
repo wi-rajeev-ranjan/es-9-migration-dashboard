@@ -88,8 +88,9 @@
     .plan-tab:not(.active) .tab-status-analysis { background: #ede9fe; color: #6d28d9; }
 
     .layout.consolidation-mode .sidebar-shell { display: none; }
-    .layout.consolidation-mode .sidebar-toggle { display: none; }
     .layout.consolidation-mode { grid-template-columns: 1fr; }
+
+    .sidebar-toggle.is-hidden { display: none !important; }
 
     .consolidation-verdict {
       border-radius: var(--radius);
@@ -364,10 +365,9 @@
     }
 
     .sidebar-toggle {
-      position: absolute;
-      top: 16px;
+      position: fixed;
+      top: 96px;
       left: 266px;
-      right: auto;
       z-index: 90;
       width: 28px;
       height: 40px;
@@ -379,13 +379,19 @@
       border-left: none;
       border-radius: 0 8px 8px 0;
       cursor: pointer;
-      box-shadow: 2px 0 8px rgba(0, 0, 0, 0.06);
+      box-shadow: 2px 0 8px rgba(0, 0, 0, 0.08);
       color: var(--accent);
       font-size: 20px;
       font-weight: 700;
       line-height: 1;
       padding: 0;
-      transition: left 0.22s ease, box-shadow 0.15s ease;
+      transition: left 0.22s ease, box-shadow 0.15s ease, width 0.22s ease;
+    }
+
+    .sidebar-toggle.is-collapsed {
+      left: 0;
+      border-left: 1px solid var(--border);
+      box-shadow: 2px 0 12px rgba(0, 0, 0, 0.14);
     }
 
     .sidebar-toggle:hover {
@@ -396,18 +402,6 @@
     .layout.sidebar-collapsed .sidebar-shell {
       width: 0;
       overflow: visible;
-    }
-
-    .layout.sidebar-collapsed .sidebar-toggle {
-      position: fixed;
-      left: 0;
-      right: auto;
-      top: 88px;
-      z-index: 90;
-      border-left: 1px solid var(--border);
-      border-radius: 0 8px 8px 0;
-      box-shadow: 2px 0 10px rgba(0, 0, 0, 0.12);
-      pointer-events: auto;
     }
 
     aside h3 {
@@ -1179,6 +1173,10 @@
   <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
 </header>
 
+<button type="button" class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle filter sidebar" aria-expanded="true" title="Collapse filters">
+  <span class="sidebar-toggle-icon" aria-hidden="true">‹</span>
+</button>
+
 <div class="layout" id="layout">
   <div class="sidebar-shell" id="sidebarShell">
     <aside id="sidebar">
@@ -1240,10 +1238,6 @@
     </div>
     </aside>
   </div>
-
-  <button type="button" class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle filter sidebar" aria-expanded="true" title="Collapse filters">
-    <span class="sidebar-toggle-icon" aria-hidden="true">‹</span>
-  </button>
 
   <main>
     <div class="plan-banner" id="planBanner"></div>
@@ -3406,6 +3400,8 @@ function setViewMode() {
   document.getElementById("migrationView").style.display = consolidation ? "none" : "block";
   document.getElementById("consolidationView").style.display = consolidation ? "block" : "none";
   document.getElementById("layout").classList.toggle("consolidation-mode", consolidation);
+  const toggle = document.getElementById("sidebarToggle");
+  if (toggle) toggle.classList.toggle("is-hidden", consolidation);
   const progressBar = document.querySelector("header .progress-bar");
   if (progressBar) progressBar.style.display = consolidation ? "none" : "block";
 }
@@ -3572,6 +3568,7 @@ function initSidebar() {
 
   function setCollapsed(collapsed) {
     layout.classList.toggle("sidebar-collapsed", collapsed);
+    toggle.classList.toggle("is-collapsed", collapsed);
     toggle.setAttribute("aria-expanded", String(!collapsed));
     icon.textContent = collapsed ? "›" : "‹";
     toggle.title = collapsed ? "Expand filters" : "Collapse filters";
