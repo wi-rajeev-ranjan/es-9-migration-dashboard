@@ -50,8 +50,40 @@
     .plan-tabs {
       display: flex;
       gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .plan-tabs-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
       margin-bottom: 12px;
     }
+
+    .filter-panel-toggle {
+      flex-shrink: 0;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      background: var(--surface);
+      color: var(--accent);
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.15s, border-color 0.15s;
+    }
+
+    .filter-panel-toggle:hover {
+      background: var(--accent-soft);
+      border-color: var(--accent);
+    }
+
+    .filter-panel-toggle.is-hidden { display: none !important; }
 
     .plan-tab {
       padding: 8px 18px;
@@ -90,7 +122,44 @@
     .layout.consolidation-mode .sidebar-shell { display: none; }
     .layout.consolidation-mode { grid-template-columns: 1fr; }
 
-    .sidebar-toggle.is-hidden { display: none !important; }
+    .sidebar-collapse-inline {
+      display: none;
+      margin-left: auto;
+      padding: 4px 10px;
+      font-size: 11px;
+      font-weight: 600;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--bg);
+      color: var(--accent);
+      cursor: pointer;
+    }
+
+    .sidebar-collapse-inline:hover {
+      background: var(--accent-soft);
+      border-color: var(--accent);
+    }
+
+    .sidebar-topbar {
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .sidebar-topbar strong {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--muted);
+    }
+
+    @media (min-width: 1101px) {
+      .sidebar-topbar { display: flex; }
+      .sidebar-collapse-inline { display: inline-flex; align-items: center; }
+    }
 
     .consolidation-verdict {
       border-radius: var(--radius);
@@ -362,41 +431,6 @@
       opacity: 0;
       border-right-color: transparent;
       pointer-events: none;
-    }
-
-    .sidebar-toggle {
-      position: fixed;
-      top: 96px;
-      left: 266px;
-      z-index: 90;
-      width: 28px;
-      height: 40px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-left: none;
-      border-radius: 0 8px 8px 0;
-      cursor: pointer;
-      box-shadow: 2px 0 8px rgba(0, 0, 0, 0.08);
-      color: var(--accent);
-      font-size: 20px;
-      font-weight: 700;
-      line-height: 1;
-      padding: 0;
-      transition: left 0.22s ease, box-shadow 0.15s ease, width 0.22s ease;
-    }
-
-    .sidebar-toggle.is-collapsed {
-      left: 0;
-      border-left: 1px solid var(--border);
-      box-shadow: 2px 0 12px rgba(0, 0, 0, 0.14);
-    }
-
-    .sidebar-toggle:hover {
-      background: var(--accent-soft);
-      border-color: var(--accent);
     }
 
     .layout.sidebar-collapsed .sidebar-shell {
@@ -1147,7 +1181,7 @@
         border-bottom: 1px solid var(--border);
         pointer-events: auto;
       }
-      .sidebar-toggle { display: none; }
+      .filter-panel-toggle { display: none !important; }
       .stats { grid-template-columns: repeat(3, 1fr); }
       .clusters { grid-template-columns: repeat(2, 1fr); }
       .writers-grid { grid-template-columns: 1fr; }
@@ -1158,28 +1192,33 @@
 
 <header>
   <h1>ES 9.x Migration — Requirements Dashboard</h1>
-  <div class="plan-tabs" id="planTabs">
-    <button type="button" class="plan-tab active" data-plan="migration_v0">
-      migration_v0 <span class="tab-status tab-status-committed">HLD</span>
-    </button>
-    <button type="button" class="plan-tab" data-plan="migration_v1">
-      migration_v1 <span class="tab-status tab-status-draft">DRAFT</span>
-    </button>
-    <button type="button" class="plan-tab" data-plan="write_consolidation">
-      P1 Write consolidation <span class="tab-status tab-status-analysis">ANALYSIS</span>
+  <div class="plan-tabs-row">
+    <div class="plan-tabs" id="planTabs">
+      <button type="button" class="plan-tab active" data-plan="migration_v0">
+        migration_v0 <span class="tab-status tab-status-committed">HLD</span>
+      </button>
+      <button type="button" class="plan-tab" data-plan="migration_v1">
+        migration_v1 <span class="tab-status tab-status-draft">DRAFT</span>
+      </button>
+      <button type="button" class="plan-tab" data-plan="write_consolidation">
+        P1 Write consolidation <span class="tab-status tab-status-analysis">ANALYSIS</span>
+      </button>
+    </div>
+    <button type="button" class="filter-panel-toggle" id="sidebarToggle" aria-label="Toggle filter sidebar" aria-expanded="true" title="Hide filters">
+      <span aria-hidden="true">◀</span> Hide filters
     </button>
   </div>
   <p id="planSubtitle">Consolidated change tracker · Target: ES 9.4.2 · HNSW / nested dense_vector</p>
   <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
 </header>
 
-<button type="button" class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle filter sidebar" aria-expanded="true" title="Collapse filters">
-  <span class="sidebar-toggle-icon" aria-hidden="true">‹</span>
-</button>
-
 <div class="layout" id="layout">
   <div class="sidebar-shell" id="sidebarShell">
     <aside id="sidebar">
+    <div class="sidebar-topbar">
+      <strong>Filters</strong>
+      <button type="button" class="sidebar-collapse-inline" id="sidebarCollapseInline" title="Hide filters">Hide ◀</button>
+    </div>
     <input type="text" class="search-box" id="searchBox" placeholder="Search tasks, files, repos…" />
 
     <div class="filter-section" data-filter-group="phase">
@@ -3564,22 +3603,31 @@ function render() {
 function initSidebar() {
   const layout = document.getElementById("layout");
   const toggle = document.getElementById("sidebarToggle");
-  const icon = toggle.querySelector(".sidebar-toggle-icon");
+  const inlineToggle = document.getElementById("sidebarCollapseInline");
 
   function setCollapsed(collapsed) {
     layout.classList.toggle("sidebar-collapsed", collapsed);
     toggle.classList.toggle("is-collapsed", collapsed);
     toggle.setAttribute("aria-expanded", String(!collapsed));
-    icon.textContent = collapsed ? "›" : "‹";
-    toggle.title = collapsed ? "Expand filters" : "Collapse filters";
+    toggle.innerHTML = collapsed
+      ? '<span aria-hidden="true">▶</span> Show filters'
+      : '<span aria-hidden="true">◀</span> Hide filters';
+    toggle.title = collapsed ? "Show filters" : "Hide filters";
+    if (inlineToggle) {
+      inlineToggle.textContent = collapsed ? "Show ▶" : "Hide ◀";
+      inlineToggle.title = collapsed ? "Show filters" : "Hide filters";
+    }
     localStorage.setItem("es9_sidebar_collapsed", collapsed ? "1" : "0");
   }
 
   if (localStorage.getItem("es9_sidebar_collapsed") === "1") setCollapsed(true);
 
-  toggle.addEventListener("click", () => {
-    setCollapsed(layout.classList.contains("sidebar-collapsed") ? false : true);
-  });
+  function onToggle() {
+    setCollapsed(!layout.classList.contains("sidebar-collapsed"));
+  }
+
+  toggle.addEventListener("click", onToggle);
+  if (inlineToggle) inlineToggle.addEventListener("click", onToggle);
 }
 
 initPlanTabs();
