@@ -88,6 +88,7 @@
     .plan-tab:not(.active) .tab-status-analysis { background: #ede9fe; color: #6d28d9; }
 
     .layout.consolidation-mode .sidebar-shell { display: none; }
+    .layout.consolidation-mode .sidebar-toggle { display: none; }
     .layout.consolidation-mode { grid-template-columns: 1fr; }
 
     .consolidation-verdict {
@@ -365,8 +366,9 @@
     .sidebar-toggle {
       position: absolute;
       top: 16px;
-      right: -14px;
-      z-index: 30;
+      left: 266px;
+      right: auto;
+      z-index: 90;
       width: 28px;
       height: 40px;
       display: flex;
@@ -383,7 +385,7 @@
       font-weight: 700;
       line-height: 1;
       padding: 0;
-      transition: left 0.22s ease, right 0.22s ease, box-shadow 0.15s ease;
+      transition: left 0.22s ease, box-shadow 0.15s ease;
     }
 
     .sidebar-toggle:hover {
@@ -401,8 +403,11 @@
       left: 0;
       right: auto;
       top: 88px;
+      z-index: 90;
       border-left: 1px solid var(--border);
-      box-shadow: 2px 0 10px rgba(0, 0, 0, 0.08);
+      border-radius: 0 8px 8px 0;
+      box-shadow: 2px 0 10px rgba(0, 0, 0, 0.12);
+      pointer-events: auto;
     }
 
     aside h3 {
@@ -1130,7 +1135,14 @@
     @media (max-width: 1100px) {
       .layout { grid-template-columns: 1fr; }
       .layout.sidebar-collapsed { grid-template-columns: 1fr; }
+      .layout.sidebar-collapsed aside {
+        width: 100% !important;
+        opacity: 1 !important;
+        padding: 20px 16px !important;
+        pointer-events: auto;
+      }
       .sidebar-shell { width: 100% !important; }
+      .layout.sidebar-collapsed .sidebar-shell { width: 100% !important; }
       aside {
         position: static;
         height: auto;
@@ -1227,10 +1239,11 @@
       <div class="filter-group" id="repoFilters"></div>
     </div>
     </aside>
-    <button type="button" class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle filter sidebar" aria-expanded="true" title="Collapse filters">
-      <span class="sidebar-toggle-icon" aria-hidden="true">‹</span>
-    </button>
   </div>
+
+  <button type="button" class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle filter sidebar" aria-expanded="true" title="Collapse filters">
+    <span class="sidebar-toggle-icon" aria-hidden="true">‹</span>
+  </button>
 
   <main>
     <div class="plan-banner" id="planBanner"></div>
