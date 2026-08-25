@@ -451,6 +451,40 @@
       line-height: 1.5;
     }
 
+    .cons-access-legend {
+      background: var(--accent-soft);
+      border: 1px solid #c5d9f0;
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin-bottom: 16px;
+      font-size: 12px;
+      line-height: 1.55;
+    }
+
+    .cons-access-legend p {
+      margin: 0 0 8px;
+      font-weight: 700;
+      color: var(--text);
+      font-size: 12px;
+    }
+
+    .cons-access-legend ul {
+      margin: 0;
+      padding-left: 18px;
+      color: var(--muted);
+    }
+
+    .cons-access-legend li { margin-bottom: 6px; }
+    .cons-access-legend li strong { color: var(--text); }
+
+    .cons-access-summary-line {
+      font-size: 11px;
+      color: var(--muted);
+      flex: 1 1 100%;
+    }
+
+    .cons-access-summary-line strong { color: var(--text); }
+
     .cons-box {
       background: var(--surface);
       border: 1px solid var(--border);
@@ -2243,6 +2277,8 @@ const INDEX_DOC_META = {
 function normalizeIndexKey(fragment) {
   const key = fragment.split("·")[0].trim();
   if (key === "location-matrix") return "workindia-location-matrix";
+  if (key === "CandidateFeatureV3") return "workindia-candidate-feature";
+  if (key === "JobFeatureV3") return "workindia-job-feature";
   return key;
 }
 
@@ -2361,7 +2397,15 @@ function renderIndexAccessOverlapHtml() {
       <div class="cons-access-stat"><div class="num">${totalWriteKafka}</div><div class="lbl">Kafka consumers writing</div></div>
       <div class="cons-access-stat"><div class="num">${totalReadKafka}</div><div class="lbl">Kafka consumers reading</div></div>
     </div>
-    <p class="cons-access-meta"><strong>Consolidation lens:</strong> ${critical.length} index${critical.length === 1 ? "" : "es"} score <span class="cons-signal critical">critical</span> — multiple services write the <em>same document</em> via many consumers. The hottest is <code>workindia-candidate-feature</code> (one doc per <code>candidate_id</code>, ${critical.find(m => m.key === "workindia-candidate-feature")?.writeServices.length || 5} writing services, ${critical.find(m => m.key === "workindia-candidate-feature")?.writeKafkaCount || "17+"} write consumers, ${critical.find(m => m.key === "workindia-candidate-feature")?.readKafkaCount || "8+"} read consumers).</p>
+    <p class="cons-access-meta"><strong>Consolidation lens:</strong> ${critical.length} index${critical.length === 1 ? "" : "es"} score <span class="cons-signal critical">critical</span> — multiple <em>services</em> (repos) write the <em>same document</em> via many <em>Kafka consumers</em>. Hottest: <code>workindia-candidate-feature</code> — one doc per <code>candidate_id</code>.</p>
+    <div class="cons-access-legend">
+      <p><strong>How to read each row</strong></p>
+      <ul>
+        <li><strong>Services write / read</strong> — how many <em>different microservices</em> (repos) touch this index, e.g. <code>wicandidateprofile-ms</code>, <code>workindiajobs-ms</code>. One service may run many consumers.</li>
+        <li><strong>Kafka consumers write / read</strong> — how many <em>named Kafka consumer processes</em> perform writes or reads (e.g. <code>CandidateGenerateFeatureTagConsumer</code>). Does not include HTTP/cron unless listed in the expanded table.</li>
+        <li><strong>doc:</strong> — Elasticsearch document ID for that index (<code>candidate_id</code> = one profile doc per candidate; <code>jobpost_id</code> = one job doc per job).</li>
+      </ul>
+    </div>
   `;
 
   const indicesHtml = matrix.map(idx => {
@@ -2395,7 +2439,12 @@ function renderIndexAccessOverlapHtml() {
           <code>${idx.key}</code>
           <span class="cons-signal ${idx.signal}">${idx.signal} overlap</span>
           <span style="font-size:11px;color:var(--muted)">doc: ${idx.meta.docId}</span>
-          <span style="font-size:11px;color:var(--muted)">${idx.writeServices.length} svc write · ${idx.readServices.length} svc read · ${idx.writeKafkaCount} W / ${idx.readKafkaCount} R consumers</span>
+          <span class="cons-access-summary-line" title="Services = microservice repos; Consumers = Kafka consumer processes">
+            <strong>${idx.writeServices.length}</strong> service${idx.writeServices.length === 1 ? "" : "s"} write
+            · <strong>${idx.readServices.length}</strong> service${idx.readServices.length === 1 ? "" : "s"} read
+            · <strong>${idx.writeKafkaCount}</strong> Kafka consumer${idx.writeKafkaCount === 1 ? "" : "s"} write
+            · <strong>${idx.readKafkaCount}</strong> read
+          </span>
         </summary>
         <div class="cons-access-body">
           <p class="cons-access-meta"><strong>Model:</strong> ${idx.meta.model} · <strong>Cluster:</strong> ${idx.meta.cluster} · <strong>Same document for all writers?</strong> ${idx.meta.sharedDoc ? "Yes — all paths target the same _id" : "No / reference index"}</p>
@@ -4454,7 +4503,7 @@ function renderConsolidation() {
     </div>
 
     <div class="section-title">Index &amp; document access overlap</div>
-    <p class="section-subtitle">Derived from Write/Read Fragmentation data — which <strong>Kafka consumers</strong> and <strong>services</strong> touch the same index and the <strong>same document ID</strong>. High overlap on a shared doc is the strongest signal for the &ldquo;Same ES index/document&rdquo; consolidation parameter.</p>
+    <p class="section-subtitle">Who touches the same Elasticsearch <strong>index</strong> and <strong>document</strong>? Counts are at two levels: <strong>services</strong> (microservice repos) and <strong>Kafka consumers</strong> (individual worker processes). Expand a row for the full consumer list.</p>
     ${renderIndexAccessOverlapHtml()}
 
     <div class="consolidation-verdict recommend-defer">
