@@ -548,6 +548,162 @@
     .cluster .ver { font-size: 12px; color: var(--muted); }
     .cluster .role { font-size: 12px; margin-top: 6px; }
 
+    .indices-catalog { margin-bottom: 28px; }
+
+    .indices-domain {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 12px;
+      overflow: hidden;
+    }
+
+    .indices-domain > summary {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px 18px;
+      cursor: pointer;
+      list-style: none;
+      user-select: none;
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    .indices-domain > summary::-webkit-details-marker { display: none; }
+
+    .indices-domain > summary::before {
+      content: "+";
+      flex-shrink: 0;
+      width: 18px;
+      height: 18px;
+      line-height: 16px;
+      text-align: center;
+      border-radius: 4px;
+      background: var(--bg);
+      color: var(--accent);
+      font-size: 14px;
+      font-weight: 700;
+      margin-right: 4px;
+    }
+
+    .indices-domain[open] > summary::before { content: "−"; }
+
+    .indices-domain > summary:hover { background: var(--bg); }
+
+    .indices-domain-meta {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted);
+    }
+
+    .indices-domain-body { padding: 0 18px 16px 40px; }
+
+    .index-card {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin-bottom: 10px;
+      overflow: hidden;
+      background: var(--bg);
+    }
+
+    .index-card:last-child { margin-bottom: 0; }
+
+    .index-card > summary {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      gap: 8px 12px;
+      padding: 12px 14px;
+      cursor: pointer;
+      list-style: none;
+      font-size: 13px;
+    }
+
+    .index-card > summary::-webkit-details-marker { display: none; }
+
+    .index-card > summary::before {
+      content: "▸";
+      color: var(--accent);
+      margin-right: 4px;
+      font-size: 11px;
+    }
+
+    .index-card[open] > summary::before { content: "▾"; }
+
+    .index-card > summary:hover { background: rgba(46, 109, 180, 0.04); }
+
+    .index-name {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .index-badge {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+
+    .index-badge.primary { background: #e3f0fb; color: #12496e; }
+    .index-badge.side { background: #f3eefb; color: #3d2a63; }
+    .index-badge.new { background: #e4f5ea; color: #14562f; }
+    .index-badge.legacy { background: #eef0f3; color: #5a6b7b; }
+    .index-badge.other { background: #fdf6ec; color: #8a5a00; }
+
+    .index-card-body {
+      padding: 0 14px 14px 28px;
+      border-top: 1px solid var(--border);
+      font-size: 12px;
+      line-height: 1.55;
+    }
+
+    .index-card-body p { margin: 10px 0 6px; color: var(--muted); }
+    .index-card-body p strong { color: var(--text); }
+
+    .schema-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    @media (max-width: 900px) { .schema-grid { grid-template-columns: 1fr; } }
+
+    .schema-group {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 10px 12px;
+    }
+
+    .schema-group h5 {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--accent);
+      margin-bottom: 6px;
+    }
+
+    .schema-group code {
+      font-size: 11px;
+      color: var(--text);
+      word-break: break-word;
+    }
+
+    .index-services {
+      margin-top: 8px;
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .index-services strong { color: var(--text); }
+
     .phases {
       display: flex;
       gap: 4px;
@@ -1293,6 +1449,10 @@
 
     <div class="clusters" id="clusters"></div>
 
+    <div class="section-title">Elasticsearch indices &amp; document schemas</div>
+    <p class="section-subtitle" id="indicesSectionHint">Production indices on <strong>C1/C2</strong> today, plus <strong>C3/C4</strong> experiment indices. Expand each domain for index name, model class, doc ID, field groups, and migration scope.</p>
+    <div class="indices-catalog" id="indicesCatalog"></div>
+
     <div class="phases" id="phasePills"></div>
 
     <div class="section-title" id="writersSectionTitle">Write Fragmentation (P1 draft — not confirmed)</div>
@@ -1807,6 +1967,232 @@ const READ_FRAGMENTATION = [
   },
 ];
 
+const ES_INDICES_CATALOG = [
+  {
+    id: "c1",
+    title: "C1 — Candidate ES (8.10.0)",
+    meta: "candidate-es-cluster · primary migration domain",
+    indices: [
+      {
+        name: "workindia-candidate-feature",
+        model: "CandidateFeatureV3",
+        toolkit: "wielastictoolkit",
+        badge: "primary",
+        docId: "candidate_id (_id)",
+        scale: "~47M docs · ~436M Lucene segments",
+        role: "Single source-of-truth candidate profile for search, relevancy tag building, employer view-candidate, and profile cache.",
+        writers: "wicandidateprofile-ms, wi-candidateevents-ms, wiemployerviewcandidate-ms, workindiaapi (legacy)",
+        readers: "workindiajobs-ms, wiemployerviewcandidate-ms, wicandidateprofile-ms",
+        migration: "P2 _reindex MAU cohort → C3 copy of same _source; dual-write C1+C3 after freeze; vectors land in separate embedded index (not this index).",
+        schema: [
+          { group: "Profile core", fields: "id, full_name, date_of_birth, gender, city, location, geo_location, profile_state, page_flow_state, should_show_to_employers, created_at" },
+          { group: "Education & language", fields: "education, education_details, qualification, certifications, language, languages_known, usage_language, english" },
+          { group: "Experience & role", fields: "experience, total_work_experience, work_place_details, work_industry, sector_experience, role_category_experience, experience_score, position, role" },
+          { group: "Skills & industry tags", fields: "skill, udi_skill, skill_bitset, secondary_skills_and_experience, assessment_passed_skills, industry, industry_bitset, text_search" },
+          { group: "Salary & assets", fields: "current_salary_v2, current_salary_v3, assets, otp_verified, is_resume_available, resume_data, resume_extracted_params, synced_resume_data, audio_data" },
+          { group: "Activity timestamps", fields: "timestamp (full reindex only), last_seen, last_active_time, last_app_open, last_installation_at, last_transaction_at, fcm_active_timestamp (deprecated)" },
+          { group: "Employer & job signals", fields: "employer_interactions[] (employer_id, jobpost_id, type, timestamp, meta), job_activity_v2 (nested industry/rc → activity → date), intent_bucket, unlock_count_t_7" },
+          { group: "Premium / exclusions / flags", fields: "is_premium, excluded_job_ids, reported_employer_ids, blacklisted_bitset, disabled_notification, current_app_version, inferred merge fields from profile-ms" },
+        ],
+      },
+      {
+        name: "workindia-job-post-view-candidate-status",
+        model: "JobPostViewCandidateStatus",
+        toolkit: "wielastictoolkit",
+        badge: "side",
+        docId: "jobpost_id (_id)",
+        scale: "1 doc per live jobpost",
+        role: "Per-job candidate status lists used as terms-lookup side index during employer candidate search (talked, interviewed, rejected, hired, unlocked, etc.).",
+        writers: "wiemployerviewcandidate-ms (SaveCandidateStatusConsumer)",
+        readers: "wiemployerviewcandidate-ms (V2/V3 query generators, tab counts)",
+        migration: "Stays on C1 through P4 — not part of C3 experiment; consolidation would need a third handler if moved into unified consumer.",
+        schema: [
+          { group: "Status arrays", fields: "candidates_talked, candidates_have_not_talked, candidates_interviewed, candidates_rejected, candidates_hired, candidates_called_for_interview, candidates_unlocked" },
+        ],
+      },
+      {
+        name: "workindia-location-matrix",
+        model: "LocationMatrixV2",
+        toolkit: "wielastictoolkit",
+        badge: "side",
+        docId: "location id",
+        scale: "Reference / lookup index",
+        role: "Location name ↔ city proxy queries for internal serve-candidate-queries API.",
+        writers: "Out of migration write paths (reference data)",
+        readers: "wiemployerviewcandidate-ms (POST /internal/serve-candidate-feature-queries/)",
+        migration: "Not in C3/C4 scope — remains on C1.",
+        schema: [
+          { group: "Fields", fields: "name, city (and related location metadata)" },
+        ],
+      },
+      {
+        name: "JobPostViewCandidateFeature",
+        model: "wimongomodels / basemodels elasticmodel",
+        toolkit: "legacy elasticmodels",
+        badge: "legacy",
+        docId: "jobpost_id",
+        scale: "1 doc per jobpost (VC relevancy tags)",
+        role: "Denormalized job feature tags for view-candidate relevancy (skill, compulsory_skill, gender, qualification, geo_location, salary range, is_paid). Separate from C2 JobFeatureV3.",
+        writers: "wiemployerviewcandidate-ms (JobPostFeatureTaggingConsumer)",
+        readers: "wiemployerviewcandidate-ms (preselection, feature tag util)",
+        migration: "Out of ES 9 migration critical path unless VC relevancy moves to C2 job doc.",
+        schema: [
+          { group: "VC job tags", fields: "skill, compulsory_skill, gender, qualification, english, position, industry, role_category, geo_location, min_salary, max_salary, is_paid" },
+        ],
+      },
+      {
+        name: "JobPostViewCandidateFav",
+        model: "basemodels.elasticmodels.jobpostviewcandidatefav",
+        toolkit: "legacy elasticmodels",
+        badge: "legacy",
+        docId: "jobpost_id",
+        scale: "1 doc per jobpost",
+        role: "Favourited candidate ID lists per jobpost; terms-lookup filter in legacy V2 search.",
+        writers: "wiemployerviewcandidate-ms (HTTP only — CandidateFavouriteMarkController)",
+        readers: "wiemployerviewcandidate-ms (favourite tab, terms lookup)",
+        migration: "Out of ES 9 migration scope.",
+        schema: [
+          { group: "Fields", fields: "id (jobpost_id), candidates[] (favourited candidate IDs)" },
+        ],
+      },
+    ],
+  },
+  {
+    id: "c2",
+    title: "C2 — Jobs ES (8.6.0)",
+    meta: "jobs-es-cluster · job relevancy domain",
+    indices: [
+      {
+        name: "workindia-job-feature",
+        model: "JobFeatureV3",
+        toolkit: "elastictoolkit",
+        badge: "primary",
+        docId: "jobpost_id (_id)",
+        scale: "~150K live jobs · 300–400 q/s search",
+        role: "Primary job search index for candidate job lists, similar jobs, aggregations, city counts, and embedding pipeline reads.",
+        writers: "wiemployerjobpost-ms (JobPostCrudConsumer, partial updates, cron ranking)",
+        readers: "workindiajobs-ms (primary), wiemployerjobpost-ms (existence check)",
+        migration: "P2 _reindex jobs → C4 copy; dual-write C2+C4; job context vectors in C4 embedded index.",
+        schema: [
+          { group: "Job identity & text", fields: "id, position[], gender[], qualification[], english[], role[], industry, industry_constant, role_secondary_keywords[], company_name, text_search_string, job_category" },
+          { group: "Location & work type", fields: "location[], city[], geo_location {lat,lon}, work_type[], distance_allowed_from_job_location_in_km" },
+          { group: "Salary & employer", fields: "min_salary, max_salary, salary_bucket, salary_bonus, employer_id, employer_contact_type[], is_paid, plan, priority, openings" },
+          { group: "Skills & requirements", fields: "skill[], exact_skill_match[], necessary_skill[], skills_v2[], work_experience, min_age, max_age, course_and_specialisation[], work_industry[], assets[], preferred_languages[], certifications[]" },
+          { group: "Ranking & trust", fields: "trust_factor, experience_score, connected_calls_ratio, call_overflow_ratio, daily_views, call_count, has_low_cc, extra_requirement_count" },
+          { group: "Timestamps", fields: "timestamp, live_timestamp, created_at (immutable — used for P5 batch keys, not last-modified)" },
+        ],
+      },
+      {
+        name: "workindia-job-feature-v2",
+        model: "JobFeatureV4 / legacy v2",
+        toolkit: "legacy",
+        badge: "legacy",
+        docId: "jobpost_id",
+        scale: "Legacy — check prod alias usage",
+        role: "Older job feature index enum in wi-elasticsearchmodels; production writes use workindia-job-feature (V3).",
+        writers: "None in current migration write paths",
+        readers: "Verify no active prod reads before decommission",
+        migration: "Not targeted for C4 unless alias still points here.",
+        schema: [
+          { group: "Note", fields: "Superseded by JobFeatureV3 schema on workindia-job-feature" },
+        ],
+      },
+      {
+        name: "workindia-job-title-industry-map",
+        model: "JobTitleIndustryMapV2",
+        toolkit: "elastictoolkit",
+        badge: "side",
+        docId: "mapping doc id",
+        scale: "Reference index",
+        role: "Job-title stemming → industry class lookup for profile inference and jobpost classification.",
+        writers: "Reference / batch (not in migration consumer list)",
+        readers: "wicandidateprofile-ms, wiemployerjobpost-ms",
+        migration: "Stays on C2 — not copied to C4.",
+        schema: [
+          { group: "Fields", fields: "stemming_words, class (industry), score-ranked matches" },
+        ],
+      },
+    ],
+  },
+  {
+    id: "c3c4",
+    title: "C3 / C4 — ES 9.4.2 experiment clusters",
+    meta: "new indices · semantic matching · P0 mapping lock",
+    indices: [
+      {
+        name: "workindia-candidate-feature-embedded",
+        model: "CandidateFeatureEmbedded (P0 — wi-elasticsearchmodels)",
+        toolkit: "elastictoolkit Elasticsearch9Adapter",
+        badge: "new",
+        docId: "candidate_id",
+        scale: "3M MAU cohort first (~9.4M nested vectors)",
+        role: "Experiment index for filtered kNN on candidate context embeddings. Coexists with C1 profile doc — not a replacement until P6.",
+        writers: "P3 embedding pipeline + dual-write consumer (re-embed on field change)",
+        readers: "P4 experiment endpoint only (not Consul production DNS)",
+        migration: "P0: provision C3 + mapping + index_options (int8_hnsw / bbq_hnsw — immutable). P2: _reindex profile fields from C1. P3: generate & index vectors.",
+        schema: [
+          { group: "Profile carry-over (from C1)", fields: "Subset of CandidateFeatureV3 _source needed for kNN filters (city, salary bands, skills, etc.) — exact field list P0 decision" },
+          { group: "Nested context vectors", fields: "context_vectors[] (nested): context_type, dense_vector embedding, index_options HNSW + quantization; ~3.14 vectors per MAU candidate" },
+          { group: "ES 9 requirements", fields: "indexed nested dense_vector, int8_hnsw or bbq_hnsw — blocked on C1 8.10" },
+        ],
+      },
+      {
+        name: "workindia-job-feature-embedded (planned)",
+        model: "Jobs embedded model (P0 — wi-elasticsearchmodels)",
+        toolkit: "elastictoolkit Elasticsearch9Adapter",
+        badge: "new",
+        docId: "jobpost_id",
+        scale: "~150K job context vectors",
+        role: "Job-side vectors for Candidate→Job kNN recall in semantic matching experiment.",
+        writers: "P3 embedding pipeline (job context vectors to C4)",
+        readers: "P4 experiment endpoint",
+        migration: "P0: provision C4. P3: index job context vectors. Required for two-stage kNN (candidate vectors on C3, job vectors on C4).",
+        schema: [
+          { group: "Job context", fields: "jobpost_id, context vectors per job role/qualification/geo/salary facets (exact shape P3 design)" },
+          { group: "Vector field", fields: "dense_vector with same index_options decision as C3 (dimension + quantization locked at first write)" },
+        ],
+      },
+    ],
+  },
+  {
+    id: "other",
+    title: "Other Elasticsearch clusters (out of C3/C4 migration)",
+    meta: "still used by services in write/read fragmentation",
+    indices: [
+      {
+        name: "workindia-job-verification-repository-v2",
+        model: "VerificationRepositoryV3",
+        toolkit: "wielastictoolkit ES5",
+        badge: "other",
+        docId: "verification key",
+        scale: "verification-es-cluster (separate from C1/C2)",
+        role: "Employer/job verification state (LIVE, FRAUD, NOT_PRESENT) for auto-verification flows.",
+        writers: "Verification pipelines (not candidate/job feature writers)",
+        readers: "wiemployerjobpost-ms (DocumentAttemptConsumer, HTTP)",
+        migration: "Separate cluster — not part of ES 9 C3/C4 migration.",
+        schema: [
+          { group: "Fields", fields: "tag (verification state), keyed by mobile/email/device/user identifiers" },
+        ],
+      },
+      {
+        name: "workindia-city-matrix / employer indices",
+        model: "CityMatrix, EmployerKeyBasedDetails, etc.",
+        toolkit: "wielastictoolkit / ES5 adapters",
+        badge: "other",
+        docId: "varies",
+        scale: "low-search / employer-association clusters",
+        role: "Legacy reference indices in wi-elasticsearchmodels — not on candidate-es-cluster or jobs-es-cluster.",
+        writers: "Batch / admin",
+        readers: "Sparse — verify before any cluster decommission",
+        migration: "Out of ES 9 migration scope.",
+        schema: [
+          { group: "Note", fields: "See wi-elasticsearchmodels constants/index.py + adapter mapping per model" },
+        ],
+      },
+    ],
+  },
+];
+
 const CONSOLIDATION_ANALYSIS = {
   why: {
     q: "Why do we want to consolidate all consumers into one?",
@@ -2029,6 +2415,13 @@ const PLANS = {
         tags: ["clusters", "C1", "C2", "C3", "C4"],
         q: "What are C1, C2, C3, and C4?",
         a: "<p><strong>C1</strong> (ES 8.10.0) and <strong>C2</strong> (ES 8.6.0) are production source-of-record clusters — all prod reads stay here through P4. <strong>C3</strong> and <strong>C4</strong> (ES 9.4.2) are experiment clusters for semantic matching (HNSW / nested <code>dense_vector</code>). C3 hosts <code>workindia-candidate-feature-embedded</code>; C4 hosts job context vectors for Candidate→Job kNN.</p>",
+      },
+      {
+        id: "v0-qa-indices-schemas",
+        category: "Data model",
+        tags: ["indices", "schema", "C1", "C2", "C3", "C4", "CandidateFeatureV3", "JobFeatureV3"],
+        q: "What Elasticsearch indices exist for candidates and jobs — and how do their document schemas differ?",
+        a: "<p>See the <strong>Elasticsearch indices &amp; document schemas</strong> section on this dashboard (expandable cards per cluster). Summary:</p><p><strong>C1 (candidate-es-cluster)</strong></p><ul><li><code>workindia-candidate-feature</code> — <strong>one doc per candidate</strong> (<code>CandidateFeatureV3</code>). Rich nested profile: skills, salary, geo, employer_interactions, job_activity_v2, activity timestamps. ~47M docs. Primary migration index (copied to C3, dual-write).</li><li><code>workindia-job-post-view-candidate-status</code> — <strong>one doc per jobpost</strong> with status ID arrays (talked, hired, unlocked…). Side index for terms-lookup filters.</li><li>Legacy VC indices: <code>JobPostViewCandidateFeature</code>, <code>JobPostViewCandidateFav</code> (basemodels/wimongomodels, not wi-elasticsearchmodels).</li><li><code>workindia-location-matrix</code> — reference lookup on C1.</li></ul><p><strong>C2 (jobs-es-cluster)</strong></p><ul><li><code>workindia-job-feature</code> — <strong>one doc per live job</strong> (<code>JobFeatureV3</code>). Strict pydantic schema: position, skills, geo, salary, trust/ranking stats, timestamps. ~150K jobs. Primary jobs migration index.</li><li><code>workindia-job-title-industry-map</code> — reference mapping on C2.</li></ul><p><strong>C3 / C4 (ES 9.4.2 — new)</strong></p><ul><li><code>workindia-candidate-feature-embedded</code> — MAU cohort + <strong>nested context_vectors[]</strong> with <code>dense_vector</code> (semantic experiment). Not a drop-in replacement for candidate-feature until P6.</li><li><code>workindia-job-feature-embedded</code> (planned) — job context vectors on C4 for Candidate→Job kNN.</li></ul><p><strong>Key schema differences:</strong> candidate docs are <em>wide profile + nested activity</em> updated by many partial writers; job docs are <em>structured relevancy documents</em> with validation on full save; embedded indices add <em>vector fields</em> with immutable <code>index_options</code>. Verification repo (<code>workindia-job-verification-repository-v2</code>) lives on a <strong>separate verification cluster</strong> — out of C3/C4 scope.</p>",
       },
       {
         id: "v0-qa-why-migrate",
@@ -2979,6 +3372,46 @@ function renderClusters() {
   `).join("");
 }
 
+function renderIndicesCatalog() {
+  const el = document.getElementById("indicesCatalog");
+  if (!el) return;
+  el.innerHTML = ES_INDICES_CATALOG.map(domain => `
+    <details class="indices-domain" ${domain.id === "c1" || domain.id === "c2" ? "open" : ""}>
+      <summary>
+        <span>${domain.title}</span>
+        <span class="indices-domain-meta">${domain.meta} · ${domain.indices.length} index${domain.indices.length === 1 ? "" : "es"}</span>
+      </summary>
+      <div class="indices-domain-body">
+        ${domain.indices.map(idx => `
+          <details class="index-card">
+            <summary>
+              <span class="index-name">${idx.name}</span>
+              <span class="index-badge ${idx.badge}">${idx.badge}</span>
+              <span style="font-size:11px;color:var(--muted)">${idx.model}</span>
+            </summary>
+            <div class="index-card-body">
+              <p><strong>Doc ID:</strong> ${idx.docId} · <strong>Scale:</strong> ${idx.scale}</p>
+              <p><strong>Role:</strong> ${idx.role}</p>
+              <p><strong>Toolkit:</strong> ${idx.toolkit}</p>
+              <div class="index-services"><strong>Writers:</strong> ${idx.writers}</div>
+              <div class="index-services"><strong>Readers:</strong> ${idx.readers}</div>
+              <p><strong>ES 9 migration:</strong> ${idx.migration}</p>
+              <div class="schema-grid">
+                ${idx.schema.map(s => `
+                  <div class="schema-group">
+                    <h5>${s.group}</h5>
+                    <code>${s.fields}</code>
+                  </div>
+                `).join("")}
+              </div>
+            </div>
+          </details>
+        `).join("")}
+      </div>
+    </details>
+  `).join("");
+}
+
 function renderPhasePills() {
   const el = document.getElementById("phasePills");
   const phases = planPhases();
@@ -3574,6 +4007,7 @@ function render() {
 
   renderStats();
   renderClusters();
+  renderIndicesCatalog();
   renderPhasePills();
   renderWriters();
   renderReaders();
