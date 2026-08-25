@@ -191,6 +191,145 @@
 
     @media (max-width: 900px) { .cons-pros-cons { grid-template-columns: 1fr; } }
 
+    .cons-decision-framework {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 20px;
+      margin-bottom: 20px;
+    }
+
+    .cons-decision-framework h3 {
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .cons-decision-framework > p {
+      font-size: 13px;
+      line-height: 1.55;
+      color: var(--muted);
+      margin: 0 0 14px;
+    }
+
+    .cons-decision-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+      margin-bottom: 18px;
+    }
+
+    .cons-decision-table th,
+    .cons-decision-table td {
+      border: 1px solid var(--border);
+      padding: 10px 12px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    .cons-decision-table th {
+      background: var(--accent-soft);
+      color: var(--text);
+      font-weight: 700;
+    }
+
+    .cons-decision-table td:first-child { font-weight: 600; color: var(--text); width: 28%; }
+    .cons-decision-table td:last-child { color: var(--muted); }
+
+    .cons-callout {
+      background: var(--purple-soft);
+      border: 1px solid #b9a8de;
+      border-radius: 8px;
+      padding: 14px 16px;
+      margin: 16px 0;
+    }
+
+    .cons-callout h4 {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--purple);
+      margin-bottom: 8px;
+    }
+
+    .cons-callout p {
+      font-size: 13px;
+      line-height: 1.55;
+      color: var(--text);
+      margin: 0 0 8px;
+    }
+
+    .cons-callout p:last-child { margin-bottom: 0; }
+
+    .cons-callout blockquote {
+      margin: 10px 0 0;
+      padding: 10px 14px;
+      border-left: 3px solid var(--purple);
+      background: var(--surface);
+      font-size: 14px;
+      font-weight: 600;
+      font-style: italic;
+      color: var(--purple);
+    }
+
+    .cons-ascii-diagram {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 12px;
+      line-height: 1.45;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 12px 14px;
+      margin: 10px 0;
+      white-space: pre;
+      overflow-x: auto;
+      color: var(--text);
+    }
+
+    .cons-rule-thumb {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 12px;
+      align-items: center;
+      margin: 16px 0;
+    }
+
+    @media (max-width: 700px) {
+      .cons-rule-thumb { grid-template-columns: 1fr; }
+      .cons-rule-thumb .cons-rule-arrow { text-align: center; }
+    }
+
+    .cons-rule-box {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 14px;
+      font-size: 12px;
+      line-height: 1.5;
+      text-align: center;
+    }
+
+    .cons-rule-box strong {
+      display: block;
+      font-size: 13px;
+      color: var(--accent);
+      margin-top: 6px;
+    }
+
+    .cons-rule-arrow {
+      font-size: 20px;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .cons-workindia-note {
+      font-size: 13px;
+      line-height: 1.55;
+      color: var(--text);
+      margin: 14px 0 0;
+      padding-top: 14px;
+      border-top: 1px solid var(--border);
+    }
+
     .cons-box {
       background: var(--surface);
       border: 1px solid var(--border);
@@ -2206,6 +2345,28 @@ const CONSOLIDATION_ANALYSIS = {
     ],
     alternatives: "These goals can also be met <strong>without</strong> merging consumers: dual-write in <code>elastictoolkit</code> / <code>wi-elasticsearchmodels</code> (adapter layer), an ES <code>index.blocks.write</code> flag at the cluster, or a shared adapter freeze flag. Consolidation is an architecture choice — not a prerequisite for ES 9 migration. See Approach comparison below.",
   },
+  decisionFramework: {
+    title: "Should all consumers be merged into one? — Decision parameters",
+    intro: "Use these <strong>6 parameters</strong> to judge whether consolidation is justified for a given write surface. Score each as LOW or HIGH; more HIGH scores → stronger case for a centralized writer.",
+    parameters: [
+      { name: "Same ES index / document", high: "Multiple services update the same document" },
+      { name: "Ordering requirement", high: "Updates must be applied in a strict sequence" },
+      { name: "Migration complexity", high: "Frequent dual-write / reindex / cutover operations" },
+      { name: "Common ES logic", high: "Same retry, conflict, idempotency, routing logic needed everywhere" },
+      { name: "Operational burden", high: "Many consumers are difficult to monitor, freeze, or drain" },
+      { name: "Write volume", high: "High volume requires careful centralized scaling" },
+    ],
+    keyQuestion: "Do these consumers need to coordinate with each other?",
+    keyQuestionYes: "If <strong>yes</strong>, consolidation becomes attractive — especially when concurrent updates to the same doc need consistent ordering or versioning.",
+    keyQuestionNo: "If they are completely independent and the adapter can safely handle <strong>idempotency + versioning + retries</strong>, keeping consumers separate is perfectly reasonable.",
+    candidateDiagram: "Premium ──┐\nSkills ───┤\nResume ───┼→ SAME candidate document\nTags ─────┘",
+    orderingNote: "If these updates can arrive concurrently and you need <strong>consistent ordering / versioning</strong>, a centralized writer is a strong choice.",
+    rules: [
+      { condition: "Same document + shared consistency requirements", result: "Centralized writer" },
+      { condition: "Different documents / independent ownership", result: "Separate consumers" },
+    ],
+    workindiaNote: "For WorkIndia's candidate domain, <strong>multiple services update different field groups of the same <code>CandidateFeatureV3</code> document on C1</strong> — so consolidation has stronger architectural justification than it would for unrelated indices. That said, adapter-layer dual-write can still ship ES 9 without waiting for consolidation (see verdict below).",
+  },
   verdict: {
     title: "Recommendation: do not block ES 9 migration on full consolidation",
     body: "Consumer consolidation is a valuable <strong>long-term architecture goal</strong> but a <strong>poor gate for P2</strong>. The ES migration can ship with dual-write at the adapter layer (migration_v1) or phased per-service dual-write flags (migration_v0 alternative) while writers remain fragmented. Pursue consolidation as a <strong>parallel track</strong> starting after P0 library work, or as post-P4 cleanup — unless leadership explicitly accepts delaying the experiment for a 3–6 month writer refactor.",
@@ -2617,6 +2778,13 @@ const PLANS = {
     writers: WRITE_FRAGMENTATION,
     readers: [],
     qa: [
+      {
+        id: "cons-qa-decision-params",
+        category: "Decision framework",
+        tags: ["P1", "ordering", "consolidation", "decision", "parameters"],
+        q: "What parameters should we use to judge whether all consumers should be merged into one?",
+        a: "<p>See the <strong>Decision parameters</strong> section on this tab. Six parameters — if HIGH, favor consolidation:</p><ol><li><strong>Same ES index/document</strong> — multiple services update the same doc</li><li><strong>Ordering requirement</strong> — updates must be strictly sequenced</li><li><strong>Migration complexity</strong> — frequent dual-write / reindex / cutover</li><li><strong>Common ES logic</strong> — shared retry, conflict, idempotency, routing</li><li><strong>Operational burden</strong> — many consumers hard to monitor / freeze</li><li><strong>Write volume</strong> — high volume needs centralized scaling</li></ol><p><strong>Key question:</strong> <em>Do these consumers need to coordinate with each other?</em> Premium, skills, resume, and tags all land on the <strong>same candidate document</strong> — if concurrent updates need consistent ordering/versioning, a centralized writer is attractive. If adapters handle idempotency + versioning safely, separate consumers are fine.</p><p><strong>Rule of thumb:</strong> same document + shared consistency → centralized writer; different documents / independent ownership → separate consumers. WorkIndia's candidate domain scores high on &ldquo;same document&rdquo; — stronger justification than unrelated indices — but adapter dual-write can still ship ES 9 without consolidation.</p>",
+      },
       {
         id: "cons-qa-why",
         category: "Motivation",
@@ -3921,6 +4089,18 @@ function renderConsolidation() {
 
   const newConsumerHtml = c.newConsumer.items.map(i => `<li>${i}</li>`).join("");
 
+  const df = c.decisionFramework;
+  const decisionParamsHtml = df.parameters.map(p => `
+    <tr><td>${p.name}</td><td>${p.high}</td></tr>
+  `).join("");
+  const decisionRulesHtml = df.rules.map(r => `
+    <div class="cons-rule-thumb">
+      <div class="cons-rule-box">${r.condition}</div>
+      <div class="cons-rule-arrow">↓</div>
+      <div class="cons-rule-box"><strong>${r.result}</strong></div>
+    </div>
+  `).join("");
+
   const fragSummary = WRITE_FRAGMENTATION.map(w => {
     const meta = fragmentMeta(w, "write");
     return `<li><strong>${w.service}</strong> — ${meta.text}</li>`;
@@ -3933,6 +4113,30 @@ function renderConsolidation() {
       <p>${c.why.a[1]}</p>
       <ul>${c.why.goals.map(g => `<li><strong>${g.title}</strong> — ${g.detail}</li>`).join("")}</ul>
       <p>${c.why.alternatives}</p>
+    </div>
+
+    <div class="cons-decision-framework">
+      <h3>${df.title}</h3>
+      <p>${df.intro}</p>
+      <table class="cons-decision-table">
+        <thead><tr><th>Parameter</th><th>If HIGH → favor consolidation</th></tr></thead>
+        <tbody>${decisionParamsHtml}</tbody>
+      </table>
+
+      <div class="cons-callout">
+        <h4>Most important question</h4>
+        <blockquote>${df.keyQuestion}</blockquote>
+        <p>${df.keyQuestionYes}</p>
+        <p>For the candidate document:</p>
+        <div class="cons-ascii-diagram">${df.candidateDiagram}</div>
+        <p>${df.orderingNote}</p>
+        <p>${df.keyQuestionNo}</p>
+      </div>
+
+      <h4 style="font-size:13px;font-weight:700;margin-bottom:8px">Rule of thumb</h4>
+      ${decisionRulesHtml}
+
+      <p class="cons-workindia-note">${df.workindiaNote}</p>
     </div>
 
     <div class="consolidation-verdict recommend-defer">
