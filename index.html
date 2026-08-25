@@ -330,6 +330,127 @@
       border-top: 1px solid var(--border);
     }
 
+    .cons-access-summary {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    @media (max-width: 900px) { .cons-access-summary { grid-template-columns: repeat(2, 1fr); } }
+
+    .cons-access-stat {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 14px;
+      text-align: center;
+    }
+
+    .cons-access-stat .num {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--accent);
+      line-height: 1.2;
+    }
+
+    .cons-access-stat .lbl {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    .cons-access-index {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 10px;
+      overflow: hidden;
+      background: var(--surface);
+    }
+
+    .cons-access-index.critical { border-color: #c0392b; border-width: 2px; }
+    .cons-access-index.high { border-color: var(--orange); }
+
+    .cons-access-index > summary {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px 14px;
+      padding: 12px 16px;
+      cursor: pointer;
+      list-style: none;
+      font-size: 13px;
+    }
+
+    .cons-access-index > summary::-webkit-details-marker { display: none; }
+
+    .cons-access-index > summary::before {
+      content: "▸";
+      color: var(--accent);
+      margin-right: 4px;
+      font-size: 11px;
+    }
+
+    .cons-access-index[open] > summary::before { content: "▾"; }
+
+    .cons-access-index > summary:hover { background: var(--bg); }
+
+    .cons-signal {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 4px;
+      text-transform: uppercase;
+    }
+
+    .cons-signal.critical { background: #fdecea; color: #8e2a20; }
+    .cons-signal.high { background: var(--orange-soft); color: var(--orange); }
+    .cons-signal.medium { background: var(--purple-soft); color: var(--purple); }
+    .cons-signal.low { background: #eef0f3; color: var(--muted); }
+
+    .cons-access-body { padding: 0 16px 14px 28px; border-top: 1px solid var(--border); }
+
+    .cons-access-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11.5px;
+      margin-top: 10px;
+    }
+
+    .cons-access-table th,
+    .cons-access-table td {
+      border: 1px solid var(--border);
+      padding: 7px 10px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    .cons-access-table th {
+      background: var(--bg);
+      font-weight: 700;
+      font-size: 11px;
+    }
+
+    .cons-op-badge {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 1px 6px;
+      border-radius: 3px;
+      margin-right: 4px;
+    }
+
+    .cons-op-badge.write { background: #fdecea; color: #8e2a20; }
+    .cons-op-badge.read { background: #e8f5ee; color: var(--green); }
+    .cons-op-badge.rw { background: var(--purple-soft); color: var(--purple); }
+
+    .cons-access-meta {
+      font-size: 12px;
+      color: var(--muted);
+      margin: 10px 0 4px;
+      line-height: 1.5;
+    }
+
     .cons-box {
       background: var(--surface);
       border: 1px solid var(--border);
@@ -2106,6 +2227,192 @@ const READ_FRAGMENTATION = [
   },
 ];
 
+const INDEX_DOC_META = {
+  "workindia-candidate-feature": { docId: "candidate_id (_id)", model: "CandidateFeatureV3", cluster: "C1", sharedDoc: true },
+  "workindia-job-feature": { docId: "jobpost_id (_id)", model: "JobFeatureV3", cluster: "C2", sharedDoc: true },
+  "workindia-job-post-view-candidate-status": { docId: "jobpost_id (_id)", model: "JobPostViewCandidateStatus", cluster: "C1", sharedDoc: true },
+  "workindia-location-matrix": { docId: "location id", model: "LocationMatrixV2", cluster: "C1", sharedDoc: false },
+  "workindia-job-title-industry-map": { docId: "mapping doc id", model: "JobTitleIndustryMapV2", cluster: "C2", sharedDoc: false },
+  "workindia-job-verification-repository-v2": { docId: "verification key", model: "VerificationRepositoryV3", cluster: "verification", sharedDoc: false },
+  "JobPostViewCandidateFeature (view-candidate job tags)": { docId: "jobpost_id", model: "JobPostViewCandidateFeature", cluster: "C1", sharedDoc: true },
+  "JobPostViewCandidateFav (legacy favourites)": { docId: "jobpost_id", model: "JobPostViewCandidateFav", cluster: "C1", sharedDoc: true },
+  "location-matrix": { docId: "location id", model: "LocationMatrixV2", cluster: "C1", sharedDoc: false },
+  "legacy indices": { docId: "varies", model: "legacy", cluster: "various", sharedDoc: false },
+};
+
+function normalizeIndexKey(fragment) {
+  const key = fragment.split("·")[0].trim();
+  if (key === "location-matrix") return "workindia-location-matrix";
+  return key;
+}
+
+function parseIndexKeysFromPath(indexLabel) {
+  if (indexLabel.includes(" + ")) {
+    return indexLabel.split(" + ").map(part => normalizeIndexKey(part.trim()));
+  }
+  return [normalizeIndexKey(indexLabel)];
+}
+
+function buildIndexAccessMatrix() {
+  const byIndex = new Map();
+
+  function ensureIndex(key) {
+    if (!byIndex.has(key)) {
+      const meta = INDEX_DOC_META[key] || { docId: "varies", model: "—", cluster: "?", sharedDoc: false };
+      byIndex.set(key, { key, meta, accesses: [] });
+    }
+    return byIndex.get(key);
+  }
+
+  function addAccess(indexLabel, service, entry) {
+    parseIndexKeysFromPath(indexLabel).forEach(key => {
+      ensureIndex(key).accesses.push({ service, ...entry });
+    });
+  }
+
+  WRITE_FRAGMENTATION.forEach(svc => {
+    svc.paths.forEach(path => {
+      (path.consumers || []).forEach(c => {
+        addAccess(path.index, svc.service, {
+          name: c.name,
+          op: "write",
+          via: "kafka",
+          detail: c.writes || "",
+        });
+      });
+      (path.otherTriggers || []).forEach(t => {
+        addAccess(path.index, svc.service, {
+          name: t.length > 48 ? t.slice(0, 45) + "…" : t,
+          op: "write",
+          via: "other",
+          detail: t,
+        });
+      });
+    });
+  });
+
+  READ_FRAGMENTATION.forEach(svc => {
+    svc.paths.forEach(path => {
+      (path.consumers || []).forEach(c => {
+        addAccess(path.index, svc.service, {
+          name: c.name,
+          op: "read",
+          via: "kafka",
+          detail: c.reads || "",
+        });
+      });
+      (path.otherTriggers || []).forEach(t => {
+        if (/no active es reads/i.test(t)) return;
+        addAccess(path.index, svc.service, {
+          name: t.length > 48 ? t.slice(0, 45) + "…" : t,
+          op: "read",
+          via: "other",
+          detail: t,
+        });
+      });
+    });
+  });
+
+  return [...byIndex.values()].map(idx => {
+    const writes = idx.accesses.filter(a => a.op === "write");
+    const reads = idx.accesses.filter(a => a.op === "read");
+    const writeServices = [...new Set(writes.map(a => a.service))];
+    const readServices = [...new Set(reads.map(a => a.service))];
+    const allServices = [...new Set([...writeServices, ...readServices])];
+    const writeKafka = writes.filter(a => a.via === "kafka");
+    const readKafka = reads.filter(a => a.via === "kafka");
+    const writeConsumerKeys = new Set(writeKafka.map(a => `${a.service}::${a.name}`));
+    const readConsumerKeys = new Set(readKafka.map(a => `${a.service}::${a.name}`));
+    const readWriteConsumers = [...writeConsumerKeys].filter(k => readConsumerKeys.has(k));
+    const signal = (() => {
+      if (!idx.meta.sharedDoc) return "low";
+      if (writeServices.length >= 4 && writeKafka.length >= 10) return "critical";
+      if (writeServices.length >= 3 || writeKafka.length >= 5) return "high";
+      if (writeServices.length >= 2) return "medium";
+      return "low";
+    })();
+    return {
+      ...idx,
+      writeServices,
+      readServices,
+      allServices,
+      writeKafkaCount: writeKafka.length,
+      readKafkaCount: readKafka.length,
+      writeOtherCount: writes.filter(a => a.via === "other").length,
+      readOtherCount: reads.filter(a => a.via === "other").length,
+      readWriteConsumers,
+      signal,
+      score: writeKafka.length * 3 + writeServices.length * 5 + readKafka.length + (idx.meta.sharedDoc ? 20 : 0),
+    };
+  }).sort((a, b) => b.score - a.score);
+}
+
+function renderIndexAccessOverlapHtml() {
+  const matrix = buildIndexAccessMatrix();
+  const sharedDocIndices = matrix.filter(m => m.meta.sharedDoc);
+  const totalWriteKafka = matrix.reduce((n, m) => n + m.writeKafkaCount, 0);
+  const totalReadKafka = matrix.reduce((n, m) => n + m.readKafkaCount, 0);
+  const critical = sharedDocIndices.filter(m => m.signal === "critical");
+
+  const summaryHtml = `
+    <div class="cons-access-summary">
+      <div class="cons-access-stat"><div class="num">${matrix.length}</div><div class="lbl">Distinct indices touched</div></div>
+      <div class="cons-access-stat"><div class="num">${sharedDocIndices.length}</div><div class="lbl">Shared-doc indices (same _id)</div></div>
+      <div class="cons-access-stat"><div class="num">${totalWriteKafka}</div><div class="lbl">Kafka consumers writing</div></div>
+      <div class="cons-access-stat"><div class="num">${totalReadKafka}</div><div class="lbl">Kafka consumers reading</div></div>
+    </div>
+    <p class="cons-access-meta"><strong>Consolidation lens:</strong> ${critical.length} index${critical.length === 1 ? "" : "es"} score <span class="cons-signal critical">critical</span> — multiple services write the <em>same document</em> via many consumers. The hottest is <code>workindia-candidate-feature</code> (one doc per <code>candidate_id</code>, ${critical.find(m => m.key === "workindia-candidate-feature")?.writeServices.length || 5} writing services, ${critical.find(m => m.key === "workindia-candidate-feature")?.writeKafkaCount || "17+"} write consumers, ${critical.find(m => m.key === "workindia-candidate-feature")?.readKafkaCount || "8+"} read consumers).</p>
+  `;
+
+  const indicesHtml = matrix.map(idx => {
+    const consumerRows = [];
+    const seen = new Set();
+    idx.accesses.forEach(a => {
+      const id = `${a.service}::${a.name}::${a.op}::${a.via}`;
+      if (seen.has(id)) return;
+      seen.add(id);
+      const rw = idx.readWriteConsumers.includes(`${a.service}::${a.name}`);
+      const opBadge = rw && a.via === "kafka"
+        ? `<span class="cons-op-badge rw">R+W</span>`
+        : `<span class="cons-op-badge ${a.op}">${a.op.toUpperCase()}</span>`;
+      consumerRows.push(`
+        <tr>
+          <td>${opBadge} ${a.via === "kafka" ? "<strong>" + a.name + "</strong>" : a.name}</td>
+          <td>${a.service}</td>
+          <td>${a.via}</td>
+          <td>${a.detail}</td>
+        </tr>
+      `);
+    });
+
+    const rwList = idx.readWriteConsumers.length
+      ? `<p class="cons-access-meta"><strong>Read + write same index/doc:</strong> ${idx.readWriteConsumers.map(k => { const [svc, name] = k.split("::"); return `<code>${name}</code> (${svc})`; }).join(", ")}</p>`
+      : "";
+
+    return `
+      <details class="cons-access-index ${idx.signal}" ${idx.signal === "critical" || idx.signal === "high" ? "open" : ""}>
+        <summary>
+          <code>${idx.key}</code>
+          <span class="cons-signal ${idx.signal}">${idx.signal} overlap</span>
+          <span style="font-size:11px;color:var(--muted)">doc: ${idx.meta.docId}</span>
+          <span style="font-size:11px;color:var(--muted)">${idx.writeServices.length} svc write · ${idx.readServices.length} svc read · ${idx.writeKafkaCount} W / ${idx.readKafkaCount} R consumers</span>
+        </summary>
+        <div class="cons-access-body">
+          <p class="cons-access-meta"><strong>Model:</strong> ${idx.meta.model} · <strong>Cluster:</strong> ${idx.meta.cluster} · <strong>Same document for all writers?</strong> ${idx.meta.sharedDoc ? "Yes — all paths target the same _id" : "No / reference index"}</p>
+          <p class="cons-access-meta"><strong>Writing services:</strong> ${idx.writeServices.join(", ") || "—"}<br><strong>Reading services:</strong> ${idx.readServices.join(", ") || "—"}</p>
+          ${rwList}
+          <table class="cons-access-table">
+            <thead><tr><th>Consumer / trigger</th><th>Service</th><th>Via</th><th>What it reads or writes</th></tr></thead>
+            <tbody>${consumerRows.join("")}</tbody>
+          </table>
+        </div>
+      </details>
+    `;
+  }).join("");
+
+  return summaryHtml + indicesHtml;
+}
+
 const ES_INDICES_CATALOG = [
   {
     id: "c1",
@@ -2778,6 +3085,13 @@ const PLANS = {
     writers: WRITE_FRAGMENTATION,
     readers: [],
     qa: [
+      {
+        id: "cons-qa-index-overlap",
+        category: "Decision framework",
+        tags: ["P1", "read", "write", "index", "overlap", "consolidation", "consumers"],
+        q: "Which consumers read and write the same index / same document? How many overlap?",
+        a: "<p>See <strong>Index &amp; document access overlap</strong> on this tab (computed from Write/Read Fragmentation).</p><p><strong>Hottest — <code>workindia-candidate-feature</code></strong> (one doc per <code>candidate_id</code>):</p><ul><li><strong>5 services write</strong> — wicandidateprofile-ms (13 consumers), wi-candidateevents-ms (3), wiemployerviewcandidate-ms (3+), workindiaapi legacy (SQS/Celery), plus read-modify-write in profile-ms</li><li><strong>4 services read</strong> — workindiajobs-ms (4 consumers + all job-list HTTP), wiemployerviewcandidate-ms (3 export consumers + heavy HTTP search), wicandidateprofile-ms (4 read-before-write CDC consumers), wiemployerservicingms (boost consumers)</li><li><strong>4 consumers both read &amp; write same doc</strong> in profile-ms — VerifiedContactConsumer, BlacklistedCandidateBitsetConsumer, CandidateExcludedJobIdsCDCStreamConsumer, CandidateEmployerReportMappingCDCStreamConsumer (read existing doc → merge → write)</li></ul><p><strong><code>workindia-job-feature</code></strong> (one doc per <code>jobpost_id</code>): 1 primary writer service (jobpost-ms, 8 consumers), read by jobs-ms (5 consumers + all relevancy HTTP), jobpost-ms (read-before-write partial), employerservicingms (boost). Lower overlap than candidate.</p><p><strong>Side indices</strong> (<code>job-post-view-candidate-status</code>, location-matrix, job-title-map, verification repo) — fewer writers, mostly read as terms-lookup or reference; weaker consolidation case.</p><p><strong>Takeaway:</strong> consolidation justification is strongest for <strong>candidate-feature</strong> where many independent consumers mutate the same document without coordination — not for unrelated reference indices.</p>",
+      },
       {
         id: "cons-qa-decision-params",
         category: "Decision framework",
@@ -4138,6 +4452,10 @@ function renderConsolidation() {
 
       <p class="cons-workindia-note">${df.workindiaNote}</p>
     </div>
+
+    <div class="section-title">Index &amp; document access overlap</div>
+    <p class="section-subtitle">Derived from Write/Read Fragmentation data — which <strong>Kafka consumers</strong> and <strong>services</strong> touch the same index and the <strong>same document ID</strong>. High overlap on a shared doc is the strongest signal for the &ldquo;Same ES index/document&rdquo; consolidation parameter.</p>
+    ${renderIndexAccessOverlapHtml()}
 
     <div class="consolidation-verdict recommend-defer">
       <h3>${c.verdict.title}</h3>
