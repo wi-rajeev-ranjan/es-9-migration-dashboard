@@ -118,9 +118,561 @@
     .plan-tab:not(.active) .tab-status-committed { background: var(--green-soft); color: var(--green); }
     .plan-tab:not(.active) .tab-status-draft { background: var(--orange-soft); color: var(--orange); }
     .plan-tab:not(.active) .tab-status-analysis { background: #ede9fe; color: #6d28d9; }
+    .plan-tab:not(.active) .tab-status-adapter { background: #e0f2fe; color: #0369a1; }
 
     .layout.consolidation-mode .sidebar-shell { display: none; }
     .layout.consolidation-mode { grid-template-columns: 1fr; }
+
+    .adapter-thesis {
+      background: var(--accent-soft);
+      border: 1px solid #b8d4f0;
+      border-radius: var(--radius);
+      padding: 18px 20px;
+      margin-bottom: 20px;
+    }
+
+    .adapter-thesis h3 { font-size: 15px; font-weight: 700; margin-bottom: 8px; }
+    .adapter-thesis p { font-size: 13px; line-height: 1.55; margin-bottom: 8px; }
+    .adapter-thesis p:last-child { margin-bottom: 0; }
+
+    .adapter-controls-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .adapter-control-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+    }
+
+    .adapter-control-card h4 {
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .adapter-control-card p {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.45;
+      margin: 0;
+    }
+
+    .adapter-control-card .hook {
+      display: inline-block;
+      margin-top: 8px;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      padding: 2px 8px;
+      border-radius: 4px;
+      background: var(--purple-soft);
+      color: var(--purple);
+    }
+
+    .consolidation-verdict.recommend-proceed {
+      border-color: var(--green);
+      background: var(--green-soft);
+    }
+
+    .adapter-goal-list {
+      margin: 12px 0 0;
+      padding-left: 20px;
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .adapter-goal-list li { margin-bottom: 6px; }
+
+    .adapter-tab-guide {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 18px;
+      margin-bottom: 24px;
+    }
+
+    .adapter-tab-guide h3 {
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 10px;
+      color: var(--text);
+    }
+
+    .adapter-tab-guide p {
+      font-size: 12.5px;
+      color: var(--muted);
+      margin: 0 0 12px;
+      line-height: 1.5;
+    }
+
+    .adapter-tab-guide ol {
+      margin: 0;
+      padding-left: 20px;
+      font-size: 12.5px;
+      line-height: 1.55;
+    }
+
+    .adapter-tab-guide li { margin-bottom: 8px; }
+    .adapter-tab-guide li strong { color: var(--text); }
+
+    .plan-banner.adapter-tab-banner ul { list-style: none; padding-left: 0; }
+    .plan-banner.adapter-tab-banner li::before { content: "→ "; color: var(--accent); font-weight: 700; }
+
+    .adapter-caveat {
+      background: var(--red-soft);
+      border: 1px solid #f0b8b3;
+      border-radius: var(--radius);
+      padding: 16px 18px;
+      margin-bottom: 24px;
+    }
+
+    .adapter-caveat h4 {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--red);
+      margin-bottom: 8px;
+    }
+
+    .adapter-caveat p {
+      font-size: 13px;
+      line-height: 1.5;
+      margin: 0 0 8px;
+    }
+
+    .adapter-caveat p:last-child { margin-bottom: 0; }
+
+    .adapter-change-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+
+    @media (max-width: 900px) { .adapter-change-grid { grid-template-columns: 1fr; } }
+
+    .adapter-change-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+    }
+
+    .adapter-change-box h4 {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+
+    .adapter-change-box.before { border-left: 3px solid var(--orange); }
+    .adapter-change-box.after { border-left: 3px solid var(--green); }
+
+    .adapter-code-block {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 12.5px;
+      line-height: 1.65;
+      background: #0f172a;
+      color: #e2e8f0;
+      border-radius: 6px;
+      padding: 14px 16px;
+      margin: 0;
+      white-space: pre-wrap;
+      overflow-x: auto;
+      tab-size: 4;
+    }
+
+    .adapter-change-caption {
+      font-size: 12px;
+      color: var(--muted);
+      margin: 0 0 10px;
+      line-height: 1.45;
+    }
+
+    .adapter-after-steps {
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px dashed var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .adapter-after-steps-title {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      color: var(--muted);
+      margin-bottom: 2px;
+    }
+
+    .adapter-after-step {
+      display: grid;
+      grid-template-columns: 26px 1fr;
+      gap: 10px;
+      align-items: start;
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .adapter-after-step-num {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--green-soft);
+      color: var(--green);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 11px;
+      flex-shrink: 0;
+    }
+
+    .adapter-after-step strong {
+      display: block;
+      color: var(--text);
+      margin-bottom: 2px;
+    }
+
+    .adapter-after-step span {
+      color: var(--muted);
+      font-size: 11.5px;
+    }
+
+    .adapter-after-step code {
+      font-size: 11px;
+    }
+
+    .adapter-flow-divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 22px 0 14px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.55px;
+      color: var(--muted);
+    }
+
+    .adapter-flow-divider::before,
+    .adapter-flow-divider::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .adapter-flow-divider span {
+      white-space: nowrap;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+    }
+
+    .adapter-route-badge {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      padding: 2px 8px;
+      border-radius: 4px;
+      white-space: nowrap;
+    }
+
+    .adapter-route-badge.common { background: var(--green-soft); color: var(--green); }
+    .adapter-route-badge.common-legacy { background: var(--orange-soft); color: var(--orange); }
+    .adapter-route-badge.alternate { background: #fef3c7; color: #92400e; }
+    .adapter-route-badge.legacy-index { background: #fef9c3; color: #854d0e; }
+    .adapter-route-badge.bypass { background: var(--red-soft); color: var(--red); }
+
+    .adapter-inventory-summary {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .adapter-inv-stat {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+      text-align: center;
+    }
+
+    .adapter-inv-stat .num { font-size: 22px; font-weight: 700; }
+    .adapter-inv-stat .lbl { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+    .adapter-purpose-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 0;
+    }
+
+    .adapter-purpose-grid .adapter-purpose-card.alternative {
+      grid-column: 1 / -1;
+    }
+
+    @media (max-width: 800px) { .adapter-purpose-grid { grid-template-columns: 1fr; } }
+
+    .adapter-purpose-wrap,
+    .adapter-collapsible-section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 24px;
+      overflow: hidden;
+    }
+
+    .adapter-purpose-wrap > summary,
+    .adapter-collapsible-section > summary {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px 18px;
+      cursor: pointer;
+      list-style: none;
+      border-bottom: 1px solid transparent;
+    }
+
+    .adapter-purpose-wrap[open] > summary,
+    .adapter-collapsible-section[open] > summary {
+      border-bottom-color: var(--border);
+    }
+
+    .adapter-purpose-wrap > summary::-webkit-details-marker,
+    .adapter-collapsible-section > summary::-webkit-details-marker { display: none; }
+
+    .adapter-collapsible-section > summary::before {
+      content: "▸";
+      font-size: 12px;
+      color: var(--muted);
+      flex-shrink: 0;
+      transition: transform 0.15s;
+    }
+
+    .adapter-collapsible-section[open] > summary::before {
+      transform: rotate(90deg);
+    }
+
+    .adapter-purpose-wrap-title,
+    .adapter-collapsible-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .adapter-purpose-wrap-hint,
+    .adapter-collapsible-hint {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--muted);
+      flex-shrink: 0;
+    }
+
+    .adapter-purpose-wrap-body,
+    .adapter-collapsible-body {
+      padding: 14px 18px 18px;
+    }
+
+    .adapter-collapsible-body .section-subtitle {
+      margin-top: 0;
+      margin-bottom: 14px;
+    }
+
+    .qa-section-wrap:not(.collapsible-enabled) {
+      border: none;
+      background: transparent;
+      margin-bottom: 0;
+    }
+
+    .qa-section-wrap:not(.collapsible-enabled) > summary { display: none; }
+
+    .qa-section-wrap:not(.collapsible-enabled) .adapter-collapsible-body {
+      padding: 0;
+    }
+
+    .qa-section-wrap.collapsible-enabled .qa-panel {
+      border: none;
+      border-radius: 0;
+      padding: 0;
+      background: transparent;
+      box-shadow: none;
+    }
+
+    .qa-section-wrap.collapsible-enabled .qa-panel-header { display: none; }
+
+    .adapter-purpose-wrap-body .section-subtitle {
+      margin-bottom: 14px;
+    }
+
+    .adapter-purpose-card {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .adapter-purpose-card > summary {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 12px 14px;
+      cursor: pointer;
+      list-style: none;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .adapter-purpose-card > summary::-webkit-details-marker { display: none; }
+
+    .adapter-purpose-card > summary::before {
+      content: "▸";
+      font-size: 11px;
+      color: var(--muted);
+      flex-shrink: 0;
+      transition: transform 0.15s;
+    }
+
+    .adapter-purpose-card[open] > summary::before {
+      transform: rotate(90deg);
+    }
+
+    .adapter-purpose-card.achieve > summary { color: var(--green); }
+    .adapter-purpose-card.required > summary { color: var(--accent); }
+    .adapter-purpose-card.alternative > summary { color: var(--purple); }
+
+    .adapter-purpose-card-meta {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--muted);
+      flex-shrink: 0;
+    }
+
+    .adapter-purpose-card-body {
+      padding: 0 14px 14px;
+      border-top: 1px solid var(--border);
+    }
+
+    .adapter-purpose-card-body p {
+      font-size: 12.5px;
+      line-height: 1.5;
+      color: var(--muted);
+      margin: 12px 0 10px;
+    }
+
+    .adapter-purpose-card-body ul {
+      margin: 0;
+      padding-left: 18px;
+      font-size: 12.5px;
+      line-height: 1.5;
+    }
+
+    .adapter-purpose-card-body li { margin-bottom: 6px; }
+    .adapter-purpose-card-body li strong { color: var(--text); }
+
+    .adapter-checklist-phase {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 12px;
+      overflow: hidden;
+    }
+
+    .adapter-checklist-phase summary {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 16px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 13px;
+      list-style: none;
+    }
+
+    .adapter-checklist-phase summary::-webkit-details-marker { display: none; }
+
+    .adapter-checklist-phase summary .phase-tag {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      padding: 2px 8px;
+      border-radius: 4px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      flex-shrink: 0;
+    }
+
+    .adapter-checklist-phase summary .task-count {
+      margin-left: auto;
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--muted);
+    }
+
+    .adapter-checklist-body { padding: 0 16px 14px; }
+
+    .adapter-checklist-body > p {
+      font-size: 12px;
+      color: var(--muted);
+      margin: 0 0 10px;
+      line-height: 1.45;
+    }
+
+    .adapter-task-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+
+    .adapter-task-table th,
+    .adapter-task-table td {
+      border: 1px solid var(--border);
+      padding: 8px 10px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    .adapter-task-table th {
+      background: var(--bg);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      color: var(--muted);
+    }
+
+    .adapter-task-table td:first-child { width: 28%; font-weight: 600; color: var(--text); }
+    .adapter-task-table td:nth-child(2) { width: 14%; }
+    .adapter-task-table code { font-size: 11px; }
+
+    .adapter-blocker-tag {
+      display: inline-block;
+      font-size: 9px;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 1px 5px;
+      border-radius: 3px;
+      background: var(--red-soft);
+      color: var(--red);
+      margin-left: 6px;
+      vertical-align: middle;
+    }
 
     .sidebar-collapse-inline {
       display: none;
@@ -645,7 +1197,232 @@
       color: var(--muted);
       margin-bottom: 24px;
       font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      white-space: pre;
+      overflow-x: auto;
     }
+
+    .adapter-arch-diagram {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0;
+      margin: 4px 0 8px;
+    }
+
+    .adapter-arch-connector {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: var(--muted);
+      font-size: 18px;
+      line-height: 1;
+      padding: 4px 0;
+    }
+
+    .adapter-arch-split-line {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 11px;
+      color: var(--border);
+      letter-spacing: 1px;
+      margin-top: 2px;
+    }
+
+    .adapter-arch-node {
+      width: 100%;
+      max-width: 560px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px 18px;
+      text-align: center;
+    }
+
+    .adapter-arch-node-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      line-height: 1.45;
+    }
+
+    .adapter-arch-node-title code {
+      font-size: 12px;
+    }
+
+    .adapter-arch-node-note {
+      margin-top: 6px;
+      font-size: 11.5px;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+
+    .adapter-arch-tag {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.45px;
+      padding: 2px 8px;
+      border-radius: 4px;
+      margin-bottom: 8px;
+    }
+
+    .adapter-arch-node.sources {
+      border-left: 3px solid #94a3b8;
+      background: var(--bg);
+    }
+
+    .adapter-arch-node.unchanged {
+      border-left: 3px solid var(--green);
+    }
+
+    .adapter-arch-node.unchanged .adapter-arch-tag {
+      background: var(--green-soft);
+      color: var(--green);
+    }
+
+    .adapter-arch-node.config {
+      border-left: 3px solid var(--orange);
+    }
+
+    .adapter-arch-node.config .adapter-arch-tag {
+      background: var(--orange-soft);
+      color: var(--orange);
+    }
+
+    .adapter-arch-node.change {
+      border-left: 3px solid var(--accent);
+      background: #f0f7ff;
+    }
+
+    .adapter-arch-node.change .adapter-arch-tag {
+      background: #dbeafe;
+      color: #1d4ed8;
+    }
+
+    .adapter-arch-targets {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      width: 100%;
+      max-width: 560px;
+    }
+
+    @media (max-width: 640px) {
+      .adapter-arch-targets { grid-template-columns: 1fr; }
+    }
+
+    .adapter-arch-target {
+      border-radius: 8px;
+      padding: 16px;
+      text-align: center;
+      border: 1px solid var(--border);
+    }
+
+    .adapter-arch-target-id {
+      font-size: 22px;
+      font-weight: 800;
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+
+    .adapter-arch-target-sub {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .adapter-arch-target.c1 {
+      background: var(--orange-soft);
+      border-color: #f5c99a;
+    }
+
+    .adapter-arch-target.c1 .adapter-arch-target-id { color: var(--orange); }
+
+    .adapter-arch-target.c3 {
+      background: var(--green-soft);
+      border-color: #a7d9b8;
+    }
+
+    .adapter-arch-target.c3 .adapter-arch-target-id { color: var(--green); }
+
+    .adapter-freeze-flow {
+      margin: 4px 0 8px;
+    }
+
+    .adapter-freeze-headline {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text);
+      margin: 0 0 4px;
+    }
+
+    .adapter-freeze-intro {
+      font-size: 12px;
+      color: var(--muted);
+      margin: 0 0 16px;
+      line-height: 1.45;
+    }
+
+    .adapter-freeze-steps {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .adapter-freeze-step {
+      display: grid;
+      grid-template-columns: 30px 1fr;
+      gap: 12px;
+      align-items: start;
+      padding: 12px 14px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+
+    .adapter-freeze-step-num {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: #dbeafe;
+      color: #1d4ed8;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 12px;
+      flex-shrink: 0;
+    }
+
+    .adapter-freeze-step strong {
+      display: block;
+      font-size: 12.5px;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+
+    .adapter-freeze-command {
+      display: block;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 12px;
+      line-height: 1.5;
+      background: #0f172a;
+      color: #e2e8f0;
+      border-radius: 5px;
+      padding: 8px 10px;
+      margin: 0 0 6px;
+      white-space: pre-wrap;
+    }
+
+    .adapter-freeze-note {
+      display: block;
+      font-size: 11.5px;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+
+    .adapter-freeze-step.freeze .adapter-freeze-step-num { background: #fee2e2; color: #b91c1c; }
+    .adapter-freeze-step.migrate .adapter-freeze-step-num { background: var(--orange-soft); color: var(--orange); }
+    .adapter-freeze-step.resume .adapter-freeze-step-num { background: var(--green-soft); color: var(--green); }
 
     .consolidation-why {
       background: var(--surface);
@@ -1651,7 +2428,10 @@
         migration_v1 <span class="tab-status tab-status-draft">DRAFT</span>
       </button>
       <button type="button" class="plan-tab" data-plan="write_consolidation">
-        P1 Write consolidation <span class="tab-status tab-status-analysis">ANALYSIS</span>
+        P1 Single consumer <span class="tab-status tab-status-analysis">ANALYSIS</span>
+      </button>
+      <button type="button" class="plan-tab" data-plan="adapter_write_control">
+        Adapter write control <span class="tab-status tab-status-adapter">APPROACH</span>
       </button>
     </div>
     <button type="button" class="filter-panel-toggle" id="sidebarToggle" aria-label="Toggle filter sidebar" aria-expanded="true" title="Hide filters">
@@ -1772,7 +2552,14 @@
     </div>
 
     <div id="consolidationView" style="display:none"></div>
+    <div id="adapterView" style="display:none"></div>
 
+    <details class="adapter-collapsible-section qa-section-wrap" id="qaSectionWrap">
+      <summary>
+        <span class="adapter-collapsible-title">Q&amp;A</span>
+        <span class="adapter-collapsible-hint" id="qaCollapsibleMeta"></span>
+      </summary>
+      <div class="adapter-collapsible-body">
     <div class="qa-panel" id="qaPanel">
       <div class="qa-panel-header">
         <h2>Q&amp;A</h2>
@@ -1793,6 +2580,8 @@
         Try a different search term or clear the tag filter.
       </div>
     </div>
+      </div>
+    </details>
   </main>
 </div>
 
@@ -2891,6 +3680,521 @@ const CONSOLIDATION_ANALYSIS = {
   ],
 };
 
+const ADAPTER_WRITE_ANALYSIS = {
+  goal: {
+    headline: "Least disruptive approach — keep all consumers unchanged",
+    summary: "Do <strong>not</strong> merge 30+ Kafka consumers. Change one shared layer so every existing <code>CandidateFeatureV3.update()</code> / <code>bulk()</code> call automatically writes C1 + C3 (when enabled) and respects freeze / retry / metrics.",
+    goals: [
+      { title: "Zero consumer refactors", detail: "Consumers keep calling CandidateFeatureV3 — no new Kafka topics, no event schema migration." },
+      { title: "Single choke point for migration", detail: "Dual-write, freeze, 404 backfill, and failure handling live in the common adapter — not copied across 5 repos." },
+      { title: "Ship ES 9 without P1 consolidation", detail: "P2 freeze + C1→C3 copy + resume dual-write can run while write fragmentation stays as-is." },
+      { title: "Incremental rollout", detail: "Feature flags per cluster (shadow → dual-write → freeze) — start with wi-candidateevents-ms before profile-ms." },
+    ],
+  },
+  purpose: {
+    achieve: {
+      title: "What adapter write control achieves",
+      intro: "One change in <code>elastictoolkit</code> / <code>wi-elasticsearchmodels</code> gives every adapter-covered writer the same migration behaviour — without touching consumer code.",
+      items: [
+        { title: "Dual-write C1 + C3 (and C2 + C4 for jobs)", detail: "Every index / update / bulk automatically mirrors to the embedded ES 9 cluster when the flag is on — HLD-04 partial writes, no doc_as_upsert on C3." },
+        { title: "Global write freeze for P2", detail: "Flip one flag → all adapter writes stop. Coordinates the migration window without scaling down 30+ consumer deployments individually (use both for safety)." },
+        { title: "Centralized 404 backfill", detail: "C3 miss → GET full doc from C1 → MAU predicate → full index on C3. Implemented once, not copied into every service." },
+        { title: "ES 9 client routing", detail: "C1/C2 stay on Elasticsearch8Adapter; C3/C4 use Elasticsearch9Adapter — call sites keep using CandidateFeatureV3 unchanged." },
+        { title: "Shared ops: retry, metrics, DLQ", detail: "One dashboard for write latency, C1 vs C3 error rates, and failed C3 retries — instead of per-consumer monitoring." },
+        { title: "Unblock the experiment on schedule", detail: "Ship P2–P4 (reindex, embeddings, kNN on C3/C4) without waiting for the 3–6 month single-consumer refactor." },
+      ],
+    },
+    required: {
+      title: "Why this is required",
+      intro: "The ES 9 migration has hard requirements that today&rsquo;s fragmented write surface cannot meet without <em>some</em> centralization. Adapter control is the smallest place to put that logic.",
+      items: [
+        { title: "ES 9 is a product blocker, not an ops upgrade", detail: "C1 (8.10) and C2 (8.6) cannot run dense_vector + HNSW / int8_hnsw mappings needed for semantic matching. C3/C4 on 9.4.2 are mandatory for the experiment." },
+        { title: "Every live write must reach C3 after P2 resume", detail: "If only some consumers dual-write, C3 diverges immediately after _reindex. Adapter intercepts all paths that flow through CandidateFeatureV3 — one guarantee instead of 30+ implementations." },
+        { title: "P2 freeze must stop all writers reliably", detail: "Migration window needs zero writes to C1 during copy. Without a shared freeze hook, you depend on coordinating scale-down across 5 services + HTTP sync paths + legacy Celery." },
+        { title: "Library work is unavoidable anyway", detail: "ES9Adapter, C3/C4 models, and cluster constants are P0 regardless of single-consumer vs adapter. Dual-write belongs in the same layer — not duplicated per consumer later." },
+        { title: "HLD-04 backfill is non-trivial", detail: "Partial update on C3 → 404 → GET C1 → MAU check → full index. Getting this wrong in even one consumer causes silent C3 drift." },
+      ],
+    },
+    alternative: {
+      title: "Why this is the alternative to P1 Single consumer",
+      intro: "Both approaches solve the <strong>same migration problem</strong> — dual-write, freeze, backfill, ES 9 routing. They differ in <em>where</em> the logic lives and <em>how much</em> application code changes.",
+      comparison: [
+        { aspect: "What moves", singleConsumer: "ES I/O moves to 1–2 new Kafka consumers; services publish events only", adapter: "ES I/O stays in existing consumers; logic moves into DualWriteAdapter" },
+        { aspect: "Service diff", singleConsumer: "Large — remove CandidateFeatureV3 calls from 5 repos; new event schema", adapter: "Small — bump libs, configure C3 in apps.py, enable flags" },
+        { aspect: "Kafka changes", singleConsumer: "New unified topics (candidate-es-changes, job-es-changes)", adapter: "None — existing topics and consumers unchanged" },
+        { aspect: "HTTP sync profile update", singleConsumer: "Breaking change or request-reply complexity", adapter: "Unchanged — adapter dual-writes synchronously on same call" },
+        { aspect: "Per-doc ordering", singleConsumer: "Better — partition by candidate_id serializes updates", adapter: "Does not fix — last-write-wins races remain on C1/C3" },
+        { aspect: "Time to ship P2", singleConsumer: "3–6+ months if gated on migration", adapter: "Weeks after P0 library work — parallel to experiment" },
+        { aspect: "Long-term ops", singleConsumer: "Cleaner — one consumer to scale, monitor, freeze", adapter: "Fragmented consumers remain; migration logic centralized in library only" },
+      ],
+      whenToChoose: [
+        { choice: "Choose adapter write control", detail: "When the priority is shipping ES 9 + semantic matching experiment on time. Acceptable if last-write-wins on overlapping fields is tolerable (same as today on C1)." },
+        { choice: "Choose P1 Single consumer", detail: "When ordering, canonical updated_at, and long-term write ops matter more than migration timeline — or as post-P4 cleanup once experiment is proven." },
+        { choice: "Run both in parallel", detail: "Ship migration with adapter dual-write now; pursue single consumer as a separate architecture program without blocking P2." },
+      ],
+    },
+  },
+  targetArchitectureFlow: {
+    steps: [
+      { type: "sources", title: "30+ Kafka consumers + HTTP / cron triggers" },
+      { type: "unchanged", tag: "Unchanged", title: "<code>CandidateFeatureV3</code> · save() · update() · bulk()", note: "Call sites in consumers stay the same" },
+      { type: "config", tag: "Configure", title: "<code>CandidateESClusterAdapter</code> (common adapter)", note: "Wire C1 + C3 cluster nodes in each service apps.py" },
+      { type: "change", tag: "Change here", title: "<code>adapter.update()</code> — instead of <code>client.update(...)</code>", note: "Dual-write interception point in elastictoolkit" },
+    ],
+    targets: [
+      { id: "C1", subtitle: "prod ES8", variant: "c1" },
+      { id: "C3", subtitle: "embedded ES9", variant: "c3" },
+    ],
+  },
+  adapterBehaviorChange: {
+    before: `def update(self, index, _id, **kwargs):
+    client = self.get_client(ClientType.WRITE)
+    return client.update(index=index, id=_id, **kwargs)`,
+    after: `def update(self, index, _id, **kwargs):
+    if WritePolicy.freeze_writes:
+        return NOOP_OR_RAISE
+
+    result = primary_adapter.update(...)       # C1 — prod ES8
+
+    if WritePolicy.dual_write_enabled:
+        try:
+            secondary_adapter.update(...)        # C3 — ES9 embedded
+        except NotFoundError:
+            backfill_from_primary(_id)           # GET C1 → MAU → index C3
+        except Exception:
+            retry_or_dlq(...)
+
+    emit_metrics(...)
+    return result`,
+    afterSteps: [
+      { title: "Freeze gate", body: "If <code>WritePolicy.freeze_writes</code> → noop or raise. Used during P2 reindex." },
+      { title: "Primary write (C1)", body: "Always write to production ES8 first — existing behaviour, unchanged contract for callers." },
+      { title: "Dual-write (C3)", body: "When flag on, mirror the same update to the embedded ES9 cluster." },
+      { title: "Backfill on miss", body: "<code>NotFoundError</code> on C3 → fetch doc from C1, apply MAU transform, index into C3." },
+      { title: "Failure handling", body: "Other C3 errors → retry with backoff or DLQ. Primary C1 write must not fail." },
+      { title: "Metrics", body: "Emit dual-write success, lag, and error counters for rollout monitoring." },
+    ],
+    areas: [
+      { area: "elastictoolkit-py", what: "DualWriteAdapter / WritePolicy on index · update · bulk · delete" },
+      { area: "wi-elasticsearchmodels-py", what: "C3/C4 cluster adapters; wire CandidateFeatureV3 to dual-write stack; migrate off wielastictoolkit" },
+      { area: "Each service apps.py", what: "Configure embedded cluster nodes; enable flags — no consumer edits" },
+      { area: "Bypass paths (P0)", what: "Route workindiaapi + raw ES clients through common adapter or deprecate" },
+    ],
+  },
+  thesis: {
+    title: "Centralize migration controls in the adapter — not in every consumer",
+    paragraphs: [
+      "Today most services call <code>CandidateFeatureV3().save()</code> / <code>update()</code> / <code>bulk()</code>, which delegate to <code>CandidateESClusterAdapter</code> → <code>Elasticsearch8Adapter</code> → the ES client. That stack is already the natural interception point.",
+      "Instead of merging consumers (P1 Single consumer tab), implement <strong>adapter.update() → C1 + C3</strong> once in <code>elastictoolkit-py</code>. Services bump library versions and configure C3 nodes in <code>apps.py</code>.",
+      "Trade-off: consumers still race on the same document (last-write-wins). Adapter layer does <em>not</em> fix ordering — but it is the <strong>smallest diff</strong> to ship ES 9 migration.",
+    ],
+  },
+  caveat: {
+    title: "Important caveat — only works if writers use the common adapter path",
+    body: "Adapter controls apply only to code that flows through <code>CandidateFeatureV3 → CandidateESClusterAdapter</code> (or the equivalent job adapter). Paths that call a <strong>raw Elasticsearch client</strong>, use <strong>legacy sharedmodules</strong>, or a <strong>different adapter package</strong> bypass centralized freeze and dual-write.",
+    firstStep: "Before P2 freeze: inventory every ES writer and classify its route — adapter path (legacy toolkit vs dual-write ready), alternate adapter, legacy index, or bypass. Close gaps before relying on adapter-only freeze.",
+  },
+  migrationControls: [
+    "Dual-write feature flag (C1 then C3; shadow mode for rollout)",
+    "Write freeze switch (global no-op on index / update / bulk)",
+    "Retry with backoff on C3 failures",
+    "Idempotency keys / dedup for bulk batches",
+    "Metrics — latency, error rate, C1 vs C3 success per operation",
+    "C1 / C3 failure handling — C1 fail = abort; C3 fail = retry/DLQ without blocking C1 prod",
+    "404 backfill — GET C1 → MAU predicate → full index on C3 (HLD-04)",
+  ],
+  callStack: `[Kafka consumer / HTTP handler]
+        │
+        ▼
+CandidateFeatureV3.save | update | bulk | get   ← wi-elasticsearchmodels (Elasticsearch8Index)
+        │
+        ▼
+CandidateESClusterAdapter                        ← cluster singleton, configured in apps.py
+        │
+        ▼
+Elasticsearch8Adapter.index | update | bulk      ← elastictoolkit (HOOK HERE)
+        │
+        ▼
+elasticsearch8 / elasticsearch9 client  →  C1 (prod)  +  C3 (embedded, when dual-write on)`,
+  controls: [
+    {
+      name: "Write freeze",
+      hook: "index · update · bulk",
+      detail: "Global flag (Consul / Flagsmith / env). When ON: write methods no-op or raise — all 30+ paths stop without scaling each consumer deployment. Reads unchanged.",
+    },
+    {
+      name: "Dual-write C1 → C3",
+      hook: "index · update · bulk",
+      detail: "After successful C1 write, mirror to C3. Partial updates on C3; never doc_as_upsert on C3 (HLD-04).",
+    },
+    {
+      name: "404 backfill",
+      hook: "update · bulk",
+      detail: "C3 miss → GET full doc from C1 → MAU predicate → full index on C3. Centralizes backfill logic once.",
+    },
+    {
+      name: "Shadow / dry-run",
+      hook: "index · update · bulk",
+      detail: "Write C1 only but log what <em>would</em> have been sent to C3 — phased rollout per service (start wi-candidateevents-ms).",
+    },
+    {
+      name: "Retry & idempotency",
+      hook: "update · bulk",
+      detail: "Backoff retry on transient C3 errors; idempotency key or batch dedup so Kafka replays do not double-apply partial updates.",
+    },
+    {
+      name: "C1 / C3 failure policy",
+      hook: "all write ops",
+      detail: "C1 failure = abort (prod is source of truth). C3 failure = retry queue / DLQ — do not roll back C1. Configurable strict vs best-effort.",
+    },
+    {
+      name: "Write metrics & DLQ",
+      hook: "all write ops",
+      detail: "Single place for latency, error rate, per-cluster routing — instead of per-consumer dashboards.",
+    },
+    {
+      name: "ES version routing",
+      hook: "adapter factory",
+      detail: "C1/C2 → Elasticsearch8Adapter; C3/C4 → Elasticsearch9Adapter. Models stay unchanged at call site.",
+    },
+  ],
+  libraries: [
+    {
+      repo: "elastictoolkit-py",
+      effort: "high",
+      changes: [
+        "Add <code>Elasticsearch9Adapter</code> + <code>Elasticsearch9Index</code> (mirror ES8 API)",
+        "Add <code>DualWriteAdapter</code> or <code>MigrationWriteRouter</code> wrapping primary + secondary cluster adapters",
+        "Add <code>WritePolicy</code> mixin on <code>BaseElasticsearchAdapter</code>: <code>freeze_writes</code>, <code>dual_write_enabled</code>, <code>shadow_mode</code> — read from shared config provider",
+        "Implement HLD-04 in <code>update()</code> / <code>bulk()</code>: C1 first → C3 partial → 404 GET C1 → MAU check → full index",
+        "Optional: <code>index.blocks.write</code> helper for cluster-level emergency stop (ops fallback)",
+      ],
+      files: "elastictoolkit/adapters/elasticsearch9adapter.py, dualwriteadapter.py, baseelasticsearchadapter.py",
+    },
+    {
+      repo: "wi-elasticsearchmodels-py",
+      effort: "medium",
+      changes: [
+        "Add <code>CANDIDATE_ES_EMBEDDED_CLUSTER</code> / <code>JOBS_ES_EMBEDDED_CLUSTER</code> constants",
+        "Add <code>CandidateEmbeddedESClusterAdapter</code> (C3), <code>JobsEmbeddedESClusterAdapter</code> (C4)",
+        "Wire <code>CandidateFeatureV3</code> to use dual-write adapter when flag enabled (or inject secondary adapter on model)",
+        "Migrate <code>CandidateFeatureV3</code> off <code>wielastictoolkit</code> → <code>elastictoolkit</code> (unify stack)",
+        "Add <code>CandidateFeatureEmbedded</code> model for C3 vector fields",
+      ],
+      files: "wielasticsearchmodels/adapters/, models/candidatefeaturev3.py, constants/cluster.py",
+    },
+    {
+      repo: "wi-elastictoolkit-py (legacy)",
+      effort: "low",
+      changes: [
+        "No new features — services still on <code>wielastictoolkit</code> bypass the new dual-write path until migrated",
+        "CandidateFeatureV3 migration to elastictoolkit is a prerequisite for adapter controls on candidate writes",
+      ],
+      files: "deprecate; remove transitive pins from services",
+    },
+  ],
+  services: [
+    {
+      service: "All ES-writing services (5)",
+      effort: "low",
+      today: "Each calls model classes directly; configures adapter in apps.py at startup",
+      changes: [
+        "Bump <code>elastictoolkit-py</code> + <code>wi-elasticsearchmodels-py</code> to version with DualWriteAdapter",
+        "In <code>apps.py</code>: configure C3/C4 embedded adapter nodes (feature-flagged, not Consul prod DNS)",
+        "Enable dual-write / freeze flags via settings or Flagsmith — no consumer code changes for basic path",
+        "P2 freeze: flip global adapter freeze flag <em>and</em> scale consumers to zero (belt + suspenders)",
+      ],
+      files: "*/apps.py, settings/*.py, requirements/*.txt",
+    },
+    {
+      service: "wicandidateprofile-ms",
+      effort: "low",
+      today: "13 write consumers + HTTP sync path — largest surface; still uses wielastictoolkit via CandidateFeatureV3",
+      changes: [
+        "Migrate CandidateFeatureV3 import path to elastictoolkit-backed model (P0 library work)",
+        "Configure embedded C3 adapter in Development/api/apps.py",
+        "R+W consumers (VerifiedContact, Blacklist, exclusions) keep read-modify-write in consumer — GET also routes through adapter (read_nodes unchanged)",
+        "HTTP profile update: no semantic change if adapter dual-writes synchronously",
+      ],
+      files: "Development/api/apps.py, candidatefeaturetagging.py",
+      consumers: 13,
+    },
+    {
+      service: "wi-candidateevents-ms",
+      effort: "low",
+      today: "3 consumers — bulk scripted job_activity_v2, intent_bucket, app_open",
+      changes: [
+        "Good <strong>Phase A</strong> shadow dual-write candidate — isolated fields, high bulk volume",
+        "No consumer refactor; adapter handles C1+C3 on bulk()",
+        "Remove dead ES5 bulk payload code while touching deps",
+      ],
+      files: "api/apps.py, events/helpers/candidatejobactivitytracker.py",
+      consumers: 3,
+    },
+    {
+      service: "wiemployerviewcandidate-ms",
+      effort: "low",
+      today: "employer_interactions, intent_bucket, JobPostViewCandidateStatus",
+      changes: [
+        "Bump stale elastictoolkit 0.5.0 pin",
+        "Adapter dual-write on candidate + VC status indices separately (different adapters)",
+      ],
+      files: "api/apps.py, api/utils/employercandidateinteractionhelper.py",
+      consumers: 5,
+    },
+    {
+      service: "wiemployerjobpost-ms",
+      effort: "low",
+      today: "8 consumers → JobFeatureV3 on C2; local duplicate model",
+      changes: [
+        "Configure C4 embedded adapter for job dual-write",
+        "Optional later: consolidate local JobFeatureV3 with wi-elasticsearchmodels",
+      ],
+      files: "api/apps.py, api/utils/job/jobfeaturetagging.py",
+      consumers: 8,
+    },
+    {
+      service: "workindiaapi (legacy)",
+      effort: "medium",
+      today: "Celery/SQS still writes C1 via sharedmodules — bypasses wi-elasticsearchmodels adapter stack",
+      changes: [
+        "<strong>Gap:</strong> adapter freeze / dual-write does NOT apply until this path is deprecated or bridged to Kafka → profile-ms",
+        "Track traffic; zero-out before relying on adapter-only freeze",
+      ],
+      files: "sharedmodules/candidatefeaturetagging.py",
+      consumers: 0,
+      triggers: 4,
+    },
+  ],
+  bypassPaths: [
+    { path: "workindiaapi Celery/SQS feature tags", risk: "high", note: "Direct ES client / legacy module — not intercepted by elastictoolkit adapter" },
+    { path: "Services on wielastictoolkit (not elastictoolkit)", risk: "medium", note: "CandidateFeatureV3 still imports wielastictoolkit — dual-write hooks live in elastictoolkit only until migration" },
+    { path: "workindiajobs-ms raw elasticsearch 6.x", risk: "low", note: "Read-heavy; some management commands bypass adapter — not on write path for migration" },
+    { path: "wiemployerjobpost-ms local JobFeatureV3", risk: "medium", note: "Uses wielasticsearchadapter locally — may need explicit C4 wiring or model unification" },
+    { path: "ES cluster index.blocks.write", risk: "low", note: "Ops-level freeze — works regardless of app code but blocks ALL writers including reads if misconfigured" },
+  ],
+  verdict: {
+    title: "Recommendation: adapter layer is the practical migration path",
+    body: "Use adapter dual-write + global freeze flag to ship P2–P4 without waiting for consumer consolidation. Library work (P0) is required either way — ES9Adapter + C3/C4 models. Service changes are mostly <strong>version bumps + apps.py config + flags</strong>, not rewriting 30 consumers. Close bypass paths (legacy API, wielastictoolkit) before relying on adapter-only freeze.",
+  },
+  vsConsolidation: [
+    {
+      name: "Adapter write control (this tab)",
+      recommended: true,
+      summary: "Hook freeze + dual-write in elastictoolkit; services unchanged at consumer level.",
+      points: [
+        "Smallest cross-service diff",
+        "Ships with migration_v0 / migration_v1 HLD",
+        "Does not fix per-doc ordering races",
+        "Dual-write logic in one library — but invoked on every write call",
+        "Freeze = one flag + optional consumer scale-down",
+      ],
+    },
+    {
+      name: "Single consumer consolidation (P1 tab)",
+      recommended: false,
+      summary: "Merge writers into 1–2 Kafka consumers; services publish events only.",
+      points: [
+        "Fixes ordering via partition key",
+        "3–6 month cross-repo program",
+        "Poor gate for P2 if mandatory",
+        "HTTP sync semantics need redesign",
+        "Best long-term ops story",
+      ],
+    },
+  ],
+  freezeFlow: {
+    headline: "P2 migration window (adapter freeze ON)",
+    intro: "Operational runbook for the cutover window. Adapter freeze stops all writes while the MAU cohort is reindexed from C1 to C3.",
+    steps: [
+      { group: "freeze", title: "Enable freeze", command: "adapter.freeze_writes = true", note: "Consul / Flagsmith / env — adapter noop on index · update · bulk" },
+      { group: "freeze", title: "Drain consumers", command: "Scale all write consumers → 0", note: "Kafka buffers backlog; optional belt-and-suspenders if freeze is trusted" },
+      { group: "freeze", title: "Verify zero writes", command: "C1 write rate → 0", note: "Confirm via adapter metrics + ES _stats before reindex" },
+      { group: "migrate", title: "Reindex MAU cohort", command: "_reindex C1 → C3", note: "MAU predicate cohort only — not full index" },
+      { group: "resume", title: "Resume dual-write", command: "freeze_writes = false\ndual_write = true", note: "Unfreeze adapter; enable C1 + C3 fan-out on every call" },
+      { group: "resume", title: "Resume consumers", command: "Scale consumers back up", note: "Backlog drains; adapter writes C1 + C3 on every update" },
+    ],
+  },
+  openItems: [
+    "Step 0: complete writer path inventory — verify every path classified (see table below)",
+    "Where does WritePolicy config live? (Consul KV vs Flagsmith vs per-service settings)",
+    "Sync vs async C3 write after C1 ack — block HTTP path or fire-and-forget with DLQ?",
+    "MAU predicate implementation inside adapter vs injected callback",
+    "Migrate CandidateFeatureV3 off wielastictoolkit — blocking for candidate dual-write hooks in elastictoolkit",
+    "Bridge or deprecate workindiaapi Celery path before adapter-only freeze",
+    "jobpost-ms local JobFeatureV3 — wire C4 dual-write on alternate adapter or unify model",
+  ],
+  rolloutPhases: [
+    { phase: "Step 0", title: "Writer path inventory", detail: "Classify every ES write path: adapter path (legacy toolkit or dual-write ready), alternate adapter, legacy index, or bypass. Fix bypasses first." },
+    { phase: "P0", title: "Library foundation", detail: "ES9Adapter, C3/C4 models, migrate CandidateFeatureV3 to elastictoolkit, DualWriteAdapter skeleton." },
+    { phase: "P1", title: "Shadow dual-write", detail: "Flag on in wi-candidateevents-ms; log C3 payloads without writing; compare drift." },
+    { phase: "P2", title: "Freeze + reindex", detail: "adapter.freeze_writes + scale consumers; _reindex MAU C1→C3; resume with dual_write=true." },
+    { phase: "P3–P4", title: "Vectors + experiment", detail: "Embedding writes to C3 via same adapter; experiment reads on C3/C4." },
+  ],
+  changeChecklist: {
+    intro: "End-to-end work items to ship adapter write control. Consumers stay unchanged — almost all effort is in <strong>2 libraries</strong>, <strong>infra</strong>, and <strong>per-service config bumps</strong>. Expand each phase for ticket-ready tasks.",
+    groups: [
+      {
+        phase: "Step 0",
+        title: "Prerequisites — inventory & decisions",
+        subtitle: "Blockers before writing DualWriteAdapter code or enabling flags in prod.",
+        tasks: [
+          { id: "s0-inventory", title: "Complete writer path inventory", detail: "Verify every row in the inventory table on this tab. Confirm Kafka consumers on adapter path (legacy toolkit); flag bypass (workindiaapi) and alternate (jobpost-ms local model).", repo: "discovery", files: "Write Fragmentation data", blocker: true },
+          { id: "s0-mau-field", title: "Decide MAU activity field", detail: "P0 decision: which timestamp filters the 3M cohort for _reindex and backfill predicate (last_active_time vs last_app_open vs last_seen). Adapter backfill must use the same field.", repo: "design", files: "HLD / P0 decision doc", blocker: true },
+          { id: "s0-quantization", title: "Decide C3 vector index_options", detail: "int8_hnsw vs bbq_hnsw — immutable after first write. Blocks C3 index creation.", repo: "design", files: "mapping spec", blocker: true },
+          { id: "s0-writepolicy-config", title: "Decide WritePolicy config source", detail: "Where freeze_writes / dual_write_enabled / shadow_mode are read from: Flagsmith, Consul KV, or per-service settings with shared keys.", repo: "design", files: "HLD / adapter RFC", blocker: true },
+          { id: "s0-workindiaapi", title: "Plan workindiaapi bypass closure", detail: "Measure Celery/SQS generatefeaturetags traffic. Deprecate → profile-ms Kafka, or bridge sharedmodules to publish same events. Required before adapter-only freeze.", repo: "workindiaapi", files: "sharedmodules/.../candidatefeaturetagging.py, api/tasks/candidatetask.py", blocker: true },
+        ],
+      },
+      {
+        phase: "P0",
+        title: "Infrastructure — C3 / C4 clusters",
+        subtitle: "Embedded clusters are not Consul prod DNS — configured explicitly in service settings.",
+        tasks: [
+          { id: "p0-c3-provision", title: "Provision C3 (ES 9.4.2)", detail: "Candidate embedded cluster; sizing for MAU cohort + vectors. Network access from all writing services.", repo: "infra", files: "Terraform / ops runbook", blocker: true },
+          { id: "p0-c4-provision", title: "Provision C4 (ES 9.4.2)", detail: "Jobs embedded cluster for job-feature + future job vectors.", repo: "infra", files: "Terraform / ops runbook", blocker: false },
+          { id: "p0-c3-index", title: "Create C3 candidate index + mapping", detail: "workindia-candidate-feature-embedded (or alias strategy). Profile fields from C1 + dense_vector nested structure. index_options set before first doc.", repo: "infra", files: "index template JSON", blocker: true },
+          { id: "p0-settings-nodes", title: "Add C3/C4 nodes to service settings", detail: "NOSQL_DATABASES entries for embedded clusters in each service settings/*.py — separate from Consul prod C1/C2 DNS.", repo: "all writers", files: "settings/staging.py, settings/production.py", blocker: true },
+        ],
+      },
+      {
+        phase: "P0",
+        title: "elastictoolkit-py — adapter implementation",
+        subtitle: "Core dual-write, freeze, and ES9 client — the main engineering work.",
+        tasks: [
+          { id: "et-es9-dep", title: "Add elasticsearch9 dependency", detail: "setup.py + requirements.txt alongside elasticsearch8 during migration window.", repo: "elastictoolkit-py", files: "setup.py", blocker: true },
+          { id: "et-es9-adapter", title: "Elasticsearch9Adapter + Elasticsearch9Index", detail: "Mirror Elasticsearch8Adapter API: index, get, update, bulk, search, scroll, mget, msearch.", repo: "elastictoolkit-py", files: "adapters/elasticsearch9adapter.py, indexes/elasticsearch9index.py", blocker: true },
+          { id: "et-write-policy", title: "WritePolicy config provider", detail: "Class or module: freeze_writes, dual_write_enabled, shadow_mode, strict_c3_failure. Pluggable reader (env / Flagsmith / Consul).", repo: "elastictoolkit-py", files: "adapters/writepolicy.py", blocker: true },
+          { id: "et-dual-write", title: "DualWriteAdapter (or MigrationWriteRouter)", detail: "Wrap primary (C1/C2 ES8) + secondary (C3/C4 ES9) adapters. Delegate reads to primary read_nodes only.", repo: "elastictoolkit-py", files: "adapters/dualwriteadapter.py", blocker: true },
+          { id: "et-freeze", title: "Write freeze in index / update / bulk / delete", detail: "When freeze_writes=true: no-op or raise WriteFrozenError before any ES call. Emit metric on blocked write.", repo: "elastictoolkit-py", files: "adapters/dualwriteadapter.py", blocker: true },
+          { id: "et-dualwrite-logic", title: "Dual-write execution order", detail: "C1 write first (abort on failure) → C3 partial write. Never doc_as_upsert on C3.", repo: "elastictoolkit-py", files: "adapters/dualwriteadapter.py", blocker: true },
+          { id: "et-hld04-backfill", title: "HLD-04 404 backfill on C3", detail: "C3 update/bulk 404 → GET full doc from C1 → MAU predicate → full index on C3.", repo: "elastictoolkit-py", files: "adapters/dualwriteadapter.py", blocker: true },
+          { id: "et-shadow", title: "Shadow / dry-run mode", detail: "dual_write_enabled + shadow_mode: log C3 payload, skip secondary write. For Phase A rollout.", repo: "elastictoolkit-py", files: "adapters/dualwriteadapter.py", blocker: false },
+          { id: "et-retry-dlq", title: "C3 retry + DLQ hook", detail: "Transient C3 failure → backoff retry; exhausted → DLQ topic or log sink. C1 success is never rolled back.", repo: "elastictoolkit-py", files: "adapters/dualwriteadapter.py", blocker: false },
+          { id: "et-metrics", title: "Write metrics", detail: "Statsd/Prometheus: latency, success, cluster tag (c1/c3), operation (index/update/bulk), freeze blocks.", repo: "elastictoolkit-py", files: "adapters/dualwriteadapter.py", blocker: false },
+          { id: "et-tests", title: "Unit + integration tests", detail: "Mock ES clients: freeze blocks writes, C1-then-C3 order, 404 triggers backfill, C1 failure aborts C3.", repo: "elastictoolkit-py", files: "tests/adapters/test_dualwriteadapter.py", blocker: true },
+          { id: "et-publish", title: "Publish elastictoolkit to internal PyPI", detail: "Version bump + CHANGELOG. Coordinate wi-elasticsearchmodels release.", repo: "elastictoolkit-py", files: "setup.py, CHANGELOG.md", blocker: true },
+        ],
+      },
+      {
+        phase: "P0",
+        title: "wi-elasticsearchmodels-py — models & cluster wiring",
+        subtitle: "Connect services to DualWriteAdapter via existing CandidateFeatureV3 call sites.",
+        tasks: [
+          { id: "wem-cluster-enum", title: "C3/C4 cluster constants", detail: "CANDIDATE_ES_EMBEDDED_CLUSTER, JOBS_ES_EMBEDDED_CLUSTER in WIElasticSearchCluster.", repo: "wi-elasticsearchmodels-py", files: "constants/cluster.py", blocker: true },
+          { id: "wem-index-enum", title: "Embedded index constants", detail: "workindia-candidate-feature-embedded, job embedded index name in WIElasticsearchIndex.", repo: "wi-elasticsearchmodels-py", files: "constants/index.py", blocker: true },
+          { id: "wem-c3-adapter", title: "CandidateEmbeddedESClusterAdapter (ES9)", detail: "Points to C3; uses Elasticsearch9Adapter.", repo: "wi-elasticsearchmodels-py", files: "adapters/candidateembeddedesclusteradapter.py", blocker: true },
+          { id: "wem-c4-adapter", title: "JobsEmbeddedESClusterAdapter (ES9)", detail: "Points to C4 for job dual-write.", repo: "wi-elasticsearchmodels-py", files: "adapters/jobsembeddedesclusteradapter.py", blocker: false },
+          { id: "wem-wielastictoolkit", title: "Migrate CandidateFeatureV3 to elastictoolkit", detail: "Change import from wielastictoolkit.indexes to elastictoolkit.indexes. Prerequisite for dual-write hooks.", repo: "wi-elasticsearchmodels-py", files: "models/candidatefeaturev3.py, adapters/candidateesclusteradapter.py", blocker: true },
+          { id: "wem-dualwrite-wire", title: "Wire DualWriteAdapter on CandidateESClusterAdapter", detail: "When flag on: CandidateFeatureV3.adapter = DualWriteAdapter(primary=CandidateESClusterAdapter, secondary=CandidateEmbedded...). Or factory in model.", repo: "wi-elasticsearchmodels-py", files: "adapters/candidateesclusteradapter.py, models/candidatefeaturev3.py", blocker: true },
+          { id: "wem-job-dualwrite", title: "Wire JobsESClusterAdapter dual-write (C2+C4)", detail: "Same pattern for JobFeatureV3 used by jobpost-ms after model unification.", repo: "wi-elasticsearchmodels-py", files: "adapters/jobsesclusteradapter.py, models/jobfeaturev3.py", blocker: false },
+          { id: "wem-embedded-model", title: "CandidateFeatureEmbedded model", detail: "C3 index model with dense_vector mapping fields for P3 vector writes.", repo: "wi-elasticsearchmodels-py", files: "models/candidatefeatureembedded.py", blocker: false },
+          { id: "wem-publish", title: "Publish wi-elasticsearchmodels to internal PyPI", detail: "All writing services bump pin in same release train.", repo: "wi-elasticsearchmodels-py", files: "setup.py, CHANGELOG.md", blocker: true },
+        ],
+      },
+      {
+        phase: "P1",
+        title: "Service rollout — config only (no consumer edits)",
+        subtitle: "Bump libs + apps.py + flags. Recommended order: candidateevents-ms → profile-ms → view-candidate-ms → jobpost-ms.",
+        tasks: [
+          { id: "svc-events", title: "wi-candidateevents-ms — Phase A pilot", detail: "Bump libs. Configure C3 adapter in apps.py. Enable shadow_mode → dual_write. 3 consumers (bulk job_activity_v2, intent_bucket, app_open) — no code changes.", repo: "wi-candidateevents-ms", files: "api/apps.py, settings/*.py, requirements/*.txt", blocker: false },
+          { id: "svc-profile", title: "wicandidateprofile-ms — largest surface", detail: "Bump libs (currently wielastictoolkit transitively). Configure C3. 13 consumers + HTTP CandidateUpdateProfileParser inherit dual-write on bump.", repo: "wicandidateprofile-ms", files: "Development/api/apps.py, requirements/*.txt", blocker: false },
+          { id: "svc-profile-legacy", title: "profile-ms — remove direct ES5 imports", detail: "candidatefeaturetagging.py mixed elasticsearch + elasticsearch8 exceptions — clean while bumping deps.", repo: "wicandidateprofile-ms", files: "common/utils/candidate/profiling/candidatefeaturetagging.py", blocker: false },
+          { id: "svc-evc", title: "wiemployerviewcandidate-ms", detail: "Bump elastictoolkit 0.5.0 → HEAD. C3 for candidate-feature; separate adapter for JobPostViewCandidateStatus index.", repo: "wiemployerviewcandidate-ms", files: "api/apps.py, requirements/*.txt", blocker: false },
+          { id: "svc-jobpost", title: "wiemployerjobpost-ms — C2+C4", detail: "Configure C4 embedded adapter. Unify local api/elasticmodels/jobfeaturev3.py with wi-elasticsearchmodels OR add DualWrite on local adapter.", repo: "wiemployerjobpost-ms", files: "api/apps.py, api/utils/job/jobfeaturetagging.py", blocker: false },
+          { id: "svc-flagsmith", title: "Flagsmith flags per service", detail: "es_dual_write_candidate, es_dual_write_jobs, es_shadow_mode, es_freeze_writes — document defaults per env.", repo: "all writers", files: "Flagsmith / settings", blocker: false },
+          { id: "svc-drift-check", title: "C1 vs C3 drift sampling job", detail: "Cron or script: sample candidate_ids, diff C1 GET vs C3 GET after shadow period. Gate before P2.", repo: "infra / new script", files: "management command or Jenkins job", blocker: false },
+        ],
+      },
+      {
+        phase: "P2",
+        title: "Migration window — freeze, reindex, resume",
+        subtitle: "Operational sequence using adapter freeze + consumer scale-down.",
+        tasks: [
+          { id: "p2-precheck", title: "Pre-freeze checklist", detail: "All services on dual-write lib version; workindiaapi bypass at zero; drift sample &lt; threshold; Kafka retention &gt; freeze window.", repo: "ops", files: "runbook", blocker: true },
+          { id: "p2-freeze-flag", title: "Enable adapter.freeze_writes", detail: "Global flag ON — verify C1 _stats indexing rate → 0 via adapter metrics.", repo: "ops", files: "Flagsmith / Consul", blocker: true },
+          { id: "p2-scale-consumers", title: "Scale write consumers → 0", detail: "All 5 services' write consumer deployments. Kafka buffers messages.", repo: "ops", files: "build/prod_values.yml per service", blocker: true },
+          { id: "p2-reindex", title: "_reindex MAU cohort C1 → C3", detail: "Query filtered by MAU field. Verify doc count + spot-check fields.", repo: "ops", files: "_reindex job / curator", blocker: true },
+          { id: "p2-resume", title: "Resume: freeze OFF, dual_write ON", detail: "Scale consumers back. Drain Kafka backlog — every message writes C1+C3 through adapter.", repo: "ops", files: "runbook", blocker: true },
+          { id: "p2-verify", title: "Post-resume verification", detail: "C3 doc count growth tracks C1; no DLQ spike; p99 write latency acceptable on HTTP path.", repo: "ops", files: "Grafana dashboards", blocker: true },
+        ],
+      },
+      {
+        phase: "P3–P4",
+        title: "Vectors & experiment (same adapter path)",
+        subtitle: "Embedding writes reuse the dual-write adapter — no new consumer work.",
+        tasks: [
+          { id: "p3-embed-pipeline", title: "Embedding generation pipeline", detail: "Batch/stream job writes context vectors to CandidateFeatureEmbedded on C3 via model.save/update.", repo: "new / profile-ms", files: "embedding worker", blocker: false },
+          { id: "p3-c4-jobs", title: "Job context vectors on C4", detail: "Job embedding writes through JobsEmbedded adapter dual-write path.", repo: "wiemployerjobpost-ms", files: "job feature tagging / embed worker", blocker: false },
+          { id: "p4-experiment-reads", title: "Experiment kNN reads on C3/C4", detail: "Separate read client config — not via dual-write adapter. jobs-ms experiment endpoint.", repo: "workindiajobs-ms", files: "new experiment view / settings", blocker: false },
+        ],
+      },
+      {
+        phase: "Ops",
+        title: "Observability & runbooks",
+        subtitle: "Required for safe production rollout.",
+        tasks: [
+          { id: "ops-dashboard", title: "Adapter write dashboard", detail: "Grafana: C1/C3 write rate, error rate, freeze blocks, DLQ depth, p50/p99 latency.", repo: "ops", files: "Grafana", blocker: false },
+          { id: "ops-alerts", title: "Alerts", detail: "C3 error rate &gt; threshold; DLQ non-empty; freeze flag accidentally on in prod.", repo: "ops", files: "Prometheus / PagerDuty", blocker: false },
+          { id: "ops-runbook-freeze", title: "Freeze / resume runbook", detail: "Step-by-step for on-call: flag order, consumer scale, rollback if C3 unhealthy.", repo: "ops", files: "Confluence / runbook", blocker: false },
+        ],
+      },
+    ],
+  },
+};
+
+const ADAPTER_ROUTE_META = {
+  common_legacy: {
+    label: "Adapter path · legacy toolkit",
+    badgeClass: "common-legacy",
+    description: "Model → ClusterAdapter → <strong>wielastictoolkit</strong> Elasticsearch8Adapter. Correct call-stack shape, but dual-write / freeze / 404 backfill land in <strong>elastictoolkit</strong> — migrate the package first (P1).",
+  },
+  common: {
+    label: "Adapter path · dual-write ready",
+    badgeClass: "common",
+    description: "Model → ClusterAdapter → <strong>elastictoolkit</strong>. Fully covered by DualWriteAdapter on library bump + apps.py C3/C4 config — no consumer rewrites.",
+  },
+  alternate: {
+    label: "Alternate adapter",
+    badgeClass: "alternate",
+    description: "Different model or local adapter package (e.g. jobpost-ms <code>wielasticsearchadapter</code>) — needs explicit C4 dual-write wiring or model unification with wi-elasticsearchmodels.",
+  },
+  legacy_index: {
+    label: "Legacy index",
+    badgeClass: "legacy-index",
+    description: "Legacy ES5 / separate wielastictoolkit index class (VC fav, feature side indices) — out of main candidate-feature scope; defer unless explicitly in migration scope.",
+  },
+  bypass: {
+    label: "Bypass",
+    badgeClass: "bypass",
+    description: "Raw ES client or sharedmodules — does <strong>not</strong> pass through any cluster adapter. Bridge to Kafka/profile-ms or deprecate before adapter-only freeze.",
+  },
+};
+
+function buildAdapterWriterInventory() {
+  const pathSpecs = [
+    { service: "wicandidateprofile-ms", index: "workindia-candidate-feature", route: "common_legacy", stack: "CandidateFeatureV3 → CandidateESClusterAdapter → wielastictoolkit", consumers: 13, triggers: 2, action: "Migrate model to elastictoolkit; bump wi-elasticsearchmodels" },
+    { service: "wi-candidateevents-ms", index: "workindia-candidate-feature", route: "common_legacy", stack: "CandidateFeatureV3().bulk() / update()", consumers: 3, triggers: 3, action: "Phase A shadow dual-write pilot" },
+    { service: "wiemployerviewcandidate-ms", index: "workindia-candidate-feature", route: "common_legacy", stack: "CandidateFeatureV3 via employercandidateinteractionhelper", consumers: 3, triggers: 3, action: "Bump elastictoolkit pin; adapter applies on bump" },
+    { service: "wiemployerviewcandidate-ms", index: "workindia-job-post-view-candidate-status", route: "common_legacy", stack: "JobPostViewCandidateStatus → CandidateESClusterAdapter", consumers: 1, triggers: 0, action: "Same adapter family; separate index handler in DualWriteAdapter" },
+    { service: "wiemployerviewcandidate-ms", index: "JobPostViewCandidateFeature", route: "legacy_index", stack: "JobPostFeatureTagging — legacy wielastictoolkit ES5 path", consumers: 1, triggers: 0, action: "Out of candidate-feature scope; defer or separate C3 index plan" },
+    { service: "wiemployerviewcandidate-ms", index: "JobPostViewCandidateFav", route: "legacy_index", stack: "HTTP only — legacy favourites index", consumers: 0, triggers: 1, action: "Defer unless VC fav migration in scope" },
+    { service: "wiemployerjobpost-ms", index: "workindia-job-feature", route: "alternate", stack: "Local api/elasticmodels/jobfeaturev3.py → wielasticsearchadapter", consumers: 7, triggers: 1, action: "Unify with wi-elasticsearchmodels JobFeatureV3 OR add C4 hook on local adapter" },
+    { service: "workindiaapi (shared)", index: "workindia-candidate-feature", route: "bypass", stack: "sharedmodules/candidatefeaturetagging.py — direct ES / legacy client", consumers: 0, triggers: 4, action: "Deprecate or bridge to Kafka → profile-ms before adapter-only freeze" },
+  ];
+  const summary = {
+    commonLegacy: pathSpecs.filter(p => p.route === "common_legacy"),
+    common: pathSpecs.filter(p => p.route === "common"),
+    alternate: pathSpecs.filter(p => p.route === "alternate"),
+    legacyIndex: pathSpecs.filter(p => p.route === "legacy_index"),
+    bypass: pathSpecs.filter(p => p.route === "bypass"),
+  };
+  const kafkaOnCommonLegacy = summary.commonLegacy.reduce((n, p) => n + p.consumers, 0);
+  const kafkaBypass = summary.bypass.reduce((n, p) => n + p.consumers, 0);
+  const kafkaAlternate = summary.alternate.reduce((n, p) => n + p.consumers, 0);
+  return { paths: pathSpecs, summary, kafkaOnCommonLegacy, kafkaBypass, kafkaAlternate };
+}
+
 const PLANS = {
   migration_v0: {
     id: "migration_v0",
@@ -2910,7 +4214,7 @@ const PLANS = {
     hldLinks: true,
     phases: [
       { id: "P0", label: "P0 Pre-flight", type: "committed", desc: "MAU field, quantization, provision C3/C4" },
-      { id: "P1", label: "P1 Consumer consolidation (DRAFT)", type: "draft", desc: "5 writers → single Kafka consumer — not confirmed" },
+      { id: "P1", label: "P1 Single consumer (DRAFT)", type: "draft", desc: "5 writers → single Kafka consumer — not confirmed" },
       { id: "P2", label: "P2 Migration window", type: "committed", desc: "Freeze, _reindex 3M MAU, verify, resume" },
       { id: "P3", label: "P3 Embeddings", type: "committed", desc: "~9.4M context vectors — critical path" },
       { id: "P4", label: "P4 Experiment", type: "committed", desc: "kNN reads on C3/C4 (MAU cohort)" },
@@ -3116,10 +4420,10 @@ const PLANS = {
   write_consolidation: {
     id: "write_consolidation",
     viewType: "consolidation",
-    subtitle: "Decision analysis · consolidate 5 fragmented ES writers → 1 (or 2) Kafka consumers · P1 draft",
+    subtitle: "Decision analysis · single consumer write consolidation · 5 fragmented ES writers → 1 (or 2) Kafka consumers · P1 draft",
     bannerClass: "draft",
     banner: {
-      title: "P1 — Single Write Consumer Consolidation",
+      title: "P1 — Single Consumer Write Consolidation",
       summary: "Should we route all Elasticsearch writes through one consumer before/during the ES 9 migration? This tab maps required changes, trade-offs, and a scope recommendation.",
       bullets: [
         "Today: 5 services · 30+ write paths · 2 clusters (C1 candidate, C2 jobs)",
@@ -3182,6 +4486,114 @@ const PLANS = {
         tags: ["painless", "ordering", "intent_bucket"],
         q: "What are the hardest pieces to migrate?",
         a: "<p><strong>Painless scripted bulk</strong> (<code>job_activity_v2</code>, exclusions, employer reporting) — script params and batching logic must move intact. <strong>Field ownership conflicts</strong> — <code>intent_bucket</code> written by both <code>wi-candidateevents-ms</code> and <code>wiemployerviewcandidate-ms</code>; consumer must define merge rules. <strong>Per-candidate ordering</strong> — events for the same <code>candidate_id</code> must land in one partition; cross-field races today are masked by last-write-wins on C1. <strong>Cache invalidation</strong> — <code>CandidateFeatureElasticCacheUpdateConsumer</code> in jobs-ms expects ES writes to have happened; event contract must trigger cache refresh.</p>",
+      },
+    ],
+    data: null,
+  },
+
+  adapter_write_control: {
+    id: "adapter_write_control",
+    viewType: "adapter_writes",
+    subtitle: "Change analysis · freeze + dual-write at elastictoolkit / wi-elasticsearchmodels · keep fragmented consumers",
+    bannerClass: "draft",
+    banner: {
+      title: "Adapter write control",
+      summary: "This tab documents one migration approach — not a committed HLD. Scroll down for detail; sections build on each other.",
+      bullets: [
+        "<strong>Purpose</strong> — what it achieves, why it&rsquo;s needed, how it differs from P1 Single consumer",
+        "<strong>Required changes checklist</strong> — phased ticket list (libraries, services, ops)",
+        "<strong>Inventory &amp; architecture</strong> — which writers use the adapter, diagrams, caveats",
+      ],
+    },
+    hldLinks: false,
+    phases: [],
+    clusters: [],
+    writers: WRITE_FRAGMENTATION,
+    readers: [],
+    qa: [
+      {
+        id: "adapter-qa-changes",
+        category: "Implementation",
+        tags: ["checklist", "changes", "tasks", "P0", "P1", "P2"],
+        q: "What is the full list of changes required for adapter write control?",
+        a: "<p>See <strong>Required changes checklist</strong> on this tab — phased from Step 0 through P2 ops.</p><p><strong>Summary:</strong> Step 0 decisions + bypass closure → P0 infra (C3/C4) + elastictoolkit DualWriteAdapter + wi-elasticsearchmodels wiring → P1 per-service lib bumps and apps.py config (no consumer edits) → P2 freeze/reindex/resume runbook.</p>",
+      },
+      {
+        id: "adapter-qa-achieve",
+        category: "Purpose",
+        tags: ["achieve", "goal", "adapter", "dual-write"],
+        q: "What does adapter write control achieve?",
+        a: "<p>See <strong>What adapter write control achieves</strong> on this tab. In short: dual-write C1+C3, global P2 freeze, HLD-04 backfill, ES9 routing, and shared retry/metrics — all inherited by every service on library bump, with consumers unchanged.</p>",
+      },
+      {
+        id: "adapter-qa-required",
+        category: "Purpose",
+        tags: ["required", "why", "migration", "P2"],
+        q: "Why is adapter write control required for the ES 9 migration?",
+        a: "<p>See <strong>Why this is required</strong> on this tab. C3/C4 on ES 9.4.2 are mandatory for vectors; after P2 every live write must dual-write or C3 drifts; freeze must stop all paths reliably; and ES9 + dual-write library work is P0 either way — the adapter is the natural home for that logic.</p>",
+      },
+      {
+        id: "adapter-qa-alternative",
+        category: "Comparison",
+        tags: ["single-consumer", "alternative", "P1", "consolidation"],
+        q: "Why is adapter write control an alternative to P1 Single consumer?",
+        a: "<p>Both solve dual-write + freeze + backfill. <strong>Single consumer</strong> moves ES I/O to new Kafka handlers (large refactor, better ordering). <strong>Adapter</strong> intercepts existing <code>CandidateFeatureV3</code> calls (small diff, ships P2 faster). See the comparison table on this tab.</p>",
+      },
+      {
+        id: "adapter-qa-goal",
+        category: "Motivation",
+        tags: ["goal", "least-disruptive", "adapter"],
+        q: "What is the goal of adapter-layer changes?",
+        a: "<p><strong>Keep all consumers unchanged</strong> while centralizing migration controls (dual-write, freeze, retry, metrics) in the shared adapter.</p><p>Every path that already does <code>CandidateFeatureV3.update()</code> → <code>CandidateESClusterAdapter</code> automatically gets C1+C3 writes when the flag is on — no Kafka schema migration, no removing ES calls from 30+ consumers.</p>",
+      },
+      {
+        id: "adapter-qa-inventory",
+        category: "Step 0",
+        tags: ["inventory", "bypass", "adapter", "writers"],
+        q: "What is Step 0 before implementing adapter dual-write?",
+        a: "<p><strong>Inventory all ES writers and classify each route.</strong></p><p>See the <strong>Writer path inventory</strong> table on this tab. <em>Adapter path · legacy toolkit</em> (wielastictoolkit) must migrate to elastictoolkit before dual-write hooks apply. <em>Adapter path · dual-write ready</em> is covered on library bump. <em>Bypass</em> and <em>alternate adapter</em> paths do not inherit controls automatically — bridge, unify, or wire explicitly.</p>",
+      },
+      {
+        id: "adapter-qa-why",
+        category: "Motivation",
+        tags: ["adapter", "dual-write", "freeze", "migration"],
+        q: "Why use the adapter layer instead of consolidating consumers?",
+        a: "<p>Both approaches centralize <strong>dual-write</strong> and <strong>freeze</strong> logic. Single-consumer consolidation moves ES I/O to one process; adapter control intercepts the <strong>existing call path</strong> (<code>CandidateFeatureV3().update()</code> etc.) without rewriting 30+ consumers across 5 repos.</p><p>Adapter path ships faster for P2–P4. Single-consumer consolidation is still valuable long-term for ordering and ops — see the <strong>P1 Single consumer</strong> tab.</p>",
+      },
+      {
+        id: "adapter-qa-hook",
+        category: "Architecture",
+        tags: ["adapter", "elastictoolkit", "hook"],
+        q: "Where exactly is the hook point?",
+        a: "<p><code>CandidateFeatureV3</code> (model) → <code>CandidateESClusterAdapter</code> (singleton) → <code>Elasticsearch8Adapter.index | update | bulk</code>.</p><p>Add a <code>DualWriteAdapter</code> or mixin on <code>BaseElasticsearchAdapter</code> that wraps write methods. Reads (<code>get</code>, <code>search</code>) stay on read_nodes — unchanged unless you add read-fallback for migration_v1.</p>",
+      },
+      {
+        id: "adapter-qa-freeze",
+        category: "Migration",
+        tags: ["freeze", "P2", "adapter"],
+        q: "Can adapter freeze replace scaling down all consumers?",
+        a: "<p><strong>Almost, but use both.</strong> Adapter freeze stops ES writes from application code — even HTTP sync paths. Consumers still run and may retry Kafka messages unless also scaled to zero.</p><p>Recommended P2: <code>freeze_writes=true</code> + scale consumers → 0. Kafka buffers; on resume, dual-write drains backlog to C1+C3 through the same adapter hooks.</p>",
+      },
+      {
+        id: "adapter-qa-service-changes",
+        category: "Services",
+        tags: ["apps.py", "config", "services"],
+        q: "What does each service need to change?",
+        a: "<p><strong>Minimal path:</strong></p><ul><li>Bump <code>elastictoolkit-py</code> + <code>wi-elasticsearchmodels-py</code></li><li>Configure C3/C4 embedded cluster nodes in <code>apps.py</code> (flag-gated)</li><li>Enable dual-write / freeze via settings or Flagsmith</li><li>No consumer rewrites</li></ul><p><strong>Exception:</strong> services still on <code>wielastictoolkit</code> or direct ES clients must migrate to the elastictoolkit stack first.</p>",
+      },
+      {
+        id: "adapter-qa-vs-consolidation",
+        category: "Comparison",
+        tags: ["consolidation", "adapter", "P1"],
+        q: "Adapter dual-write vs single consumer consolidation — which for ES 9?",
+        a: "<p><strong>Adapter for migration (P2–P4):</strong> required library work either way; smallest service diff; does not block experiment.</p><p><strong>Consolidation for long-term:</strong> better ordering, single scale-to-zero deployment, canonical event schema — pursue parallel or post-P4 unless leadership gates on it.</p>",
+      },
+      {
+        id: "adapter-qa-bypass",
+        category: "Gaps",
+        tags: ["legacy", "workindiaapi", "bypass"],
+        q: "What write paths bypass the adapter?",
+        a: "<p><strong>workindiaapi</strong> Celery/SQS <code>generatefeaturetags</code> — legacy sharedmodules, not wi-elasticsearchmodels.</p><p><strong>wielastictoolkit</strong> — CandidateFeatureV3 still imports old package; dual-write hooks in elastictoolkit only apply after model migration.</p><p><strong>jobpost-ms local JobFeatureV3</strong> — separate adapter package; needs explicit C4 wiring.</p><p>Track and zero these before relying on adapter-only freeze.</p>",
       },
     ],
     data: null,
@@ -3857,7 +5269,8 @@ function initFilters() {
 function renderPlanBanner() {
   const plan = getPlan();
   const b = plan.banner;
-  document.getElementById("planBanner").className = `plan-banner ${plan.bannerClass || ""}`.trim();
+  const isAdapter = plan.viewType === "adapter_writes";
+  document.getElementById("planBanner").className = `plan-banner ${plan.bannerClass || ""} ${isAdapter ? "adapter-tab-banner" : ""}`.trim();
   document.getElementById("planBanner").innerHTML = `
     <h2>${b.title}</h2>
     <p>${b.summary}</p>
@@ -4217,7 +5630,7 @@ function renderRepoCard(repoData) {
 }
 
 function renderStats() {
-  if (isConsolidationView()) return;
+  if (isAnalysisView()) return;
   const data = planData();
   const tasks = allTasks();
   const done = tasks.filter(t => status[t.id]).length;
@@ -4330,6 +5743,12 @@ function renderQa() {
   const sortedCategories = categoryOrder.filter(c => grouped[c]);
 
   document.getElementById("qaTotalBadge").textContent = `${items.length} questions`;
+  const qaMeta = document.getElementById("qaCollapsibleMeta");
+  if (qaMeta) {
+    qaMeta.textContent = getPlan().viewType === "adapter_writes"
+      ? `${items.length} questions · expand / collapse`
+      : "";
+  }
   document.getElementById("qaResultCount").textContent = query || qaFilter.tag !== "all"
     ? `${filtered.length} of ${items.length}`
     : `${items.length} total`;
@@ -4394,19 +5813,586 @@ function initQaControls() {
   }, true);
 }
 
+function isAnalysisView() {
+  const vt = getPlan().viewType;
+  return vt === "consolidation" || vt === "adapter_writes";
+}
+
 function isConsolidationView() {
   return getPlan().viewType === "consolidation";
 }
 
 function setViewMode() {
-  const consolidation = isConsolidationView();
-  document.getElementById("migrationView").style.display = consolidation ? "none" : "block";
-  document.getElementById("consolidationView").style.display = consolidation ? "block" : "none";
-  document.getElementById("layout").classList.toggle("consolidation-mode", consolidation);
+  const analysis = isAnalysisView();
+  const vt = getPlan().viewType;
+  document.getElementById("migrationView").style.display = analysis ? "none" : "block";
+  document.getElementById("consolidationView").style.display = vt === "consolidation" ? "block" : "none";
+  document.getElementById("adapterView").style.display = vt === "adapter_writes" ? "block" : "none";
+  document.getElementById("layout").classList.toggle("consolidation-mode", analysis);
   const toggle = document.getElementById("sidebarToggle");
-  if (toggle) toggle.classList.toggle("is-hidden", consolidation);
+  if (toggle) toggle.classList.toggle("is-hidden", analysis);
   const progressBar = document.querySelector("header .progress-bar");
-  if (progressBar) progressBar.style.display = consolidation ? "none" : "block";
+  if (progressBar) progressBar.style.display = analysis ? "none" : "block";
+
+  const qaWrap = document.getElementById("qaSectionWrap");
+  if (qaWrap) {
+    const adapterTab = vt === "adapter_writes";
+    qaWrap.classList.toggle("collapsible-enabled", adapterTab);
+    if (!adapterTab) qaWrap.open = true;
+  }
+}
+
+function buildAdapterTabGuideHtml(a, inv, checklistTotal, checklistBlockers) {
+  const sections = [
+    {
+      type: "external",
+      label: "Tab banner (orange strip at top)",
+      detail: "Short tab summary — what this page is about. Not a duplicate of the sections below.",
+    },
+    {
+      type: "section",
+      n: 1,
+      label: "Purpose — what, why, and why not single consumer",
+      detail: `Why choose adapter control. Contains 3 nested cards: what it achieves (${a.purpose.achieve.items.length} points), why required (${a.purpose.required.items.length} points), vs P1 Single consumer. Opens by default.`,
+    },
+    {
+      type: "section",
+      n: 2,
+      label: "Writer path inventory",
+      detail: `Rollout Step 0 — do this first. Adapter-path caveat plus audit table: ${inv.paths.length} write surfaces, ${inv.kafkaOnCommonLegacy} Kafka consumers on legacy toolkit adapter path.`,
+    },
+    {
+      type: "section",
+      n: 3,
+      label: "Target architecture",
+      detail: "Dual-write flow diagram: Kafka/HTTP triggers → CandidateFeatureV3 → CandidateESClusterAdapter → C1 + C3. Consumers unchanged at the call site.",
+    },
+    {
+      type: "section",
+      n: 4,
+      label: "What changes in the adapter",
+      detail: "Before/after code blocks (preserved formatting) with a 6-step walkthrough of dual-write logic, plus a table of repos/layers touched.",
+    },
+    {
+      type: "section",
+      n: 5,
+      label: "Migration controls (in adapter)",
+      detail: `${a.migrationControls.length} control types (freeze, dual-write, backfill, …) and ${a.controls.length} capability cards for what the adapter implements.`,
+    },
+    {
+      type: "section",
+      n: 6,
+      label: "Required changes checklist",
+      detail: `Ticket-ready tasks: ${checklistTotal} items in ${a.changeChecklist.groups.length} phase groups (${checklistBlockers} blockers). Each phase expands separately.`,
+    },
+    {
+      type: "section",
+      n: 7,
+      label: "Recommendation",
+      detail: "Summary verdict: ship migration via adapter dual-write without waiting for single-consumer refactor.",
+    },
+    {
+      type: "section",
+      n: 8,
+      label: "Rollout phases",
+      detail: `${a.rolloutPhases.length} high-level phases from Step 0 inventory through P3–P4 vectors.`,
+    },
+    {
+      type: "section",
+      n: 9,
+      label: "P2 freeze flow (adapter + consumers)",
+      detail: "Operational sequence: freeze flag → scale consumers → _reindex → resume dual-write.",
+    },
+    {
+      type: "section",
+      n: 10,
+      label: "Library changes required",
+      detail: `${a.libraries.length} repos (elastictoolkit-py, wi-elasticsearchmodels-py, legacy wielastictoolkit). Each repo expands to a task list.`,
+    },
+    {
+      type: "section",
+      n: 11,
+      label: "Per-service changes required",
+      detail: `${a.services.length} services — mostly requirements bump + apps.py C3/C4 config; no consumer rewrites.`,
+    },
+    {
+      type: "section",
+      n: 12,
+      label: "Known bypass paths (detail)",
+      detail: `${a.bypassPaths.length} paths that do NOT go through the common adapter (workindiaapi, wielastictoolkit, local JobFeatureV3, etc.).`,
+    },
+    {
+      type: "section",
+      n: 13,
+      label: "vs single consumer consolidation",
+      detail: "Side-by-side comparison with the P1 Single consumer tab approach.",
+    },
+    {
+      type: "section",
+      n: 14,
+      label: "Open design items",
+      detail: `${a.openItems.length} unresolved decisions (WritePolicy config source, sync vs async C3, MAU predicate, …).`,
+    },
+    {
+      type: "external",
+      label: "Q&A (below all sections)",
+      detail: "Searchable questions with expand/collapse per answer. Expand all / Collapse all buttons inside.",
+    },
+  ];
+
+  const sectionCount = sections.filter(s => s.type === "section").length;
+  const renderItem = (s) => `<li><strong>${s.label}</strong> — ${s.detail}</li>`;
+
+  const banner = sections.find(s => s.type === "external" && s.label.includes("banner"));
+  const qa = sections.find(s => s.type === "external" && s.label.includes("Q&A"));
+  const sectionItems = sections.filter(s => s.type === "section");
+
+  const listHtml = `
+    ${banner ? `<ul class="adapter-guide-external" style="margin:0 0 10px;padding-left:20px;font-size:12.5px;line-height:1.55">${renderItem(banner)}</ul>` : ""}
+    <ol style="margin:0;padding-left:20px;font-size:12.5px;line-height:1.55">${sectionItems.map(renderItem).join("")}</ol>
+    ${qa ? `<ul class="adapter-guide-external" style="margin:10px 0 0;padding-left:20px;font-size:12.5px;line-height:1.55">${renderItem(qa)}</ul>` : ""}
+  `;
+
+  return {
+    sectionCount,
+    html: `
+      <p style="margin-top:0;font-size:12.5px;color:var(--muted);line-height:1.5">
+        This tab documents <strong>adapter write control</strong> — change the shared ES library so existing consumers dual-write C1+C3 without a refactor.
+        Compare with <strong>P1 Single consumer</strong> (merge all writers into one Kafka consumer) on the other tab.
+        Every block below is collapsible (click the ▸ row). Suggested read order: <strong>1 → 2 → 3 → 5</strong> for a decision; <strong>6 → 10 → 11</strong> for implementation.
+      </p>
+      <p style="font-size:12px;font-weight:600;color:var(--text);margin:12px 0 8px">${sectionCount} numbered sections + banner + Q&A:</p>
+      ${listHtml}
+    `,
+    hint: `${sectionCount} sections + banner + Q&A`,
+  };
+}
+
+function adapterFlowDivider(label) {
+  return `<div class="adapter-flow-divider"><span>${label}</span></div>`;
+}
+
+function renderFreezeFlowHtml(flow) {
+  const stepsHtml = flow.steps.map((step, i) => `
+    <div class="adapter-freeze-step ${step.group}">
+      <span class="adapter-freeze-step-num">${i + 1}</span>
+      <div>
+        <strong>${step.title}</strong>
+        <pre class="adapter-freeze-command">${step.command}</pre>
+        <span class="adapter-freeze-note">${step.note}</span>
+      </div>
+    </div>
+  `).join("");
+
+  return `
+    <div class="adapter-freeze-flow">
+      <p class="adapter-freeze-headline">${flow.headline}</p>
+      <p class="adapter-freeze-intro">${flow.intro}</p>
+      <div class="adapter-freeze-steps">${stepsHtml}</div>
+    </div>
+  `;
+}
+
+function renderTargetArchitectureHtml(flow) {
+  const stepsHtml = flow.steps.map((step, i) => `
+    ${i > 0 ? '<div class="adapter-arch-connector"><span>▼</span></div>' : ""}
+    <div class="adapter-arch-node ${step.type}">
+      ${step.tag ? `<span class="adapter-arch-tag">${step.tag}</span>` : ""}
+      <div class="adapter-arch-node-title">${step.title}</div>
+      ${step.note ? `<div class="adapter-arch-node-note">${step.note}</div>` : ""}
+    </div>
+  `).join("");
+
+  const targetsHtml = flow.targets.map(t => `
+    <div class="adapter-arch-target ${t.variant}">
+      <div class="adapter-arch-target-id">${t.id}</div>
+      <div class="adapter-arch-target-sub">${t.subtitle}</div>
+    </div>
+  `).join("");
+
+  return `
+    <div class="adapter-arch-diagram">
+      ${stepsHtml}
+      <div class="adapter-arch-connector">
+        <span>▼</span>
+        <span class="adapter-arch-split-line">┌─────────┴─────────┐</span>
+      </div>
+      <div class="adapter-arch-targets">${targetsHtml}</div>
+    </div>
+  `;
+}
+
+function adapterCodeBlock(code) {
+  return `<pre class="adapter-code-block">${code}</pre>`;
+}
+
+function adapterAfterStepsHtml(steps) {
+  const items = steps.map((s, i) => `
+    <div class="adapter-after-step">
+      <span class="adapter-after-step-num">${i + 1}</span>
+      <div><strong>${s.title}</strong><span>${s.body}</span></div>
+    </div>
+  `).join("");
+  return `
+    <div class="adapter-after-steps">
+      <div class="adapter-after-steps-title">What each block does</div>
+      ${items}
+    </div>
+  `;
+}
+
+function adapterCollapsibleSection(title, hint, bodyHtml, open = false) {
+  return `
+    <details class="adapter-collapsible-section"${open ? " open" : ""}>
+      <summary>
+        <span class="adapter-collapsible-title">${title}</span>
+        <span class="adapter-collapsible-hint">${hint}</span>
+      </summary>
+      <div class="adapter-collapsible-body">${bodyHtml}</div>
+    </details>
+  `;
+}
+
+function renderAdapterWrites() {
+  const a = ADAPTER_WRITE_ANALYSIS;
+  const inv = buildAdapterWriterInventory();
+
+  const achieveHtml = a.purpose.achieve.items.map(item => `<li><strong>${item.title}</strong> — ${item.detail}</li>`).join("");
+  const requiredHtml = a.purpose.required.items.map(item => `<li><strong>${item.title}</strong> — ${item.detail}</li>`).join("");
+  const comparisonHtml = a.purpose.alternative.comparison.map(row => `
+    <tr>
+      <td><strong>${row.aspect}</strong></td>
+      <td>${row.singleConsumer}</td>
+      <td>${row.adapter}</td>
+    </tr>
+  `).join("");
+  const whenToChooseHtml = a.purpose.alternative.whenToChoose.map(w => `<li><strong>${w.choice}</strong> — ${w.detail}</li>`).join("");
+
+  const checklistTotal = a.changeChecklist.groups.reduce((n, g) => n + g.tasks.length, 0);
+  const checklistBlockers = a.changeChecklist.groups.reduce((n, g) => n + g.tasks.filter(t => t.blocker).length, 0);
+  const checklistHtml = a.changeChecklist.groups.map(group => {
+    const rows = group.tasks.map(t => `
+      <tr>
+        <td>${t.title}${t.blocker ? '<span class="adapter-blocker-tag">blocker</span>' : ""}</td>
+        <td><code>${t.repo}</code></td>
+        <td>${t.detail}</td>
+        <td><code>${t.files}</code></td>
+      </tr>
+    `).join("");
+    return `
+      <details class="adapter-checklist-phase">
+        <summary>
+          <span class="phase-tag">${group.phase}</span>
+          ${group.title}
+          <span class="task-count">${group.tasks.length} task${group.tasks.length === 1 ? "" : "s"}</span>
+        </summary>
+        <div class="adapter-checklist-body">
+          <p>${group.subtitle}</p>
+          <table class="adapter-task-table">
+            <thead><tr><th>Task</th><th>Repo</th><th>Detail</th><th>Files</th></tr></thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </div>
+      </details>
+    `;
+  }).join("");
+
+  const controlsHtml = a.controls.map(c => `
+    <div class="adapter-control-card">
+      <h4>${c.name}</h4>
+      <p>${c.detail}</p>
+      <span class="hook">${c.hook}</span>
+    </div>
+  `).join("");
+
+  const migrationControlsHtml = a.migrationControls.map(item => `<li>${item}</li>`).join("");
+
+  const changeAreasHtml = a.adapterBehaviorChange.areas.map(row => `
+    <tr><td><strong>${row.area}</strong></td><td>${row.what}</td></tr>
+  `).join("");
+
+  const inventorySummaryHtml = `
+    <div class="adapter-inventory-summary">
+      <div class="adapter-inv-stat"><div class="num">${inv.kafkaOnCommonLegacy}</div><div class="lbl">Kafka consumers · legacy toolkit</div></div>
+      <div class="adapter-inv-stat"><div class="num">${inv.summary.bypass.length}</div><div class="lbl">Bypass write surfaces</div></div>
+      <div class="adapter-inv-stat"><div class="num">${inv.kafkaAlternate}</div><div class="lbl">Consumers on alternate adapter</div></div>
+      <div class="adapter-inv-stat"><div class="num">${inv.summary.legacyIndex.length}</div><div class="lbl">Legacy index paths</div></div>
+    </div>
+  `;
+
+  const inventoryHtml = inv.paths.map(p => {
+    const meta = ADAPTER_ROUTE_META[p.route] || ADAPTER_ROUTE_META.bypass;
+    return `
+      <tr>
+        <td>${p.service}</td>
+        <td><code>${p.index}</code></td>
+        <td><span class="adapter-route-badge ${meta.badgeClass}">${meta.label}</span></td>
+        <td style="font-size:12px">${p.stack}</td>
+        <td>${p.consumers} / ${p.triggers}</td>
+        <td style="font-size:12px;color:var(--muted)">${p.action}</td>
+      </tr>
+    `;
+  }).join("");
+
+  const routeLegendHtml = Object.entries(ADAPTER_ROUTE_META).map(([, meta]) => `
+    <li><span class="adapter-route-badge ${meta.badgeClass}">${meta.label}</span> — ${meta.description}</li>
+  `).join("");
+
+  const rolloutHtml = a.rolloutPhases.map(p => `
+    <tr>
+      <td><strong>${p.phase}</strong></td>
+      <td>${p.title}</td>
+      <td>${p.detail}</td>
+    </tr>
+  `).join("");
+
+  const librariesHtml = a.libraries.map(lib => `
+    <details class="cons-service-card">
+      <summary>
+        ${lib.repo}
+        <span class="cons-effort ${lib.effort}">${lib.effort} effort</span>
+      </summary>
+      <div class="cons-service-body">
+        <h5>Required changes</h5>
+        <ul>${lib.changes.map(ch => `<li>${ch}</li>`).join("")}</ul>
+        <h5>Key files</h5>
+        <p><code>${lib.files}</code></p>
+      </div>
+    </details>
+  `).join("");
+
+  const servicesHtml = a.services.map(s => `
+    <details class="cons-service-card">
+      <summary>
+        ${s.service}
+        <span class="cons-effort ${s.effort}">${s.effort} effort</span>
+        ${s.consumers != null ? `<span class="writer-summary-meta">${s.consumers} consumer${s.consumers === 1 ? "" : "s"}${s.triggers ? ` + ${s.triggers} triggers` : ""}</span>` : ""}
+      </summary>
+      <div class="cons-service-body">
+        <p><strong>Today:</strong> ${s.today}</p>
+        <h5>Required changes</h5>
+        <ul>${s.changes.map(ch => `<li>${ch}</li>`).join("")}</ul>
+        <h5>Key files</h5>
+        <p><code>${s.files}</code></p>
+      </div>
+    </details>
+  `).join("");
+
+  const bypassHtml = a.bypassPaths.map(b => `
+    <tr>
+      <td><code>${b.path}</code></td>
+      <td><span class="cons-signal ${b.risk === "high" ? "critical" : b.risk === "medium" ? "high" : "low"}">${b.risk}</span></td>
+      <td>${b.note}</td>
+    </tr>
+  `).join("");
+
+  const vsHtml = a.vsConsolidation.map(v => `
+    <div class="cons-compare-card ${v.recommended ? "recommended" : ""}">
+      <h4>${v.name}${v.recommended ? " ✓" : ""}</h4>
+      <p>${v.summary}</p>
+      <ul>${v.points.map(p => `<li>${p}</li>`).join("")}</ul>
+    </div>
+  `).join("");
+
+  const openItemsHtml = a.openItems.map(item => `<li>${item}</li>`).join("");
+
+  const tabGuide = buildAdapterTabGuideHtml(a, inv, checklistTotal, checklistBlockers);
+
+  document.getElementById("adapterView").innerHTML = `
+    ${adapterCollapsibleSection(
+      "How to read this tab",
+      tabGuide.hint,
+      tabGuide.html,
+      true
+    )}
+
+    <details class="adapter-collapsible-section adapter-purpose-wrap" open>
+      <summary>
+        <span class="adapter-collapsible-title">Purpose — what, why, and why not single consumer</span>
+        <span class="adapter-collapsible-hint">Expand / collapse section</span>
+      </summary>
+      <div class="adapter-collapsible-body adapter-purpose-wrap-body">
+        <p class="section-subtitle" style="margin-top:0"><strong>${a.goal.headline}</strong> — ${a.goal.summary}</p>
+        <div class="adapter-purpose-grid">
+          <details class="adapter-purpose-card achieve">
+            <summary>
+              <span>${a.purpose.achieve.title}</span>
+              <span class="adapter-purpose-card-meta">${a.purpose.achieve.items.length} points</span>
+            </summary>
+            <div class="adapter-purpose-card-body">
+              <p>${a.purpose.achieve.intro}</p>
+              <ul>${achieveHtml}</ul>
+            </div>
+          </details>
+          <details class="adapter-purpose-card required">
+            <summary>
+              <span>${a.purpose.required.title}</span>
+              <span class="adapter-purpose-card-meta">${a.purpose.required.items.length} points</span>
+            </summary>
+            <div class="adapter-purpose-card-body">
+              <p>${a.purpose.required.intro}</p>
+              <ul>${requiredHtml}</ul>
+            </div>
+          </details>
+          <details class="adapter-purpose-card alternative">
+            <summary>
+              <span>${a.purpose.alternative.title}</span>
+              <span class="adapter-purpose-card-meta">comparison table</span>
+            </summary>
+            <div class="adapter-purpose-card-body">
+              <p>${a.purpose.alternative.intro}</p>
+              <table class="cons-decision-table" style="margin-top:10px">
+                <thead><tr><th></th><th>P1 Single consumer</th><th>Adapter write control</th></tr></thead>
+                <tbody>${comparisonHtml}</tbody>
+              </table>
+              <p style="margin-top:12px;margin-bottom:6px;font-size:12px;font-weight:600;color:var(--text)">When to choose which</p>
+              <ul>${whenToChooseHtml}</ul>
+            </div>
+          </details>
+        </div>
+      </div>
+    </details>
+
+    ${adapterFlowDivider("Prerequisite · rollout Step 0")}
+
+    ${adapterCollapsibleSection(
+      "Writer path inventory",
+      `Rollout Step 0 · ${inv.kafkaOnCommonLegacy} consumers · legacy toolkit · ${inv.paths.length} write surfaces`,
+      `<p class="section-subtitle" style="margin-top:0">Map every ES write path <strong>before</strong> designing dual-write or running a freeze. Close <span class="adapter-route-badge bypass">Bypass</span> gaps first — migration controls apply only on the adapter path.</p>
+      <div class="adapter-caveat" style="margin-bottom:16px">
+        <h4>${a.caveat.title}</h4>
+        <p>${a.caveat.body}</p>
+        <p><strong>${a.caveat.firstStep}</strong></p>
+      </div>
+      <p class="section-subtitle">Five route types below. Only <span class="adapter-route-badge common">Adapter path · dual-write ready</span> (elastictoolkit) gets freeze / dual-write / 404 backfill automatically. <span class="adapter-route-badge common-legacy">Legacy toolkit</span> rows need wielastictoolkit → elastictoolkit migration first — most candidate writers are here today.</p>
+      ${inventorySummaryHtml}
+      <table class="cons-scope-table">
+        <thead>
+          <tr>
+            <th>Service</th>
+            <th>Index</th>
+            <th>Route</th>
+            <th>Stack</th>
+            <th>Kafka / triggers</th>
+            <th>Action required</th>
+          </tr>
+        </thead>
+        <tbody>${inventoryHtml}</tbody>
+      </table>
+      <ul class="writer-data-list" style="font-size:12px;color:var(--muted);padding-left:20px;margin:16px 0 0">${routeLegendHtml}</ul>`
+    )}
+
+    ${adapterFlowDivider("Solution design")}
+
+    ${adapterCollapsibleSection(
+      "Target architecture",
+      "Consumer → CandidateFeatureV3 → adapter → C1 + C3",
+      `<p class="section-subtitle">Consumers stay unchanged. Only the adapter layer learns to fan out writes.</p>
+      ${renderTargetArchitectureHtml(a.targetArchitectureFlow)}`
+    )}
+
+    ${adapterCollapsibleSection(
+      "What changes in the adapter",
+      "Before / after code · step-by-step · layer table",
+      `<p class="section-subtitle">Replace direct <code>client.update(...)</code> with routed dual-write logic inside <code>Elasticsearch8Adapter</code> / <code>DualWriteAdapter</code>. Call sites in consumers stay unchanged.</p>
+      <div class="adapter-change-grid">
+        <div class="adapter-change-box before">
+          <h4>Today</h4>
+          <p class="adapter-change-caption">Single write target — production C1 only.</p>
+          ${adapterCodeBlock(a.adapterBehaviorChange.before)}
+        </div>
+        <div class="adapter-change-box after">
+          <h4>After (conceptual)</h4>
+          <p class="adapter-change-caption">Same method signature — adapter fans out to C1 + C3 internally.</p>
+          ${adapterCodeBlock(a.adapterBehaviorChange.after)}
+          ${adapterAfterStepsHtml(a.adapterBehaviorChange.afterSteps)}
+        </div>
+      </div>
+      <p class="section-subtitle" style="margin-top:4px">Repos and layers touched:</p>
+      <table class="cons-decision-table">
+        <thead><tr><th>Layer</th><th>What changes</th></tr></thead>
+        <tbody>${changeAreasHtml}</tbody>
+      </table>`
+    )}
+
+    ${adapterCollapsibleSection(
+      "Migration controls (in adapter)",
+      `${a.migrationControls.length} controls · ${a.controls.length} capability cards`,
+      `<p class="section-subtitle">All of these live in one library — inherited by every service on bump + config.</p>
+      <ul class="adapter-goal-list" style="margin-bottom:20px">${migrationControlsHtml}</ul>
+      <div class="adapter-controls-grid">${controlsHtml}</div>`
+    )}
+
+    ${adapterFlowDivider("Plan & execute")}
+
+    ${adapterCollapsibleSection(
+      "Required changes checklist",
+      `${checklistTotal} tasks · ${a.changeChecklist.groups.length} groups · ${checklistBlockers} blockers`,
+      `<p class="section-subtitle">${a.changeChecklist.intro}</p>${checklistHtml}`
+    )}
+
+    ${adapterCollapsibleSection(
+      "Recommendation",
+      "Adapter layer is the practical migration path",
+      `<div class="consolidation-verdict recommend-proceed" style="margin:0;border:none;padding:0;background:transparent">
+        <h3>${a.verdict.title}</h3>
+        <p>${a.verdict.body}</p>
+      </div>`
+    )}
+
+    ${adapterCollapsibleSection(
+      "Rollout phases",
+      `${a.rolloutPhases.length} phases · Step 0 through P3–P4`,
+      `<table class="cons-scope-table">
+        <thead><tr><th>Phase</th><th>Title</th><th>Detail</th></tr></thead>
+        <tbody>${rolloutHtml}</tbody>
+      </table>`
+    )}
+
+    ${adapterCollapsibleSection(
+      "P2 freeze flow (adapter + consumers)",
+      "Freeze flag → scale consumers → reindex → resume",
+      renderFreezeFlowHtml(a.freezeFlow)
+    )}
+
+    ${adapterCollapsibleSection(
+      "Library changes required",
+      `${a.libraries.length} repos · elastictoolkit + wi-elasticsearchmodels`,
+      `<p class="section-subtitle">Primary engineering work — same P0 tasks as migration_v0, plus DualWriteAdapter and WritePolicy.</p>
+      ${librariesHtml}`
+    )}
+
+    ${adapterCollapsibleSection(
+      "Per-service changes required",
+      `${a.services.length} services · config only, no consumer rewrites`,
+      `<p class="section-subtitle">Much lighter than consumer consolidation — bump libs, configure C3/C4 in apps.py, enable flags. No consumer rewrites.</p>
+      ${servicesHtml}`
+    )}
+
+    ${adapterCollapsibleSection(
+      "Known bypass paths (detail)",
+      `${a.bypassPaths.length} paths · must close before adapter-only freeze`,
+      `<table class="cons-scope-table">
+        <thead><tr><th>Path</th><th>Risk</th><th>Notes</th></tr></thead>
+        <tbody>${bypassHtml}</tbody>
+      </table>`
+    )}
+
+    ${adapterFlowDivider("Reference")}
+
+    ${adapterCollapsibleSection(
+      "vs single consumer consolidation",
+      `${a.vsConsolidation.length} approaches compared`,
+      `<p class="section-subtitle">Same migration goals — different scope. See <strong>P1 Single consumer</strong> tab.</p>
+      <div class="cons-compare">${vsHtml}</div>`
+    )}
+
+    ${adapterCollapsibleSection(
+      "Open design items",
+      `${a.openItems.length} decisions pending`,
+      `<ul class="writer-data-list" style="font-size:12.5px;color:var(--muted);padding-left:20px;margin:0">${openItemsHtml}</ul>`
+    )}
+  `;
 }
 
 function renderConsolidation() {
@@ -4568,8 +6554,9 @@ function render() {
   setViewMode();
   renderPlanBanner();
 
-  if (isConsolidationView()) {
-    renderConsolidation();
+  if (isAnalysisView()) {
+    if (getPlan().viewType === "consolidation") renderConsolidation();
+    else if (getPlan().viewType === "adapter_writes") renderAdapterWrites();
     saveQaOpenState();
     renderQa();
     bindCheckboxes();
