@@ -3968,7 +3968,7 @@ const CONSOLIDATION_ANALYSIS = {
 
 const MATCHING_ENGINE_VISION = {
   headline: "Matching Engine as a system",
-  source: "Leadership direction (MA) — proposed architecture, not in committed HLD",
+  source: "Proposed architecture — not in committed HLD",
   summary: "Treat matching (ingestion, storage, retrieval, ranking) as a <strong>bounded system or package</strong>. Applications send <em>domain data</em> (candidate profile, activity, job context) — not ES documents. The system owns processing, indexing, dual-write, kNN/BM25 retrieval, and ranking. <strong>Elasticsearch is one pluggable backend</strong> inside the system; clients must not depend on cluster names, index names, or adapter classes.",
   principles: [
     { title: "Storage abstraction", detail: "<strong>Ingest:</strong> apps publish domain events to <strong>Kafka</strong> — they do not call matching directly or write ES. <strong>Query:</strong> apps call <code>matching_engine.match_jobs(...)</code>. Where data lands (C1, C3, vector-store-ms) is an internal detail." },
@@ -4311,6 +4311,72 @@ jobpost-ms ──► Postgres ──► Kafka: job.posted / job.updated
     ],
     note: "Transition: during P2–P4, existing per-service consumers continue via adapter dual-write until matching engine consumers are ready and cutover is complete. Both paths must not double-write — use feature flag per event type.",
   },
+  deploymentAndWritePath: {
+    title: "Deployment & write path — where L3–L7 sit",
+    summary: "Layers L4–L7 are <strong>not</strong> inside profile-ms, jobs-ms, or today&rsquo;s recommendation helpers. They live inside <strong>one matching-engine deployment</strong> (<code>wi-matching-engine-ms</code>). Kafka consumers (L3) are thin entry points; they call <code>ingest()</code>, which always passes through governance → pipeline → storage adapter. <strong>Only L6 writes to ES.</strong>",
+    deploymentDiagram: `wi-matching-engine-ms  (single service / package)
+┌─────────────────────────────────────────────────────────────┐
+│  L3 · Kafka consumers (thin — entry point only)              │
+│    me-candidate-ingest · me-job-ingest · me-interaction-ingest│
+│         │ each calls ingest(event) — no direct ES imports     │
+│         ▼                                                    │
+│  L4 · Data governance (YAML registry — shared module)         │
+│         │ resolve: fields, index, cluster, merge, embed, TTL   │
+│         ▼                                                    │
+│  L5 · Ingest pipeline (shared module)                        │
+│         │ normalize → merge doc → Triton embed → build ES doc  │
+│         ▼                                                    │
+│  L6 · Storage adapters (shared module)  ◄── WRITES TO ES     │
+│         │ DualWriteAdapter · ES8/ES9 clients · freeze/backfill│
+│         ▼                                                    │
+│  L7 · Elasticsearch (C1/C3 candidate · C2/C4 job)            │
+└─────────────────────────────────────────────────────────────┘
+
+NOT here: profile-ms consumers · jobs-ms recommendation · CandidateFeatureV3 in apps`,
+    layers: [
+      { layer: "L3", name: "Kafka consumers", sits: "Inside wi-matching-engine-ms", role: "Receive event from Kafka, deserialize, call <code>ingest(event)</code>. Thin — no ES logic, no field mapping." },
+      { layer: "L4", name: "Data governance", sits: "Shared module in same package", role: "YAML lookup per <code>event_type</code>. Decides what/where/how. Rejects or DLQs unconfigured events." },
+      { layer: "L5", name: "Ingest pipeline", sits: "Shared module in same package", role: "Normalize, partial merge, embed trigger, build document. Called by <code>ingest()</code> after governance." },
+      { layer: "L6", name: "Storage adapters", sits: "Shared module in same package", role: "<strong>Only layer that calls ES.</strong> DualWriteAdapter → C1+C3 or C2+C4." },
+      { layer: "L7", name: "Elasticsearch", sits: "External clusters", role: "Storage backend — not owned by any app microservice." },
+      { layer: "L8", name: "Query API", sits: "Same wi-matching-engine-ms (HTTP/gRPC)", role: "<code>match_jobs()</code> — separate from ingest consumers; also passes through governance on read." },
+    ],
+    writeFlow: [
+      "Kafka delivers event to matching-engine consumer (L3).",
+      "Consumer calls <code>ingest(event)</code> — does not import ES models.",
+      "Governance (L4) loads YAML for <code>event.event_type</code> → returns write config.",
+      "Pipeline (L5) normalizes payload, merges into doc shape, triggers embed if config says so.",
+      "Storage adapter (L6) executes write: partial update → DualWrite → C1 then C3 (or C2 then C4).",
+      "On C3 404: adapter GETs from C1, applies MAU predicate, full index — all inside L6.",
+    ],
+    governanceEnforcement: [
+      "Consumers cannot bypass governance — they only call <code>ingest()</code>, which always hits L4 first.",
+      "No <code>CandidateFeatureV3.update()</code> in consumer code — ES access is encapsulated in L6.",
+      "Unmapped event types → reject + DLQ + metric (not silent write to wrong index).",
+      "Field allowlist in YAML — events cannot write fields not in config.",
+      "Same governance module used on query path (L8) for retrieval field access.",
+    ],
+    notThis: [
+      { wrong: "Governance inside each Kafka consumer", why: "Duplicated logic, drift across 3 consumer groups — governance is one shared module." },
+      { wrong: "Consumers write ES directly", why: "Bypasses merge rules, dual-write, backfill, freeze — all belong in L6 adapter." },
+      { wrong: "Layers split across profile-ms + jobs-ms", why: "Apps publish Kafka events only; matching engine owns all matching I/O." },
+      { wrong: "jobs-ms recommendation engine writes matching ES", why: "jobs-ms becomes API client (<code>match_jobs()</code>); ingest is engine-internal." },
+    ],
+    codeSketch: `# wi-matching-engine-ms/consumers/candidate_ingest.py
+class CandidateIngestConsumer:
+    def on_message(self, event):
+        matching_engine.ingest(event)   # L3 → entry only
+
+# wi-matching-engine/ingest.py
+def ingest(event):
+    config = governance.resolve(event.event_type)   # L4
+    if not config: raise UnmappedEventError
+    doc = pipeline.process(event, config)           # L5
+    storage.write(doc, config)                        # L6 → ES (L7)
+
+# Consumers never call:
+# CandidateFeatureV3().update(...)  ✗`,
+  },
   candidateEmployerSplit: {
     title: "Candidate vs employer / job — pipelines & ES",
     summary: "Same matching engine <strong>package</strong>, but <strong>separate ingest pipelines, consumer groups, and ES clusters</strong> per domain. Candidate data does not land on C2; job data does not land on C1.",
@@ -4335,7 +4401,7 @@ jobpost-ms ──► Postgres ──► Kafka: job.posted / job.updated
   },
   storageTopology: {
     title: "Same ES or separate? — storage topology",
-    intro: "Matching data is split across <strong>two domain clusters</strong> today (C1 candidate, C2 job) and will remain split in the matching engine. C3/C4 are ES9 mirrors for the experiment.",
+    intro: "Answers: <strong>(1)</strong> Candidate and job data use <em>different</em> ES clusters (C1/C3 vs C2/C4). <strong>(2)</strong> Matching indices (search/kNN) are separate from <em>operational</em> indices (VC status, location matrix) — matching engine owns only the matching ones.",
     rows: [
       { domain: "Candidate profile + features", cluster: "C1 → C3", index: "workindia-candidate-feature", owner: "Matching engine", usedFor: "Candidate-side matching, kNN, filters" },
       { domain: "Candidate embeddings", cluster: "C3", index: "workindia-candidate-feature-embedded", owner: "Matching engine", usedFor: "Semantic kNN (P3/P4 experiment)" },
@@ -4344,7 +4410,7 @@ jobpost-ms ──► Postgres ──► Kafka: job.posted / job.updated
       { domain: "VC status, location matrix, title map", cluster: "C1 / C2", index: "side indices", owner: "Respective services (operational)", usedFor: "Non-matching lookups — NOT owned by matching engine" },
       { domain: "Employer dashboard / export data", cluster: "—", index: "Postgres + APIs", owner: "Source services", usedFor: "Not ES — apps read Postgres or dedicated API" },
     ],
-    rule: "Matching engine owns <strong>matching indices only</strong> (candidate-feature, job-feature, embedded). Operational / reference indices stay with their owning services or a separate operational projection layer.",
+    rule: "Matching engine owns <strong>matching indices only</strong> (candidate-feature, job-feature, embedded). Operational / reference indices (VC status, location matrix, title map) stay with their owning services — same physical cluster, different index, different owner.",
   },
   appInteraction: {
     title: "How applications interact with the matching engine",
@@ -5429,7 +5495,7 @@ const PLANS = {
     subtitle: "Proposed direction · L1–L8 layers · governance · candidate/job split · migration alignment",
     bannerClass: "draft",
     banner: {
-      title: "Matching engine — proposed architecture (MA direction)",
+      title: "Matching engine — proposed architecture",
       summary: "Full HLD: services → Kafka → matching engine consumers → governance (YAML) → ingest pipeline → ES (C1/C3 candidate · C2/C4 job). Apps query via <code>match_jobs()</code> API only.",
       bullets: [
         "<strong>HLD diagram</strong> — all moving parts, layers L1–L8, connections between components",
@@ -6943,13 +7009,18 @@ function buildMatchingEngineTabGuideHtml(m) {
     },
     {
       type: "section",
+      label: m.deploymentAndWritePath.title,
+      detail: "L3–L7 all inside wi-matching-engine-ms. Consumers are thin; governance + pipeline + storage adapters are shared modules. Only L6 writes ES.",
+    },
+    {
+      type: "section",
       label: m.candidateEmployerSplit.title,
       detail: "Candidate pipeline (C1/C3) vs job/employer pipeline (C2/C4) — same package, different consumers, different ES. Answers same pipeline / same ES questions.",
     },
     {
       type: "section",
       label: m.storageTopology.title,
-      detail: "Per-domain cluster/index ownership table — matching indices vs operational side indices (VC status, location matrix).",
+      detail: "Candidate C1/C3 vs job C2/C4 — separate clusters. Matching indices vs operational side indices (VC status, location matrix) — who owns what.",
     },
     {
       type: "section",
@@ -7031,14 +7102,7 @@ function buildMatchingEngineTabGuideHtml(m) {
   return {
     sectionCount,
     html: `
-      <p style="margin-top:0;font-size:12.5px;color:var(--muted);line-height:1.5">
-        This tab documents the <strong>proposed matching engine</strong> (MA direction) — not committed HLD.
-        Matching owns ingest, retrieval, and ranking; ES is an internal backend.
-        Compare with <strong>Adapter write control</strong> (short-term bridge) and <strong>migration_v0</strong> (committed ES 9 path) on other tabs.
-        Every block below is collapsible (click the ▸ row).
-        Suggested read order: <strong>guide → HLD → data sync → candidate/job split → governance → migration alignment</strong> for a first pass.
-      </p>
-      <p style="font-size:12px;font-weight:600;color:var(--text);margin:12px 0 8px">${sectionCount} numbered sections + banner:</p>
+      <p style="font-size:12px;font-weight:600;color:var(--text);margin:0 0 8px">${sectionCount} numbered sections + banner:</p>
       ${listHtml}
     `,
     hint: `${sectionCount} sections · expand / collapse`,
@@ -7408,6 +7472,19 @@ function renderMatchingEngine() {
     <tr><td>${r.aspect}</td><td>${r.today}</td><td>${r.target}</td></tr>
   `).join("");
 
+  const deployLayersHtml = m.deploymentAndWritePath.layers.map(r => `
+    <tr>
+      <td><strong>${r.layer}</strong></td>
+      <td>${r.name}</td>
+      <td>${r.sits}</td>
+      <td>${r.role}</td>
+    </tr>
+  `).join("");
+
+  const deployNotHtml = m.deploymentAndWritePath.notThis.map(r => `
+    <tr><td>${r.wrong}</td><td>${r.why}</td></tr>
+  `).join("");
+
   const topologyRowsHtml = m.storageTopology.rows.map(r => `
     <tr>
       <td>${r.domain}</td><td><code>${r.cluster}</code></td><td>${r.index}</td>
@@ -7522,6 +7599,36 @@ function renderMatchingEngine() {
         <tbody>${consumerRowsHtml}</tbody>
       </table>
       <div class="me-callout">${m.consumerDistribution.note}</div>
+    `)}
+
+    ${meSection(m.deploymentAndWritePath.title, "L3 thin consumers · L6 writes ES · all in one service", `
+      <p class="section-subtitle">${m.deploymentAndWritePath.summary}</p>
+      <div class="me-hld-wrap"><div class="cons-flow">${m.deploymentAndWritePath.deploymentDiagram}</div></div>
+
+      <h3 style="font-size:13px;margin:16px 0 8px">Where each layer sits</h3>
+      <table class="cons-decision-table">
+        <thead><tr><th>Layer</th><th>Component</th><th>Deployment</th><th>Role</th></tr></thead>
+        <tbody>${deployLayersHtml}</tbody>
+      </table>
+
+      <h3 style="font-size:13px;margin:16px 0 8px">Write path — step by step</h3>
+      <ol style="margin:0;padding-left:18px;font-size:12px;line-height:1.6;color:var(--muted)">
+        ${m.deploymentAndWritePath.writeFlow.map(s => `<li>${s}</li>`).join("")}
+      </ol>
+
+      <h3 style="font-size:13px;margin:16px 0 8px">How governance is enforced</h3>
+      <ul class="writer-data-list" style="font-size:12.5px;color:var(--muted);padding-left:20px;margin:0 0 14px">
+        ${m.deploymentAndWritePath.governanceEnforcement.map(s => `<li>${s}</li>`).join("")}
+      </ul>
+
+      <h3 style="font-size:13px;margin:16px 0 8px">What this is NOT</h3>
+      <table class="cons-decision-table">
+        <thead><tr><th>Anti-pattern</th><th>Why not</th></tr></thead>
+        <tbody>${deployNotHtml}</tbody>
+      </table>
+
+      <p class="section-subtitle" style="font-size:12px;margin:14px 0 8px"><strong>Code sketch</strong></p>
+      ${adapterCodeBlock(m.deploymentAndWritePath.codeSketch)}
     `)}
 
     ${meSection(ce.title, "Candidate C1/C3 · Job C2/C4 · separate pipelines", `
