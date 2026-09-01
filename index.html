@@ -4332,18 +4332,6 @@ def ingest(event):
       detail: "Apps needing employer export, VC status, location matrix, or dashboard data continue via <strong>Postgres APIs</strong> or <strong>operational ES projection</strong> — not matching engine query API. See ES coexistence section.",
     },
   },
-  dataPlanes: {
-    title: "Data planes — ingest vs query",
-    ingest: {
-      label: "Ingest plane (write)",
-      layers: ["Application → Kafka", "Matching consumer (L3)", "Governance config (L4)", "Ingest pipeline (L5)", "Storage adapter (L6)", "ES cluster (L7)"],
-    },
-    query: {
-      label: "Query plane (read)",
-      layers: ["Application → match API (L8)", "Governance config (L4)", "Retrieval core (L7)", "Storage adapter read (L6)", "ES cluster (L7)", "Ranking → response"],
-    },
-    note: "Governance layer (L4) sits on <strong>both</strong> planes — controls what gets written on ingest and what fields retrieval can access on query.",
-  },
   eventTaxonomy: {
     title: "Event types — profile/state vs interactions",
     summary: "Two broad families of events feed matching (and other systems). Both publish to Kafka; matching engine governance config decides which fields land in matching ES and how they merge.",
@@ -6923,11 +6911,6 @@ function buildMatchingEngineTabGuideHtml(m) {
     },
     {
       type: "section",
-      label: m.dataPlanes.title,
-      detail: "Ingest plane vs query plane — both pass through governance layer (L4).",
-    },
-    {
-      type: "section",
       label: m.eventTaxonomy.title,
       detail: "Profile/state events (skills, prefs, premium) vs interaction events (green tap, call, apply, suggestion accepted) — how both feed matching via config.",
     },
@@ -7432,7 +7415,6 @@ function renderMatchingEngine() {
 
   const ce = m.candidateEmployerSplit;
   const ai = m.appInteraction;
-  const dp = m.dataPlanes;
   const tabGuide = buildMatchingEngineTabGuideHtml(m);
 
   document.getElementById("matchingEngineView").innerHTML = `
@@ -7556,20 +7538,6 @@ function renderMatchingEngine() {
         </div>
       </div>
       <div class="me-callout"><strong>Non-matching reads:</strong> ${ai.nonMatchingRead.detail}</div>
-    `)}
-
-    ${meSection(m.dataPlanes.title, "Ingest plane vs query plane", `
-      <div class="adapter-change-grid">
-        <div class="adapter-change-box after">
-          <h4>${dp.ingest.label}</h4>
-          <p style="font-size:12px;color:var(--muted);margin:0">${dp.ingest.layers.join(" → ")}</p>
-        </div>
-        <div class="adapter-change-box before">
-          <h4>${dp.query.label}</h4>
-          <p style="font-size:12px;color:var(--muted);margin:0">${dp.query.layers.join(" → ")}</p>
-        </div>
-      </div>
-      <div class="me-callout">${dp.note}</div>
     `)}
 
     ${meSection(m.eventTaxonomy.title, "Profile/state vs interaction events", `
