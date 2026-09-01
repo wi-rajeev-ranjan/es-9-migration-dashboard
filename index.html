@@ -384,6 +384,14 @@
 
     .me-event-type code { font-size: 10.5px; }
 
+    #matchingEngineView .adapter-collapsible-section {
+      margin-bottom: 10px;
+    }
+
+    #matchingEngineView .adapter-collapsible-body .section-subtitle:first-child {
+      margin-top: 0;
+    }
+
     .layout.consolidation-mode .sidebar-shell { display: none; }
     .layout.consolidation-mode { grid-template-columns: 1fr; }
 
@@ -6897,6 +6905,10 @@ function adapterCollapsibleSection(title, hint, bodyHtml, open = false) {
   `;
 }
 
+function meSection(title, hint, bodyHtml, open = false) {
+  return adapterCollapsibleSection(title, hint, bodyHtml, open);
+}
+
 function renderAdapterWrites() {
   const a = ADAPTER_WRITE_ANALYSIS;
   const inv = buildAdapterWriterInventory();
@@ -7293,16 +7305,6 @@ function renderMatchingEngine() {
     </tr>
   `).join("");
 
-  const layersHtml = m.layers.map(layer => `
-    <div class="me-layer ${layer.id}">
-      <h4>${layer.title}</h4>
-      <p>${layer.body}</p>
-    </div>
-  `).join("");
-
-  const ingestHtml = m.targetFlow.ingest.map((step, i) => `<li><strong>${i + 1}.</strong> ${step}</li>`).join("");
-  const queryHtml = m.targetFlow.query.map((step, i) => `<li><strong>${i + 1}.</strong> ${step}</li>`).join("");
-
   const systemCardsHtml = m.systemExamples.map(sys => `
     <div class="me-system-card ${sys.highlight ? "matching" : ""}">
       <h4>${sys.name}</h4>
@@ -7326,8 +7328,6 @@ function renderMatchingEngine() {
     </tr>
   `).join("");
 
-  const ingestDetailHtml = m.ingestDetail.steps.map((step, i) => `<li><strong>${i + 1}.</strong> ${step}</li>`).join("");
-
   const comparisonHtml = m.approachComparison.map(row => `
     <tr>
       <td><strong>${row.name}</strong></td>
@@ -7350,190 +7350,204 @@ function renderMatchingEngine() {
     <span class="me-source-badge">${m.source}</span>
     <p class="section-subtitle" style="margin-top:0"><strong>${m.headline}</strong> — ${m.summary}</p>
 
-    ${adapterFlowDivider("Core principles")}
-    <ul class="writer-data-list" style="font-size:12.5px;color:var(--muted);padding-left:20px;margin:0 0 8px">${principlesHtml}</ul>
+    ${meSection("Core principles", `${m.principles.length} design principles`, `
+      <ul class="writer-data-list" style="font-size:12.5px;color:var(--muted);padding-left:20px;margin:0">${principlesHtml}</ul>
+    `, true)}
 
-    ${adapterFlowDivider(m.hld.title)}
-    <p class="section-subtitle">${m.hld.summary}</p>
-    <div class="me-legend">
-      <span class="leg-kafka">Kafka</span>
-      <span class="leg-consumer">Ingest consumers (L3)</span>
-      <span class="leg-governance">Governance (L4)</span>
-      <span class="leg-es-private">Matching ES (L7)</span>
-      <span class="leg-api">Query API (L8)</span>
-    </div>
-    <div class="me-hld-wrap"><div class="cons-flow">${m.hld.diagram}</div></div>
-
-    ${adapterFlowDivider("Layer stack (L1–L8)")}
-    <div class="me-layer-stack">${detailedLayersHtml}</div>
-
-    ${adapterFlowDivider(m.dataSyncFlow.title)}
-    <p class="section-subtitle">${m.dataSyncFlow.summary}</p>
-    <div class="me-hld-wrap"><div class="cons-flow">${m.dataSyncFlow.diagram}</div></div>
-    <ol style="margin:0;padding-left:18px;font-size:12px;line-height:1.6;color:var(--muted)">${syncStepsHtml}</ol>
-
-    ${adapterFlowDivider(m.consumerDistribution.title)}
-    <p class="section-subtitle">${m.consumerDistribution.summary}</p>
-    <table class="cons-decision-table">
-      <thead><tr><th>Aspect</th><th>Today</th><th>Target (matching engine)</th></tr></thead>
-      <tbody>${consumerRowsHtml}</tbody>
-    </table>
-    <div class="me-callout">${m.consumerDistribution.note}</div>
-
-    ${adapterFlowDivider(ce.title)}
-    <p class="section-subtitle">${ce.summary}</p>
-    <div class="me-split-grid">
-      <div class="me-split-card candidate">
-        <h4>${ce.candidate.title}</h4>
-        <ul>
-          <li><strong>Events:</strong> <code>${ce.candidate.events}</code></li>
-          <li><strong>Consumer:</strong> ${ce.candidate.consumer}</li>
-          <li><strong>ES:</strong> ${ce.candidate.es}</li>
-          <li><strong>Read path:</strong> ${ce.candidate.readPath}</li>
-        </ul>
+    ${meSection(m.hld.title, "L1–L8 · all connections", `
+      <p class="section-subtitle">${m.hld.summary}</p>
+      <div class="me-legend">
+        <span class="leg-kafka">Kafka</span>
+        <span class="leg-consumer">Ingest consumers (L3)</span>
+        <span class="leg-governance">Governance (L4)</span>
+        <span class="leg-es-private">Matching ES (L7)</span>
+        <span class="leg-api">Query API (L8)</span>
       </div>
-      <div class="me-split-card employer">
-        <h4>${ce.employer.title}</h4>
-        <ul>
-          <li><strong>Events:</strong> <code>${ce.employer.events}</code></li>
-          <li><strong>Consumer:</strong> ${ce.employer.consumer}</li>
-          <li><strong>ES:</strong> ${ce.employer.es}</li>
-          <li><strong>Read path:</strong> ${ce.employer.readPath}</li>
-        </ul>
+      <div class="me-hld-wrap"><div class="cons-flow">${m.hld.diagram}</div></div>
+    `, true)}
+
+    ${meSection("Layer stack (L1–L8)", `${m.detailedLayers.length} layers`, `
+      <div class="me-layer-stack">${detailedLayersHtml}</div>
+    `)}
+
+    ${meSection(m.dataSyncFlow.title, `${m.dataSyncFlow.steps.length} steps · services → ES`, `
+      <p class="section-subtitle">${m.dataSyncFlow.summary}</p>
+      <div class="me-hld-wrap"><div class="cons-flow">${m.dataSyncFlow.diagram}</div></div>
+      <ol style="margin:0;padding-left:18px;font-size:12px;line-height:1.6;color:var(--muted)">${syncStepsHtml}</ol>
+    `)}
+
+    ${meSection(m.consumerDistribution.title, "Where Kafka consumers live", `
+      <p class="section-subtitle">${m.consumerDistribution.summary}</p>
+      <table class="cons-decision-table">
+        <thead><tr><th>Aspect</th><th>Today</th><th>Target (matching engine)</th></tr></thead>
+        <tbody>${consumerRowsHtml}</tbody>
+      </table>
+      <div class="me-callout">${m.consumerDistribution.note}</div>
+    `)}
+
+    ${meSection(ce.title, "Candidate C1/C3 · Job C2/C4 · separate pipelines", `
+      <p class="section-subtitle">${ce.summary}</p>
+      <div class="me-split-grid">
+        <div class="me-split-card candidate">
+          <h4>${ce.candidate.title}</h4>
+          <ul>
+            <li><strong>Events:</strong> <code>${ce.candidate.events}</code></li>
+            <li><strong>Consumer:</strong> ${ce.candidate.consumer}</li>
+            <li><strong>ES:</strong> ${ce.candidate.es}</li>
+            <li><strong>Read path:</strong> ${ce.candidate.readPath}</li>
+          </ul>
+        </div>
+        <div class="me-split-card employer">
+          <h4>${ce.employer.title}</h4>
+          <ul>
+            <li><strong>Events:</strong> <code>${ce.employer.events}</code></li>
+            <li><strong>Consumer:</strong> ${ce.employer.consumer}</li>
+            <li><strong>ES:</strong> ${ce.employer.es}</li>
+            <li><strong>Read path:</strong> ${ce.employer.readPath}</li>
+          </ul>
+        </div>
       </div>
-    </div>
-    <div class="me-callout"><strong>Answer:</strong> Same engine package · <em>different</em> pipelines · <em>different</em> consumer groups · <em>different</em> ES clusters (C1/C3 vs C2/C4). ${ce.orchestration}</div>
+      <div class="me-callout"><strong>Answer:</strong> Same engine package · <em>different</em> pipelines · <em>different</em> consumer groups · <em>different</em> ES clusters (C1/C3 vs C2/C4). ${ce.orchestration}</div>
+    `)}
 
-    ${adapterFlowDivider(m.storageTopology.title)}
-    <p class="section-subtitle">${m.storageTopology.intro}</p>
-    <table class="cons-decision-table">
-      <thead><tr><th>Domain</th><th>Cluster</th><th>Index</th><th>Owner</th><th>Used for</th></tr></thead>
-      <tbody>${topologyRowsHtml}</tbody>
-    </table>
-    <div class="me-callout">${m.storageTopology.rule}</div>
+    ${meSection(m.storageTopology.title, "Same ES or separate? — per domain", `
+      <p class="section-subtitle">${m.storageTopology.intro}</p>
+      <table class="cons-decision-table">
+        <thead><tr><th>Domain</th><th>Cluster</th><th>Index</th><th>Owner</th><th>Used for</th></tr></thead>
+        <tbody>${topologyRowsHtml}</tbody>
+      </table>
+      <div class="me-callout">${m.storageTopology.rule}</div>
+    `)}
 
-    ${adapterFlowDivider(m.appInteraction.title)}
-    <div class="adapter-change-grid">
-      <div class="adapter-change-box after">
-        <h4>${ai.writePath.title}</h4>
-        <ol style="margin:0;padding-left:18px;font-size:12px;line-height:1.55;color:var(--muted)">
-          ${ai.writePath.steps.map(s => `<li>${s}</li>`).join("")}
-        </ol>
+    ${meSection(m.appInteraction.title, "Write via Kafka · read via match API", `
+      <div class="adapter-change-grid">
+        <div class="adapter-change-box after">
+          <h4>${ai.writePath.title}</h4>
+          <ol style="margin:0;padding-left:18px;font-size:12px;line-height:1.55;color:var(--muted)">
+            ${ai.writePath.steps.map(s => `<li>${s}</li>`).join("")}
+          </ol>
+        </div>
+        <div class="adapter-change-box before">
+          <h4>${ai.readPath.title}</h4>
+          <ol style="margin:0;padding-left:18px;font-size:12px;line-height:1.55;color:var(--muted)">
+            ${ai.readPath.steps.map(s => `<li>${s}</li>`).join("")}
+          </ol>
+        </div>
       </div>
-      <div class="adapter-change-box before">
-        <h4>${ai.readPath.title}</h4>
-        <ol style="margin:0;padding-left:18px;font-size:12px;line-height:1.55;color:var(--muted)">
-          ${ai.readPath.steps.map(s => `<li>${s}</li>`).join("")}
-        </ol>
+      <div class="me-callout"><strong>Non-matching reads:</strong> ${ai.nonMatchingRead.detail}</div>
+    `)}
+
+    ${meSection(m.dataPlanes.title, "Ingest plane vs query plane", `
+      <div class="adapter-change-grid">
+        <div class="adapter-change-box after">
+          <h4>${dp.ingest.label}</h4>
+          <p style="font-size:12px;color:var(--muted);margin:0">${dp.ingest.layers.join(" → ")}</p>
+        </div>
+        <div class="adapter-change-box before">
+          <h4>${dp.query.label}</h4>
+          <p style="font-size:12px;color:var(--muted);margin:0">${dp.query.layers.join(" → ")}</p>
+        </div>
       </div>
-    </div>
-    <div class="me-callout"><strong>Non-matching reads:</strong> ${ai.nonMatchingRead.detail}</div>
+      <div class="me-callout">${dp.note}</div>
+    `)}
 
-    ${adapterFlowDivider(m.dataPlanes.title)}
-    <div class="adapter-change-grid">
-      <div class="adapter-change-box after">
-        <h4>${dp.ingest.label}</h4>
-        <p style="font-size:12px;color:var(--muted);margin:0">${dp.ingest.layers.join(" → ")}</p>
+    ${meSection(m.eventTaxonomy.title, "Profile/state vs interaction events", `
+      <p class="section-subtitle">${m.eventTaxonomy.summary}</p>
+      ${eventTypesHtml}
+      <div class="me-callout">${m.eventTaxonomy.fit}</div>
+    `)}
+
+    ${meSection(m.dataGovernance.title, "YAML config · what/where/how/TTL", `
+      <p class="section-subtitle">${m.dataGovernance.summary}</p>
+      <ul class="writer-data-list" style="font-size:12.5px;color:var(--muted);padding-left:20px;margin:0 0 14px">${governanceControlsHtml}</ul>
+      <p class="section-subtitle" style="font-size:12px;margin-bottom:8px"><strong>Config example (YAML sketch)</strong></p>
+      ${adapterCodeBlock(m.dataGovernance.yamlSketch)}
+    `)}
+
+    ${meSection(m.esCoexistence.title, "Matching ES vs operational reads", `
+      <p class="section-subtitle">${m.esCoexistence.problem}</p>
+      <ul class="writer-data-list" style="font-size:12.5px;color:var(--muted);padding-left:20px;margin:0 0 14px">${coexistencePhasesHtml}</ul>
+      <table class="cons-decision-table">
+        <thead><tr><th>Application</th><th>Reads ES for (today)</th><th>Future path</th></tr></thead>
+        <tbody>${coexistenceAppsHtml}</tbody>
+      </table>
+      <div class="me-callout">${m.esCoexistence.rule}</div>
+    `)}
+
+    ${meSection(m.migrationAlignment.title, "P0–P4 maps to engine layers", `
+      <p class="section-subtitle">${m.migrationAlignment.summary}</p>
+      <table class="cons-decision-table">
+        <thead><tr><th>Phase</th><th>Committed HLD</th><th>Engine layer</th><th>Change needed?</th></tr></thead>
+        <tbody>${migrationRowsHtml}</tbody>
+      </table>
+      <div class="consolidation-verdict recommend-proceed" style="margin:14px 0 0">
+        <p style="margin:0;font-size:13px">${m.migrationAlignment.verdict}</p>
       </div>
-      <div class="adapter-change-box before">
-        <h4>${dp.query.label}</h4>
-        <p style="font-size:12px;color:var(--muted);margin:0">${dp.query.layers.join(" → ")}</p>
+    `)}
+
+    ${meSection("Today vs target", "ES leaks today · engine owns data layer tomorrow", `
+      <div class="me-vs-today">
+        <div class="me-vs-box today">
+          <h4>Today — ES leaks into every service</h4>
+          <ul>${painHtml}</ul>
+        </div>
+        <div class="me-vs-box target">
+          <h4>Target — matching engine owns the data layer</h4>
+          <ul>
+            <li>Apps publish <strong>domain events</strong> to shared Kafka — not ES writes</li>
+            <li>Matching engine consumers (L3) normalize via governance (L4) → private ES (L7)</li>
+            <li>Other systems subscribe same events → own stores</li>
+            <li>jobs-ms calls <code>match_jobs()</code> (L8) — never reads matching ES directly</li>
+          </ul>
+        </div>
       </div>
-    </div>
-    <div class="me-callout">${dp.note}</div>
+    `)}
 
-    ${adapterFlowDivider(m.eventTaxonomy.title)}
-    <p class="section-subtitle">${m.eventTaxonomy.summary}</p>
-    ${eventTypesHtml}
-    <div class="me-callout">${m.eventTaxonomy.fit}</div>
+    ${meSection("Multi-system data flow", `${m.systemExamples.length} system examples`, `
+      <p class="section-subtitle">${m.eventBus.summary}</p>
+      <div class="cons-flow" style="margin-bottom:16px">${m.eventBus.fanOutDiagram}</div>
+      <h3 style="font-size:14px;margin:18px 0 8px">System examples</h3>
+      <div class="me-system-grid">${systemCardsHtml}</div>
+    `)}
 
-    ${adapterFlowDivider(m.dataGovernance.title)}
-    <p class="section-subtitle">${m.dataGovernance.summary}</p>
-    <ul class="writer-data-list" style="font-size:12.5px;color:var(--muted);padding-left:20px;margin:0 0 14px">${governanceControlsHtml}</ul>
-    ${adapterCollapsibleSection(
-      "Governance config example (YAML sketch)",
-      "Config-driven field → index mapping",
-      adapterCodeBlock(m.dataGovernance.yamlSketch)
-    )}
+    ${meSection(m.sameFieldProjections.title, `${m.sameFieldProjections.rows.length} field examples`, `
+      <p class="section-subtitle">${m.sameFieldProjections.intro}</p>
+      <table class="cons-decision-table me-projection-table">
+        <thead>
+          <tr><th>Field / data</th><th>Postgres</th><th>Matching ES</th><th>Other projections</th></tr>
+        </thead>
+        <tbody>${projectionRowsHtml}</tbody>
+      </table>
+      <div class="me-callout" style="margin-top:14px">${m.sameFieldProjections.rule}</div>
+    `)}
 
-    ${adapterFlowDivider(m.esCoexistence.title)}
-    <p class="section-subtitle">${m.esCoexistence.problem}</p>
-    <ul class="writer-data-list" style="font-size:12.5px;color:var(--muted);padding-left:20px;margin:0 0 14px">${coexistencePhasesHtml}</ul>
-    <table class="cons-decision-table">
-      <thead><tr><th>Application</th><th>Reads ES for (today)</th><th>Future path</th></tr></thead>
-      <tbody>${coexistenceAppsHtml}</tbody>
-    </table>
-    <div class="me-callout">${m.esCoexistence.rule}</div>
+    ${meSection("Proposed integration (sketch)", "Ingest via Kafka · query via match_jobs() API", `
+      ${adapterCodeBlock(m.proposedApiSketch)}
+    `)}
 
-    ${adapterFlowDivider(m.migrationAlignment.title)}
-    <p class="section-subtitle">${m.migrationAlignment.summary}</p>
-    <table class="cons-decision-table">
-      <thead><tr><th>Phase</th><th>Committed HLD</th><th>Engine layer</th><th>Change needed?</th></tr></thead>
-      <tbody>${migrationRowsHtml}</tbody>
-    </table>
-    <div class="consolidation-verdict recommend-proceed" style="margin:14px 0">
-      <p style="margin:0;font-size:13px">${m.migrationAlignment.verdict}</p>
-    </div>
+    ${meSection("Compare approaches", `${m.approachComparison.length} options`, `
+      <table class="cons-decision-table">
+        <thead>
+          <tr><th>Approach</th><th>Client knows ES?</th><th>Ingestion</th><th>Retrieval</th><th>Migration impact</th></tr>
+        </thead>
+        <tbody>${comparisonHtml}</tbody>
+      </table>
+    `)}
 
-    ${adapterFlowDivider("Today vs target")}
-    <div class="me-vs-today">
-      <div class="me-vs-box today">
-        <h4>Today — ES leaks into every service</h4>
-        <ul>${painHtml}</ul>
+    ${meSection("Pros and cons", `${m.prosCons.pros.length} advantages · ${m.prosCons.cons.length} disadvantages`, `
+      <p class="section-subtitle">${m.prosCons.summary}</p>
+      <div class="cons-pros-cons">
+        <div class="cons-box pros"><h4>Advantages</h4><ul>${prosHtml}</ul></div>
+        <div class="cons-box cons"><h4>Disadvantages</h4><ul>${consHtml}</ul></div>
       </div>
-      <div class="me-vs-box target">
-        <h4>Target — matching engine owns the data layer</h4>
-        <ul>
-          <li>Apps publish <strong>domain events</strong> to shared Kafka — not ES writes</li>
-          <li>Matching engine consumers (L3) normalize via governance (L4) → private ES (L7)</li>
-          <li>Other systems subscribe same events → own stores</li>
-          <li>jobs-ms calls <code>match_jobs()</code> (L8) — never reads matching ES directly</li>
-        </ul>
+    `)}
+
+    ${meSection("Relation to ES 9 HLD", `${m.migrationStance.points.length} alignment points`, `
+      <div class="consolidation-verdict recommend-proceed" style="margin:0">
+        <h3>${m.migrationStance.title}</h3>
+        <ul class="writer-data-list" style="font-size:12.5px;color:var(--muted);padding-left:20px;margin:8px 0 0">${stanceHtml}</ul>
       </div>
-    </div>
-
-    ${adapterFlowDivider("Multi-system data flow")}
-    <p class="section-subtitle">${m.eventBus.summary}</p>
-    <div class="cons-flow" style="margin-bottom:16px">${m.eventBus.fanOutDiagram}</div>
-    <h3 style="font-size:14px;margin:18px 0 8px">System examples</h3>
-    <div class="me-system-grid">${systemCardsHtml}</div>
-
-    ${adapterFlowDivider(m.sameFieldProjections.title)}
-    <p class="section-subtitle">${m.sameFieldProjections.intro}</p>
-    <table class="cons-decision-table me-projection-table">
-      <thead>
-        <tr><th>Field / data</th><th>Postgres</th><th>Matching ES</th><th>Other projections</th></tr>
-      </thead>
-      <tbody>${projectionRowsHtml}</tbody>
-    </table>
-    <div class="me-callout" style="margin-top:14px">${m.sameFieldProjections.rule}</div>
-
-    ${adapterCollapsibleSection(
-      "Proposed integration (sketch)",
-      "Ingest via Kafka · query via match_jobs() API",
-      adapterCodeBlock(m.proposedApiSketch)
-    )}
-
-    ${adapterFlowDivider("Compare approaches")}
-    <table class="cons-decision-table">
-      <thead>
-        <tr><th>Approach</th><th>Client knows ES?</th><th>Ingestion</th><th>Retrieval</th><th>Migration impact</th></tr>
-      </thead>
-      <tbody>${comparisonHtml}</tbody>
-    </table>
-
-    ${adapterFlowDivider("Pros and cons")}
-    <p class="section-subtitle">${m.prosCons.summary}</p>
-    <div class="cons-pros-cons">
-      <div class="cons-box pros"><h4>Advantages</h4><ul>${prosHtml}</ul></div>
-      <div class="cons-box cons"><h4>Disadvantages</h4><ul>${consHtml}</ul></div>
-    </div>
-
-    ${adapterFlowDivider("Relation to ES 9 HLD")}
-    <div class="consolidation-verdict recommend-proceed" style="margin-bottom:16px">
-      <h3>${m.migrationStance.title}</h3>
-      <ul class="writer-data-list" style="font-size:12.5px;color:var(--muted);padding-left:20px;margin:8px 0 0">${stanceHtml}</ul>
-    </div>
+    `)}
   `;
 }
 
