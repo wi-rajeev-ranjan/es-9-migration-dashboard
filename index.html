@@ -4270,13 +4270,13 @@ const MATCHING_ENGINE_VISION = {
     title: "Data syncing flow — services → matching engine → ES",
     summary: "Every matching-relevant fact follows the same path: source service commits to Postgres, publishes a domain event, matching engine consumer picks it up, governance layer decides what/where/how to write, pipeline merges and enriches, storage adapter persists to the correct cluster.",
     steps: [
-      { step: "1. Source write", detail: "profile-ms / candidateevents-ms / jobpost-ms commits canonical data to <strong>Postgres</strong>." },
-      { step: "2. Event publish", detail: "After commit, service publishes typed event to Kafka (e.g. <code>candidate.profile.updated</code>, <code>candidate.interaction.green_tap</code>)." },
-      { step: "3. Consumer receive", detail: "Matching engine ingest consumer (correct consumer group) receives event, deserializes, validates schema version." },
-      { step: "4. Governance lookup", detail: "YAML config resolves: target index, cluster (C1/C3 or C2/C4), merge strategy (partial vs full), embed trigger, field allowlist." },
-      { step: "5. Pipeline process", detail: "Normalize payload → merge into existing doc (GET-if-needed) → trigger Triton re-embed if configured → build ES document." },
-      { step: "6. Storage write", detail: "Storage adapter writes via DualWriteAdapter → primary C1/C2 + secondary C3/C4 (when enabled). 404 backfill on C3 miss." },
-      { step: "7. Observability", detail: "Metrics per event type, consumer lag, governance rejections, DLQ for unprocessable events." },
+      { step: "Source write", detail: "profile-ms / candidateevents-ms / jobpost-ms commits canonical data to <strong>Postgres</strong>." },
+      { step: "Event publish", detail: "After commit, service publishes typed event to Kafka (e.g. <code>candidate.profile.updated</code>, <code>candidate.interaction.green_tap</code>)." },
+      { step: "Consumer receive", detail: "Matching engine ingest consumer (correct consumer group) receives event, deserializes, validates schema version." },
+      { step: "Governance lookup", detail: "YAML config resolves: target index, cluster (C1/C3 or C2/C4), merge strategy (partial vs full), embed trigger, field allowlist." },
+      { step: "Pipeline process", detail: "Normalize payload → merge into existing doc (GET-if-needed) → trigger Triton re-embed if configured → build ES document." },
+      { step: "Storage write", detail: "Storage adapter writes via DualWriteAdapter → primary C1/C2 + secondary C3/C4 (when enabled). 404 backfill on C3 miss." },
+      { step: "Observability", detail: "Metrics per event type, consumer lag, governance rejections, DLQ for unprocessable events." },
     ],
     diagram: `profile-ms ──► Postgres ──► Kafka: candidate.profile.updated
                                               │
