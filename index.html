@@ -6909,6 +6909,142 @@ function meSection(title, hint, bodyHtml, open = false) {
   return adapterCollapsibleSection(title, hint, bodyHtml, open);
 }
 
+function buildMatchingEngineTabGuideHtml(m) {
+  const sections = [
+    {
+      type: "external",
+      label: "Tab banner + intro (top of page)",
+      detail: "Purple PROPOSED badge, headline, and one-line summary. Not duplicated inside the collapsible sections below.",
+    },
+    {
+      type: "section",
+      label: "Core principles",
+      detail: `${m.principles.length} design rules — Kafka ingest, private ES, governance, intentional duplication. Opens by default.`,
+    },
+    {
+      type: "section",
+      label: m.hld.title,
+      detail: "Full HLD ASCII diagram: L1 apps → L2 Kafka → L3 consumers → L4 governance → L5 pipeline → L6 adapters → L7 ES (candidate + job split) → L8 query API. Opens by default.",
+    },
+    {
+      type: "section",
+      label: "Layer stack (L1–L8)",
+      detail: `${m.detailedLayers.length} expandable layer cards explaining each tier from applications through storage to query API.`,
+    },
+    {
+      type: "section",
+      label: m.dataSyncFlow.title,
+      detail: `${m.dataSyncFlow.steps.length}-step flow: Postgres → Kafka → matching consumer → governance → pipeline → DualWrite → C1/C3 or C2/C4. Includes sync diagram.`,
+    },
+    {
+      type: "section",
+      label: m.consumerDistribution.title,
+      detail: "Where Kafka consumers live (inside wi-matching-engine, not profile-ms). Today vs target table for groups, partitioning, scaling.",
+    },
+    {
+      type: "section",
+      label: m.candidateEmployerSplit.title,
+      detail: "Candidate pipeline (C1/C3) vs job/employer pipeline (C2/C4) — same package, different consumers, different ES. Answers same pipeline / same ES questions.",
+    },
+    {
+      type: "section",
+      label: m.storageTopology.title,
+      detail: "Per-domain cluster/index ownership table — matching indices vs operational side indices (VC status, location matrix).",
+    },
+    {
+      type: "section",
+      label: m.appInteraction.title,
+      detail: "Write path (apps → Kafka, no direct engine call) vs read path (match_jobs() API). Non-matching reads stay on Postgres / operational APIs.",
+    },
+    {
+      type: "section",
+      label: m.dataPlanes.title,
+      detail: "Ingest plane vs query plane — both pass through governance layer (L4).",
+    },
+    {
+      type: "section",
+      label: m.eventTaxonomy.title,
+      detail: "Profile/state events (skills, prefs, premium) vs interaction events (green tap, call, apply, suggestion accepted) — how both feed matching via config.",
+    },
+    {
+      type: "section",
+      label: m.dataGovernance.title,
+      detail: `${m.dataGovernance.controls.length} governance controls (what/where/how/TTL/PII/embed) + YAML config sketch for field → index mapping.`,
+    },
+    {
+      type: "section",
+      label: m.esCoexistence.title,
+      detail: "How matching ES coexists with apps that today read ES for non-matching purposes. Phased strategy + per-app future path.",
+    },
+    {
+      type: "section",
+      label: m.migrationAlignment.title,
+      detail: `P0–P4 committed HLD mapped to engine layers — ${m.migrationAlignment.rows.length} phases, no migration plan change required.`,
+    },
+    {
+      type: "section",
+      label: "Today vs target",
+      detail: "Side-by-side: ES leaks into every service today vs matching engine owns ingest + query tomorrow.",
+    },
+    {
+      type: "section",
+      label: "Multi-system data flow",
+      detail: `Kafka fan-out diagram + ${m.systemExamples.length} system cards (profile-ms, jobs-ms, notification, analytics, …).`,
+    },
+    {
+      type: "section",
+      label: m.sameFieldProjections.title,
+      detail: "Why the same field (city, last_app_open) exists in Postgres, matching ES, and other projections — by design.",
+    },
+    {
+      type: "section",
+      label: "Proposed integration (sketch)",
+      detail: "Code sketch: Kafka publish for ingest, match_jobs() for query, internal ingest() + storage adapters.",
+    },
+    {
+      type: "section",
+      label: "Compare approaches",
+      detail: `${m.approachComparison.length} options — fragmented today vs adapter vs P1 consumer vs matching engine.`,
+    },
+    {
+      type: "section",
+      label: "Pros and cons",
+      detail: `${m.prosCons.pros.length} advantages and ${m.prosCons.cons.length} disadvantages of the matching engine destination architecture.`,
+    },
+    {
+      type: "section",
+      label: "Relation to ES 9 HLD",
+      detail: `${m.migrationStance.points.length} points on how adapter dual-write and P4 experiment fit the long-term engine vision.`,
+    },
+  ];
+
+  const sectionCount = sections.filter(s => s.type === "section").length;
+  const renderItem = (s) => `<li><strong>${s.label}</strong> — ${s.detail}</li>`;
+  const banner = sections.find(s => s.type === "external");
+  const sectionItems = sections.filter(s => s.type === "section");
+
+  const listHtml = `
+    ${banner ? `<ul class="adapter-guide-external" style="margin:0 0 10px;padding-left:20px;font-size:12.5px;line-height:1.55">${renderItem(banner)}</ul>` : ""}
+    <ol style="margin:0;padding-left:20px;font-size:12.5px;line-height:1.55">${sectionItems.map(renderItem).join("")}</ol>
+  `;
+
+  return {
+    sectionCount,
+    html: `
+      <p style="margin-top:0;font-size:12.5px;color:var(--muted);line-height:1.5">
+        This tab documents the <strong>proposed matching engine</strong> (MA direction) — not committed HLD.
+        Matching owns ingest, retrieval, and ranking; ES is an internal backend.
+        Compare with <strong>Adapter write control</strong> (short-term bridge) and <strong>migration_v0</strong> (committed ES 9 path) on other tabs.
+        Every block below is collapsible (click the ▸ row).
+        Suggested read order: <strong>guide → HLD → data sync → candidate/job split → governance → migration alignment</strong> for a first pass.
+      </p>
+      <p style="font-size:12px;font-weight:600;color:var(--text);margin:12px 0 8px">${sectionCount} numbered sections + banner:</p>
+      ${listHtml}
+    `,
+    hint: `${sectionCount} sections · expand / collapse`,
+  };
+}
+
 function renderAdapterWrites() {
   const a = ADAPTER_WRITE_ANALYSIS;
   const inv = buildAdapterWriterInventory();
@@ -7345,10 +7481,13 @@ function renderMatchingEngine() {
   const ce = m.candidateEmployerSplit;
   const ai = m.appInteraction;
   const dp = m.dataPlanes;
+  const tabGuide = buildMatchingEngineTabGuideHtml(m);
 
   document.getElementById("matchingEngineView").innerHTML = `
     <span class="me-source-badge">${m.source}</span>
     <p class="section-subtitle" style="margin-top:0"><strong>${m.headline}</strong> — ${m.summary}</p>
+
+    ${meSection("How to read this tab", tabGuide.hint, tabGuide.html, true)}
 
     ${meSection("Core principles", `${m.principles.length} design principles`, `
       <ul class="writer-data-list" style="font-size:12.5px;color:var(--muted);padding-left:20px;margin:0">${principlesHtml}</ul>
