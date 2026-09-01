@@ -4000,112 +4000,6 @@ const MATCHING_ENGINE_VISION = {
       "Returns ranked <code>job_id[]</code> + metadata — no ES response shapes exposed.",
     ],
   },
-  eventBus: {
-    title: "Shared Kafka — one publish, many independent consumers",
-    summary: "Apps publish <strong>domain events</strong> (business facts), not ES documents. Matching is <em>one subscriber</em> among many. It does not own the event bus or block other systems from the same data.",
-    fanOutDiagram: `profile-ms / candidateevents-ms / wiemployerjobpost-ms
-        │
-        │  publish once (domain facts)
-        ▼
-┌───────────────────────────────────────────────────────────────┐
-│  Kafka — shared topics                                         │
-│  candidate.profile.updated · candidate.app_opened · job.posted │
-└───┬─────────────┬──────────────┬──────────────┬───────────────┘
-    │             │              │              │
-    ▼             ▼              ▼              ▼
- MATCHING      NOTIFICATION    ANALYTICS      (other)
- ENGINE        SYSTEM          / DATAMART     consumers
-    │             │              │
-    │ normalize   │ normalize    │ normalize
-    │ for search  │ for delivery │ for reporting
-    ▼             ▼              ▼
- Private ES     Postgres /     Warehouse
- (C1·C3·C2·C4)  Redis / own     tables
-                 store (if any)
-
-── jobs-ms (read path) ──────────────────────────────────────────
-    does NOT read matching ES directly
-    calls  matching_engine.match_jobs(...)  →  ranked job IDs`,
-  },
-  systemExamples: [
-    {
-      id: "profile",
-      name: "wicandidateprofile-ms",
-      role: "Source of truth (write)",
-      publishes: "candidate.profile.updated",
-      subscribes: "—",
-      ownStore: "Postgres — canonical profile",
-      matchingEs: "Does not read/write",
-      highlight: false,
-      note: "Owns profile data; publishes facts after DB commit. Stops calling CandidateFeatureV3 in target state.",
-    },
-    {
-      id: "events",
-      name: "wi-candidateevents-ms",
-      role: "Activity publisher",
-      publishes: "candidate.app_opened, activity events",
-      subscribes: "—",
-      ownStore: "Postgres / event log",
-      matchingEs: "Does not read/write",
-      highlight: false,
-      note: "Emits lightweight activity facts; matching merges into search doc (e.g. last_app_open).",
-    },
-    {
-      id: "jobpost",
-      name: "wiemployerjobpost-ms",
-      role: "Job source of truth",
-      publishes: "job.posted, job.updated",
-      subscribes: "—",
-      ownStore: "Postgres — canonical job",
-      matchingEs: "Does not read/write",
-      highlight: false,
-      note: "Same pattern as profile — publish domain event; matching indexes job for search.",
-    },
-    {
-      id: "matching",
-      name: "Matching engine",
-      role: "Search projection owner",
-      publishes: "optional: match.experiment.metrics",
-      subscribes: "profile, activity, job events",
-      ownStore: "Private ES (C1/C3 candidates, C2/C4 jobs) + vectors",
-      matchingEs: "Read/write — internal only",
-      highlight: true,
-      note: "Subscribes → normalizes for kNN/filters/ranking → dual-write/embed internally. ES schema is engine-owned.",
-    },
-    {
-      id: "jobs",
-      name: "workindiajobs-ms",
-      role: "Match API client",
-      publishes: "—",
-      subscribes: "—",
-      ownStore: "Postgres (app state, not search index)",
-      matchingEs: "Does not read/write",
-      highlight: false,
-      note: "Calls match_jobs() for retrieval + ranking. Today reads ES/vector-store directly — migrates to API.",
-    },
-    {
-      id: "notification",
-      name: "Notification system",
-      role: "Independent consumer",
-      publishes: "notification.sent",
-      subscribes: "candidate.profile.updated, job.posted, …",
-      ownStore: "Postgres + Redis (delivery state)",
-      matchingEs: "Does not read/write",
-      highlight: false,
-      note: "Same Kafka events; builds its own projection for dedupe, scheduling, prefs. Rarely needs ES.",
-    },
-    {
-      id: "analytics",
-      name: "Analytics / data mart",
-      role: "Independent consumer",
-      publishes: "—",
-      subscribes: "CDC or Kafka → Hudi/S3",
-      ownStore: "wi_gold_data_mart.* tables",
-      matchingEs: "Does not read/write",
-      highlight: false,
-      note: "Reporting projection from same facts. Never couples to matching ES schema.",
-    },
-  ],
   sameFieldProjections: {
     title: "Same data, different stores — by design",
     intro: "When <code>city</code> changes on a candidate profile, each system that cares builds <strong>its own copy</strong> in the shape it needs:",
@@ -7059,11 +6953,6 @@ function buildMatchingEngineTabGuideHtml(m) {
     },
     {
       type: "section",
-      label: "Multi-system data flow",
-      detail: `Kafka fan-out diagram + ${m.systemExamples.length} system cards (profile-ms, jobs-ms, notification, analytics, …).`,
-    },
-    {
-      type: "section",
       label: m.sameFieldProjections.title,
       detail: "Why the same field (city, last_app_open) exists in Postgres, matching ES, and other projections — by design.",
     },
@@ -7518,20 +7407,6 @@ function renderMatchingEngine() {
     </tr>
   `).join("");
 
-  const systemCardsHtml = m.systemExamples.map(sys => `
-    <div class="me-system-card ${sys.highlight ? "matching" : ""}">
-      <h4>${sys.name}</h4>
-      <div class="me-system-role">${sys.role}</div>
-      <dl>
-        <dt>Publishes</dt><dd>${sys.publishes}</dd>
-        <dt>Subscribes</dt><dd>${sys.subscribes}</dd>
-        <dt>Own store</dt><dd>${sys.ownStore}</dd>
-        <dt>Matching ES</dt><dd>${sys.matchingEs}</dd>
-      </dl>
-      <p style="margin:8px 0 0;font-size:11.5px;color:var(--muted)">${sys.note}</p>
-    </div>
-  `).join("");
-
   const projectionRowsHtml = m.sameFieldProjections.rows.map(row => `
     <tr>
       <td><code>${row.field}</code></td>
@@ -7747,13 +7622,6 @@ function renderMatchingEngine() {
           </ul>
         </div>
       </div>
-    `)}
-
-    ${meSection("Multi-system data flow", `${m.systemExamples.length} system examples`, `
-      <p class="section-subtitle">${m.eventBus.summary}</p>
-      <div class="cons-flow" style="margin-bottom:16px">${m.eventBus.fanOutDiagram}</div>
-      <h3 style="font-size:14px;margin:18px 0 8px">System examples</h3>
-      <div class="me-system-grid">${systemCardsHtml}</div>
     `)}
 
     ${meSection(m.sameFieldProjections.title, `${m.sameFieldProjections.rows.length} field examples`, `
