@@ -4060,6 +4060,27 @@ const MATCHING_ENGINE_VISION = {
       migrationImpact: "ES 9 is internal; clients unchanged across backend swaps",
     },
   ],
+  prosCons: {
+    summary: "Strong long-term architecture for ES independence and a unified matching surface. High upfront cost — best as a <strong>post-P4 destination</strong>, with adapter dual-write as the bridge. Do not gate ES 9 migration on building the full engine.",
+    pros: [
+      { title: "Decoupling from ES", detail: "Apps stop importing <code>wi-elasticsearchmodels</code> — cluster names, dual-write, embeddings, and index layout become engine internals." },
+      { title: "Unified matching surface", detail: "Ingest, retrieval, and ranking live in one system instead of jobs-ms handlers + vector-store-ms + directive engine + scattered ES reads." },
+      { title: "Clear data ownership", detail: "Postgres = source of truth; matching ES = private search projection; other systems build their own projections from shared Kafka events." },
+      { title: "Swappable storage backend", detail: "ES 9, index reshaping, or a future vector store changes only storage adapters — app contracts (<code>match_jobs()</code>, Kafka events) stay stable." },
+      { title: "Kafka-native ingest", detail: "Apps already publish domain facts; matching is one subscriber among many — no new &ldquo;write to matching&rdquo; coupling." },
+      { title: "Independent scaling", detail: "Engine scales ingest consumers, embed pipeline, and kNN query load without every microservice learning ES ops." },
+    ],
+    cons: [
+      { title: "Large cross-repo program", detail: "Full extraction means new package, Kafka consumers, <code>match_jobs()</code> API, and cutover from 30+ <code>CandidateFeatureV3</code> write paths — post-P4 scale." },
+      { title: "Intentional data duplication", detail: "Same fields in Postgres, matching ES, and other projections — more storage and eventual-consistency reasoning." },
+      { title: "New critical failure domain", detail: "Engine outage affects all search/matching; today failures are more localized per-service." },
+      { title: "Depends on event quality", detail: "Stale or incomplete Kafka events → stale search index; ingest correctness tied to event schemas and ordering." },
+      { title: "Overlapping architectures during migration", detail: "Adapter dual-write (P2–P4) and matching engine coexist — two mental models until cutover completes." },
+      { title: "Query path latency", detail: "<code>match_jobs()</code> adds a network hop vs jobs-ms reading ES/vector-store directly — needs caching and SLO design." },
+      { title: "Scope ambiguity", detail: "Employer-side candidate search vs candidate job matching — unclear if one engine or siblings; risk of half-abstraction." },
+      { title: "Org ownership required", detail: "Needs a clear owner for engine vs ES infra vs embedding pipeline — without it, becomes another shared library." },
+    ],
+  },
   migrationStance: {
     title: "How this relates to the committed ES 9 HLD",
     points: [
@@ -6892,6 +6913,8 @@ function renderMatchingEngine() {
   `).join("");
 
   const stanceHtml = m.migrationStance.points.map(p => `<li>${p}</li>`).join("");
+  const prosHtml = (m.prosCons.pros || []).map(p => `<li><strong>${p.title}</strong> — ${p.detail}</li>`).join("");
+  const consHtml = (m.prosCons.cons || []).map(p => `<li><strong>${p.title}</strong> — ${p.detail}</li>`).join("");
 
   document.getElementById("matchingEngineView").innerHTML = `
     <span class="me-source-badge">${m.source}</span>
@@ -7035,6 +7058,21 @@ function renderMatchingEngine() {
       </thead>
       <tbody>${comparisonHtml}</tbody>
     </table>
+
+    ${adapterFlowDivider("Pros and cons")}
+
+    <p class="section-subtitle">${m.prosCons.summary}</p>
+
+    <div class="cons-pros-cons">
+      <div class="cons-box pros">
+        <h4>Advantages</h4>
+        <ul>${prosHtml}</ul>
+      </div>
+      <div class="cons-box cons">
+        <h4>Disadvantages</h4>
+        <ul>${consHtml}</ul>
+      </div>
+    </div>
 
     ${adapterFlowDivider("Relation to ES 9 HLD")}
 
