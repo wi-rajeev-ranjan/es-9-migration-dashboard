@@ -119,6 +119,186 @@
     .plan-tab:not(.active) .tab-status-draft { background: var(--orange-soft); color: var(--orange); }
     .plan-tab:not(.active) .tab-status-analysis { background: #ede9fe; color: #6d28d9; }
     .plan-tab:not(.active) .tab-status-adapter { background: #e0f2fe; color: #0369a1; }
+    .plan-tab:not(.active) .tab-status-proposed { background: #f3e8ff; color: #7c3aed; }
+
+    .me-source-badge {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.45px;
+      padding: 3px 10px;
+      border-radius: 999px;
+      background: #f3e8ff;
+      color: #7c3aed;
+      margin-bottom: 12px;
+    }
+
+    .me-layer-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin: 16px 0;
+    }
+
+    .me-layer {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px 16px;
+      background: var(--surface);
+    }
+
+    .me-layer.public { border-left: 3px solid #7c3aed; background: #faf5ff; }
+    .me-layer.pipeline { border-left: 3px solid var(--accent); }
+    .me-layer.retrieval { border-left: 3px solid var(--green); }
+    .me-layer.storage { border-left: 3px solid var(--orange); }
+
+    .me-layer h4 {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    .me-layer p {
+      font-size: 12.5px;
+      line-height: 1.45;
+      color: var(--text);
+      margin: 0;
+    }
+
+    .me-layer code { font-size: 11px; }
+
+    .me-vs-today {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin: 16px 0;
+    }
+
+    @media (max-width: 800px) { .me-vs-today { grid-template-columns: 1fr; } }
+
+    .me-vs-box {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px 16px;
+      background: var(--bg);
+    }
+
+    .me-vs-box h4 {
+      font-size: 12px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .me-vs-box.today h4 { color: var(--red); }
+    .me-vs-box.target h4 { color: var(--green); }
+
+    .me-vs-box ul {
+      margin: 0;
+      padding-left: 18px;
+      font-size: 12px;
+      line-height: 1.5;
+      color: var(--muted);
+    }
+
+    .me-callout {
+      border: 1px solid #c4b5fd;
+      border-radius: 8px;
+      padding: 12px 14px;
+      background: #faf5ff;
+      font-size: 12.5px;
+      line-height: 1.5;
+      color: var(--text);
+      margin: 12px 0 16px;
+    }
+
+    .me-callout strong { color: #6d28d9; }
+
+    .me-system-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 12px;
+      margin: 14px 0;
+    }
+
+    .me-system-card {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 14px;
+      background: var(--surface);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .me-system-card h4 {
+      font-size: 13px;
+      font-weight: 700;
+      margin: 0 0 4px;
+      color: var(--text);
+    }
+
+    .me-system-card .me-system-role {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.35px;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .me-system-card.matching {
+      border-color: #c4b5fd;
+      background: #faf5ff;
+    }
+
+    .me-system-card dl {
+      margin: 0;
+      display: grid;
+      grid-template-columns: 72px 1fr;
+      gap: 4px 8px;
+    }
+
+    .me-system-card dt {
+      font-weight: 600;
+      color: var(--muted);
+      margin: 0;
+    }
+
+    .me-system-card dd {
+      margin: 0;
+      color: var(--text);
+    }
+
+    .me-system-card dd code { font-size: 10.5px; }
+
+    .me-projection-table td:first-child { font-weight: 600; white-space: nowrap; }
+
+    .me-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 16px;
+      font-size: 11px;
+      color: var(--muted);
+      margin: 10px 0 4px;
+    }
+
+    .me-legend span::before {
+      content: "";
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 2px;
+      margin-right: 5px;
+      vertical-align: -1px;
+    }
+
+    .me-legend .leg-kafka::before { background: #f59e0b; }
+    .me-legend .leg-pg::before { background: #3b82f6; }
+    .me-legend .leg-es-private::before { background: #7c3aed; }
+    .me-legend .leg-api::before { background: #10b981; }
 
     .layout.consolidation-mode .sidebar-shell { display: none; }
     .layout.consolidation-mode { grid-template-columns: 1fr; }
@@ -2433,6 +2613,9 @@
       <button type="button" class="plan-tab" data-plan="adapter_write_control">
         Adapter write control <span class="tab-status tab-status-adapter">APPROACH</span>
       </button>
+      <button type="button" class="plan-tab" data-plan="matching_engine">
+        Matching engine <span class="tab-status tab-status-proposed">PROPOSED</span>
+      </button>
     </div>
     <button type="button" class="filter-panel-toggle" id="sidebarToggle" aria-label="Toggle filter sidebar" aria-expanded="true" title="Hide filters">
       <span aria-hidden="true">◀</span> Hide filters
@@ -2553,6 +2736,7 @@
 
     <div id="consolidationView" style="display:none"></div>
     <div id="adapterView" style="display:none"></div>
+    <div id="matchingEngineView" style="display:none"></div>
 
     <details class="adapter-collapsible-section qa-section-wrap" id="qaSectionWrap">
       <summary>
@@ -3680,6 +3864,236 @@ const CONSOLIDATION_ANALYSIS = {
   ],
 };
 
+const MATCHING_ENGINE_VISION = {
+  headline: "Matching Engine as a system",
+  source: "Leadership direction (MA) — proposed architecture, not in committed HLD",
+  summary: "Treat matching (ingestion, storage, retrieval, ranking) as a <strong>bounded system or package</strong>. Applications send <em>domain data</em> (candidate profile, activity, job context) — not ES documents. The system owns processing, indexing, dual-write, kNN/BM25 retrieval, and ranking. <strong>Elasticsearch is one pluggable backend</strong> inside the system; clients must not depend on cluster names, index names, or adapter classes.",
+  principles: [
+    { title: "Storage abstraction", detail: "<strong>Ingest:</strong> apps publish domain events to <strong>Kafka</strong> — they do not call matching directly or write ES. <strong>Query:</strong> apps call <code>matching_engine.match_jobs(...)</code>. Where data lands (C1, C3, vector-store-ms) is an internal detail." },
+    { title: "Ingestion is system-owned", detail: "Candidate profile updates, app-open events, employer interactions → normalized events → indexing pipeline. No service imports <code>CandidateFeatureV3</code> directly." },
+    { title: "Query is system-owned", detail: "Retrieval (kNN, filters, BM25), fusion, and ranking live inside the engine. Apps receive ranked job/candidate IDs + scores — not raw ES query DSL." },
+    { title: "ES is a component, not the API", detail: "C1/C2/C3/C4, dual-write, MAU backfill, embeddings — all behind <code>StorageAdapter</code> / <code>VectorIndexAdapter</code> interfaces inside the package." },
+    { title: "Swap backends without client churn", detail: "Tomorrow the data layer could change (ES version, index layout, alternate vector DB) by swapping internal adapters — application contracts stay stable." },
+    { title: "Private projections, shared events", detail: "Kafka carries <em>business facts</em> (profile updated, app opened). Each system builds its <strong>own</strong> normalized store for its job. Matching&rsquo;s ES is for search only — not a shared org datastore." },
+    { title: "Intentional duplication", detail: "Same field (e.g. <code>city</code>) may exist in Postgres, matching ES, and a notification projection. That is OK — each copy is optimized for its consumer; Postgres remains source of truth." },
+  ],
+  todayPain: [
+    "5+ services import <code>wi-elasticsearchmodels</code> and call <code>CandidateFeatureV3().update()</code> — ES schema leaks into every microservice.",
+    "Retrieval split: vector-store-ms for ANN + C2 <code>JobFeatureV3</code> for hydrate — two storage systems, no unified abstraction.",
+    "Ranking/relevancy logic scattered in jobs-ms directive engines, handlers, and helpers — hard to evolve as one product surface.",
+    "ES 9 migration forces every writer to understand dual-write, C3, embeddings — because there is no matching layer above ES.",
+  ],
+  targetFlow: {
+    ingest: [
+      "Application publishes <code>candidate.profile.updated</code> / <code>job.posted</code> to shared Kafka (same event other systems may consume).",
+      "Matching engine consumer receives event — internal <code>ingest()</code> pipeline normalizes payload, applies field ownership rules.",
+      "Engine writes through storage adapters (profile doc → C1+C3 dual-write; vectors → C3 embedded index).",
+      "Re-embed triggered internally when relevant fields change — client does not call Triton or ES.",
+    ],
+    query: [
+      "Application calls <code>match_jobs(candidate_id, context)</code> or experiment variant.",
+      "Engine loads candidate context, runs retrieval (kNN on C3 + filters + optional BM25 on C2).",
+      "Engine applies ranking / LTR / business rules internally.",
+      "Returns ranked <code>job_id[]</code> + metadata — no ES response shapes exposed.",
+    ],
+  },
+  eventBus: {
+    title: "Shared Kafka — one publish, many independent consumers",
+    summary: "Apps publish <strong>domain events</strong> (business facts), not ES documents. Matching is <em>one subscriber</em> among many. It does not own the event bus or block other systems from the same data.",
+    fanOutDiagram: `profile-ms / candidateevents-ms / wiemployerjobpost-ms
+        │
+        │  publish once (domain facts)
+        ▼
+┌───────────────────────────────────────────────────────────────┐
+│  Kafka — shared topics                                         │
+│  candidate.profile.updated · candidate.app_opened · job.posted │
+└───┬─────────────┬──────────────┬──────────────┬───────────────┘
+    │             │              │              │
+    ▼             ▼              ▼              ▼
+ MATCHING      NOTIFICATION    ANALYTICS      (other)
+ ENGINE        SYSTEM          / DATAMART     consumers
+    │             │              │
+    │ normalize   │ normalize    │ normalize
+    │ for search  │ for delivery │ for reporting
+    ▼             ▼              ▼
+ Private ES     Postgres /     Warehouse
+ (C1·C3·C2·C4)  Redis / own     tables
+                 store (if any)
+
+── jobs-ms (read path) ──────────────────────────────────────────
+    does NOT read matching ES directly
+    calls  matching_engine.match_jobs(...)  →  ranked job IDs`,
+  },
+  systemExamples: [
+    {
+      id: "profile",
+      name: "wicandidateprofile-ms",
+      role: "Source of truth (write)",
+      publishes: "candidate.profile.updated",
+      subscribes: "—",
+      ownStore: "Postgres — canonical profile",
+      matchingEs: "Does not read/write",
+      highlight: false,
+      note: "Owns profile data; publishes facts after DB commit. Stops calling CandidateFeatureV3 in target state.",
+    },
+    {
+      id: "events",
+      name: "wi-candidateevents-ms",
+      role: "Activity publisher",
+      publishes: "candidate.app_opened, activity events",
+      subscribes: "—",
+      ownStore: "Postgres / event log",
+      matchingEs: "Does not read/write",
+      highlight: false,
+      note: "Emits lightweight activity facts; matching merges into search doc (e.g. last_app_open).",
+    },
+    {
+      id: "jobpost",
+      name: "wiemployerjobpost-ms",
+      role: "Job source of truth",
+      publishes: "job.posted, job.updated",
+      subscribes: "—",
+      ownStore: "Postgres — canonical job",
+      matchingEs: "Does not read/write",
+      highlight: false,
+      note: "Same pattern as profile — publish domain event; matching indexes job for search.",
+    },
+    {
+      id: "matching",
+      name: "Matching engine",
+      role: "Search projection owner",
+      publishes: "optional: match.experiment.metrics",
+      subscribes: "profile, activity, job events",
+      ownStore: "Private ES (C1/C3 candidates, C2/C4 jobs) + vectors",
+      matchingEs: "Read/write — internal only",
+      highlight: true,
+      note: "Subscribes → normalizes for kNN/filters/ranking → dual-write/embed internally. ES schema is engine-owned.",
+    },
+    {
+      id: "jobs",
+      name: "workindiajobs-ms",
+      role: "Match API client",
+      publishes: "—",
+      subscribes: "—",
+      ownStore: "Postgres (app state, not search index)",
+      matchingEs: "Does not read/write",
+      highlight: false,
+      note: "Calls match_jobs() for retrieval + ranking. Today reads ES/vector-store directly — migrates to API.",
+    },
+    {
+      id: "notification",
+      name: "Notification system",
+      role: "Independent consumer",
+      publishes: "notification.sent",
+      subscribes: "candidate.profile.updated, job.posted, …",
+      ownStore: "Postgres + Redis (delivery state)",
+      matchingEs: "Does not read/write",
+      highlight: false,
+      note: "Same Kafka events; builds its own projection for dedupe, scheduling, prefs. Rarely needs ES.",
+    },
+    {
+      id: "analytics",
+      name: "Analytics / data mart",
+      role: "Independent consumer",
+      publishes: "—",
+      subscribes: "CDC or Kafka → Hudi/S3",
+      ownStore: "wi_gold_data_mart.* tables",
+      matchingEs: "Does not read/write",
+      highlight: false,
+      note: "Reporting projection from same facts. Never couples to matching ES schema.",
+    },
+  ],
+  sameFieldProjections: {
+    title: "Same data, different stores — by design",
+    intro: "When <code>city</code> changes on a candidate profile, each system that cares builds <strong>its own copy</strong> in the shape it needs:",
+    rows: [
+      { field: "city, skills, experience", postgres: "Canonical values (profile-ms)", matchingEs: "Search filters + kNN context", other: "Notification: locale/prefs only if needed" },
+      { field: "last_app_open", postgres: "Activity table or profile column", matchingEs: "MAU / recency ranking signal", other: "Analytics: funnel metrics in mart" },
+      { field: "job title, salary", postgres: "Canonical job (jobpost-ms)", matchingEs: "BM25 + filter fields on C2/C4", other: "Employer dashboard: reads Postgres API" },
+    ],
+    rule: "Duplication of <em>storage</em> is fine. Duplication of <em>ownership</em> is not — Postgres + publishing service remain source of truth.",
+  },
+  ingestDetail: {
+    title: "What matching ingest actually does",
+    steps: [
+      "Subscribe to shared Kafka topic (same event notification/analytics also see).",
+      "Filter — only events relevant to search/matching.",
+      "Normalize — map domain payload → engine&rsquo;s internal doc shape (field merge, partial updates).",
+      "Enrich — trigger re-embed via Triton when embedding-relevant fields change.",
+      "Persist — write through storage adapters (profile → C1+C3 dual-write; vectors → C3 embedded index).",
+    ],
+    notDone: "Apps do not send ES documents. Other systems do not read matching ES to get profile/job data — they use Postgres or Kafka.",
+  },
+  layers: [
+    { id: "public", title: "Public API (client-facing)", body: "<strong>Ingest contract:</strong> shared Kafka event schemas (apps publish facts). <strong>Query contract:</strong> <code>match_jobs()</code>, <code>explain()</code>. Language: candidates, jobs, scores — not indices, clusters, or <code>dense_vector</code>." },
+    { id: "pipeline", title: "Ingestion & enrichment pipeline", body: "Event ordering, field merge rules, embedding generation (Triton), dual-write orchestration, MAU predicate, DLQ — today spread across 30+ consumers." },
+    { id: "retrieval", title: "Retrieval & ranking core", body: "kNN, filtered search, hybrid fusion, segment rules, LTR — today in jobs-ms relevancy handlers + vector-store-ms + directive engine." },
+    { id: "storage", title: "Storage adapters (pluggable)", body: "ElasticsearchStorage (C1/C2/C3/C4), optional VectorStoreAdapter — implements index/update/search/kNN. ES 9 migration changes only this layer." },
+  ],
+  approachComparison: [
+    {
+      name: "Today (fragmented)",
+      clientKnowsEs: "Yes — every service",
+      ingestion: "30+ consumers → CandidateFeatureV3",
+      retrieval: "vector-store-ms + JobFeatureV3 + relevancy handlers",
+      migrationImpact: "Every repo learns dual-write, C3, embeddings",
+    },
+    {
+      name: "Adapter write control",
+      clientKnowsEs: "Yes — unchanged call sites",
+      ingestion: "Still CandidateFeatureV3; DualWriteAdapter inside library",
+      retrieval: "Unchanged — still fragmented",
+      migrationImpact: "Centralizes ES <em>writes</em> only; smallest P2 diff",
+    },
+    {
+      name: "P1 Single consumer",
+      clientKnowsEs: "Reduced — publish events, not ES",
+      ingestion: "One Kafka consumer owns ES I/O",
+      retrieval: "Still mostly outside consumer",
+      migrationImpact: "Better write ordering; retrieval still leaky",
+    },
+    {
+      name: "Matching engine (proposed)",
+      clientKnowsEs: "No — domain API only",
+      ingestion: "Engine pipeline → storage adapters",
+      retrieval: "Engine owns kNN + rank end-to-end",
+      migrationImpact: "ES 9 is internal; clients unchanged across backend swaps",
+    },
+  ],
+  migrationStance: {
+    title: "How this relates to the committed ES 9 HLD",
+    points: [
+      "The <strong>committed path (P0–P4)</strong> still ships via adapter dual-write + C3/C4 experiment — do not block migration on building the full engine.",
+      "Adapter + DualWriteAdapter work is <strong>compatible</strong> — it becomes the first implementation of the engine&rsquo;s <em>ElasticsearchStorage</em> adapter, not throwaway code.",
+      "P3 embedding writes and P4 kNN reads are the <strong>first candidates</strong> to move behind a matching-engine-shaped API (even if v1 is a thin facade over ES).",
+      "Post-P4: extract a package (<code>wi-matching-engine</code> or internal SDK) so jobs-ms / profile-ms stop importing elasticsearch models directly.",
+      "vector-store-ms retrieval path should <strong>converge into</strong> the engine&rsquo;s retrieval layer or remain as a legacy adapter until cutover.",
+    ],
+  },
+  proposedApiSketch: `// INGEST — apps publish to Kafka (do not call matching engine directly)
+# candidateevents-ms / profile-ms / jobpost-ms
+kafka.publish("candidate.profile.updated", {
+    "candidate_id": 123,
+    "changes": {"last_app_open": "..."},
+    "source": "candidateevents-ms",
+})
+# → matching engine consumer picks up → internal ingest() → ES
+
+// QUERY — apps call matching engine API (sync)
+results = matching_engine.match_jobs(MatchRequest(
+    candidate_id=123,
+    filters={"city": "mumbai"},
+    experiment="semantic_v1",  # routes to C3 kNN internally
+))
+
+// INTERNAL (matching-engine package) — not visible to apps
+def ingest(event):              # called by engine's Kafka consumer
+    doc = normalize(event)
+    storage.write_profile(doc)  # → DualWriteAdapter → C1 + C3
+    storage.write_vectors(doc)  # → CandidateFeatureEmbedded → C3
+retrieval.knn(query_vector)     # → ES9 kNN or future store`,
+};
+
 const ADAPTER_WRITE_ANALYSIS = {
   goal: {
     headline: "Least disruptive approach — keep all consumers unchanged",
@@ -4596,6 +5010,31 @@ const PLANS = {
         a: "<p><strong>workindiaapi</strong> Celery/SQS <code>generatefeaturetags</code> — legacy sharedmodules, not wi-elasticsearchmodels.</p><p><strong>wielastictoolkit</strong> — CandidateFeatureV3 still imports old package; dual-write hooks in elastictoolkit only apply after model migration.</p><p><strong>jobpost-ms local JobFeatureV3</strong> — separate adapter package; needs explicit C4 wiring.</p><p>Track and zero these before relying on adapter-only freeze.</p>",
       },
     ],
+    data: null,
+  },
+
+  matching_engine: {
+    id: "matching_engine",
+    viewType: "matching_engine",
+    subtitle: "Proposed direction · matching as a system · ES as pluggable storage inside the engine",
+    bannerClass: "draft",
+    banner: {
+      title: "Matching engine — proposed architecture (MA direction)",
+      summary: "Abstract ingestion and query away from Elasticsearch. Applications talk to a <strong>matching system</strong>; ES writes, reads, dual-write, embeddings, and ranking are internal.",
+      bullets: [
+        "<strong>Not committed HLD</strong> — documents leadership intent alongside migration_v0 / adapter approaches",
+        "<strong>Shared Kafka</strong> — apps publish domain facts; matching + notification + analytics each build their own projection",
+        "<strong>Private matching ES</strong> — search index inside the engine only; others use Postgres / Kafka / own stores",
+        "<strong>Ingest → Kafka</strong> — apps publish domain events; matching engine consumes internally",
+        "<strong>Query → API</strong> — <code>match_jobs()</code>; storage layer swappable without client changes",
+      ],
+    },
+    hldLinks: false,
+    phases: [],
+    clusters: [],
+    writers: WRITE_FRAGMENTATION,
+    readers: [],
+    qa: [],
     data: null,
   },
 };
@@ -5815,7 +6254,7 @@ function initQaControls() {
 
 function isAnalysisView() {
   const vt = getPlan().viewType;
-  return vt === "consolidation" || vt === "adapter_writes";
+  return vt === "consolidation" || vt === "adapter_writes" || vt === "matching_engine";
 }
 
 function isConsolidationView() {
@@ -5828,6 +6267,7 @@ function setViewMode() {
   document.getElementById("migrationView").style.display = analysis ? "none" : "block";
   document.getElementById("consolidationView").style.display = vt === "consolidation" ? "block" : "none";
   document.getElementById("adapterView").style.display = vt === "adapter_writes" ? "block" : "none";
+  document.getElementById("matchingEngineView").style.display = vt === "matching_engine" ? "block" : "none";
   document.getElementById("layout").classList.toggle("consolidation-mode", analysis);
   const toggle = document.getElementById("sidebarToggle");
   if (toggle) toggle.classList.toggle("is-hidden", analysis);
@@ -5836,9 +6276,11 @@ function setViewMode() {
 
   const qaWrap = document.getElementById("qaSectionWrap");
   if (qaWrap) {
-    const adapterTab = vt === "adapter_writes";
-    qaWrap.classList.toggle("collapsible-enabled", adapterTab);
-    if (!adapterTab) qaWrap.open = true;
+    const hideQa = vt === "matching_engine";
+    qaWrap.style.display = hideQa ? "none" : "";
+    const collapsibleQa = vt === "adapter_writes";
+    qaWrap.classList.toggle("collapsible-enabled", collapsibleQa);
+    if (!collapsibleQa && !hideQa) qaWrap.open = true;
   }
 }
 
@@ -6395,6 +6837,214 @@ function renderAdapterWrites() {
   `;
 }
 
+function renderMatchingEngine() {
+  const m = MATCHING_ENGINE_VISION;
+
+  const principlesHtml = m.principles.map(p => `
+    <li><strong>${p.title}</strong> — ${p.detail}</li>
+  `).join("");
+
+  const painHtml = m.todayPain.map(item => `<li>${item}</li>`).join("");
+
+  const layersHtml = m.layers.map(layer => `
+    <div class="me-layer ${layer.id}">
+      <h4>${layer.title}</h4>
+      <p>${layer.body}</p>
+    </div>
+  `).join("");
+
+  const ingestHtml = m.targetFlow.ingest.map((step, i) => `<li><strong>${i + 1}.</strong> ${step}</li>`).join("");
+  const queryHtml = m.targetFlow.query.map((step, i) => `<li><strong>${i + 1}.</strong> ${step}</li>`).join("");
+
+  const systemCardsHtml = m.systemExamples.map(sys => `
+    <div class="me-system-card ${sys.highlight ? "matching" : ""}">
+      <h4>${sys.name}</h4>
+      <div class="me-system-role">${sys.role}</div>
+      <dl>
+        <dt>Publishes</dt><dd>${sys.publishes}</dd>
+        <dt>Subscribes</dt><dd>${sys.subscribes}</dd>
+        <dt>Own store</dt><dd>${sys.ownStore}</dd>
+        <dt>Matching ES</dt><dd>${sys.matchingEs}</dd>
+      </dl>
+      <p style="margin:8px 0 0;font-size:11.5px;color:var(--muted)">${sys.note}</p>
+    </div>
+  `).join("");
+
+  const projectionRowsHtml = m.sameFieldProjections.rows.map(row => `
+    <tr>
+      <td><code>${row.field}</code></td>
+      <td>${row.postgres}</td>
+      <td>${row.matchingEs}</td>
+      <td>${row.other}</td>
+    </tr>
+  `).join("");
+
+  const ingestDetailHtml = m.ingestDetail.steps.map((step, i) => `<li><strong>${i + 1}.</strong> ${step}</li>`).join("");
+
+  const comparisonHtml = m.approachComparison.map(row => `
+    <tr>
+      <td><strong>${row.name}</strong></td>
+      <td>${row.clientKnowsEs}</td>
+      <td>${row.ingestion}</td>
+      <td>${row.retrieval}</td>
+      <td>${row.migrationImpact}</td>
+    </tr>
+  `).join("");
+
+  const stanceHtml = m.migrationStance.points.map(p => `<li>${p}</li>`).join("");
+
+  document.getElementById("matchingEngineView").innerHTML = `
+    <span class="me-source-badge">${m.source}</span>
+    <p class="section-subtitle" style="margin-top:0"><strong>${m.headline}</strong> — ${m.summary}</p>
+
+    ${adapterFlowDivider("Core principles")}
+
+    <ul class="writer-data-list" style="font-size:12.5px;color:var(--muted);padding-left:20px;margin:0 0 8px">${principlesHtml}</ul>
+
+    ${adapterFlowDivider("Today vs target")}
+
+    <div class="me-vs-today">
+      <div class="me-vs-box today">
+        <h4>Today — ES leaks into every service</h4>
+        <ul>${painHtml}</ul>
+      </div>
+      <div class="me-vs-box target">
+        <h4>Target — matching engine owns the data layer</h4>
+        <ul>
+          <li>Apps publish <strong>domain events</strong> to shared Kafka — not ES writes</li>
+          <li>Matching subscribes, normalizes, indexes in <strong>private ES</strong></li>
+          <li>Other systems (notification, analytics) subscribe same events → own stores</li>
+          <li>jobs-ms calls <code>match()</code> — never reads matching ES directly</li>
+        </ul>
+      </div>
+    </div>
+
+    ${adapterFlowDivider("Multi-system data flow (proposed)")}
+
+    <p class="section-subtitle">${m.eventBus.summary}</p>
+
+    <div class="me-legend">
+      <span class="leg-kafka">Shared Kafka events</span>
+      <span class="leg-pg">Postgres (source of truth)</span>
+      <span class="leg-es-private">Matching private ES</span>
+      <span class="leg-api">match() API</span>
+    </div>
+
+    <div class="cons-flow" style="margin-bottom:16px">${m.eventBus.fanOutDiagram}</div>
+
+    <div class="me-callout">
+      <strong>Key rule:</strong> Matching&rsquo;s ES is for <em>search inside the engine</em> only.
+      Other systems use Postgres, Kafka, or their own projection — even when the underlying fact is the same.
+    </div>
+
+    <h3 style="font-size:14px;margin:18px 0 8px">System examples</h3>
+    <div class="me-system-grid">${systemCardsHtml}</div>
+
+    ${adapterFlowDivider(m.ingestDetail.title)}
+
+    <div class="adapter-change-grid">
+      <div class="adapter-change-box after">
+        <h4>Matching ingest pipeline</h4>
+        <ol style="margin:0;padding-left:18px;font-size:12px;line-height:1.55;color:var(--muted)">${ingestDetailHtml}</ol>
+      </div>
+      <div class="adapter-change-box before">
+        <h4>What apps &amp; other systems do instead</h4>
+        <ul style="margin:0;padding-left:18px;font-size:12px;line-height:1.55;color:var(--muted)">
+          <li><strong>Publishers</strong> (profile-ms, candidateevents-ms) — write Postgres, emit Kafka event</li>
+          <li><strong>Notification</strong> — subscribe same topics → own Postgres/Redis projection</li>
+          <li><strong>Analytics</strong> — subscribe/CDC → warehouse tables</li>
+          <li><strong>jobs-ms</strong> — call <code>match_jobs()</code>; no ES imports</li>
+        </ul>
+        <p style="margin:10px 0 0;font-size:11.5px;color:var(--muted)">${m.ingestDetail.notDone}</p>
+      </div>
+    </div>
+
+    ${adapterFlowDivider(m.sameFieldProjections.title)}
+
+    <p class="section-subtitle">${m.sameFieldProjections.intro}</p>
+
+    <table class="cons-decision-table me-projection-table">
+      <thead>
+        <tr>
+          <th>Field / data</th>
+          <th>Postgres (canonical)</th>
+          <th>Matching ES (search)</th>
+          <th>Other projections</th>
+        </tr>
+      </thead>
+      <tbody>${projectionRowsHtml}</tbody>
+    </table>
+
+    <div class="me-callout" style="margin-top:14px">${m.sameFieldProjections.rule}</div>
+
+    ${adapterFlowDivider("Layered architecture")}
+
+    <div class="cons-flow" style="margin-bottom:16px">[Applications: jobs-ms, profile-ms, candidateevents-ms, …]
+        │  domain API only (no CandidateFeatureV3, no ES DSL)
+        ▼
+┌───────────────────────────────────────────────────────────┐
+│  MATCHING ENGINE (package / system)                        │
+│  ┌─────────────────┐  ┌──────────────────────────────────┐ │
+│  │ Ingest pipeline │  │ Retrieval + ranking core         │ │
+│  │ events → merge  │  │ kNN · filters · BM25 · LTR       │ │
+│  └────────┬────────┘  └───────────────┬──────────────────┘ │
+│           │                           │                    │
+│           └───────────┬───────────────┘                    │
+│                       ▼                                    │
+│            Storage adapters (pluggable)                    │
+│     ┌─────────────────┴─────────────────┐                  │
+│     ▼                                   ▼                  │
+│  ElasticsearchStorage              (future store)          │
+│  C1 C2 C3 C4 · dual-write · vectors                       │
+└───────────────────────────────────────────────────────────┘</div>
+
+    <div class="me-layer-stack">${layersHtml}</div>
+
+    ${adapterFlowDivider("Abstract flows")}
+
+    <div class="adapter-change-grid">
+      <div class="adapter-change-box before">
+        <h4>Ingestion (abstract)</h4>
+        <p class="adapter-change-caption">Application sends data — engine owns processing &amp; persistence.</p>
+        <ol style="margin:0;padding-left:18px;font-size:12px;line-height:1.55;color:var(--muted)">${ingestHtml}</ol>
+      </div>
+      <div class="adapter-change-box after">
+        <h4>Query (abstract)</h4>
+        <p class="adapter-change-caption">Application asks for matches — engine owns retrieval &amp; ranking.</p>
+        <ol style="margin:0;padding-left:18px;font-size:12px;line-height:1.55;color:var(--muted)">${queryHtml}</ol>
+      </div>
+    </div>
+
+    ${adapterCollapsibleSection(
+      "Proposed integration (sketch)",
+      "Ingest via Kafka · query via match_jobs() API",
+      adapterCodeBlock(m.proposedApiSketch)
+    )}
+
+    ${adapterFlowDivider("Compare approaches")}
+
+    <table class="cons-decision-table">
+      <thead>
+        <tr>
+          <th>Approach</th>
+          <th>Client knows ES?</th>
+          <th>Ingestion</th>
+          <th>Retrieval</th>
+          <th>Migration impact</th>
+        </tr>
+      </thead>
+      <tbody>${comparisonHtml}</tbody>
+    </table>
+
+    ${adapterFlowDivider("Relation to ES 9 HLD")}
+
+    <div class="consolidation-verdict recommend-proceed" style="margin-bottom:16px">
+      <h3>${m.migrationStance.title}</h3>
+      <ul class="writer-data-list" style="font-size:12.5px;color:var(--muted);padding-left:20px;margin:8px 0 0">${stanceHtml}</ul>
+    </div>
+  `;
+}
+
 function renderConsolidation() {
   const c = CONSOLIDATION_ANALYSIS;
   const totalConsumers = c.services.reduce((n, s) => n + (s.consumers || 0), 0);
@@ -6557,8 +7207,9 @@ function render() {
   if (isAnalysisView()) {
     if (getPlan().viewType === "consolidation") renderConsolidation();
     else if (getPlan().viewType === "adapter_writes") renderAdapterWrites();
+    else if (getPlan().viewType === "matching_engine") renderMatchingEngine();
     saveQaOpenState();
-    renderQa();
+    if (getPlan().viewType !== "matching_engine") renderQa();
     bindCheckboxes();
     return;
   }
