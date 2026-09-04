@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ES 9 + Matching — Dashboard V2 (Brainstorm)</title>
+  <style>
+    :root {
+      --bg: #0f1419;
+      --surface: #1a2332;
+      --surface-2: #243044;
+      --border: #2d3a4f;
+      --text: #e8eef5;
+      --muted: #94a3b8;
+      --accent: #38bdf8;
+      --accent-soft: rgba(56, 189, 248, 0.12);
+      --green: #4ade80;
+      --green-soft: rgba(74, 222, 128, 0.12);
+      --orange: #fbbf24;
+      --orange-soft: rgba(251, 191, 36, 0.12);
+      --purple: #c084fc;
+      --purple-soft: rgba(192, 132, 252, 0.12);
+      --radius: 12px;
+      --font: "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      --mono: ui-monospace, "SF Mono", Menlo, Monaco, Consolas, monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.55;
+      font-size: 14px;
+      min-height: 100vh;
+    }
+
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: rgba(15, 20, 25, 0.92);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .topbar h1 {
+      font-size: 18px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .v2-badge {
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      padding: 3px 8px;
+      border-radius: 6px;
+      background: var(--purple-soft);
+      color: var(--purple);
+      border: 1px solid rgba(192, 132, 252, 0.35);
+    }
+
+    .topbar-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      font-size: 12px;
+      font-weight: 600;
+      padding: 8px 14px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+    }
+
+    .btn:hover { background: var(--surface-2); border-color: var(--accent); }
+    .btn-primary { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
+    .btn-ghost { background: transparent; color: var(--muted); }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      gap: 0;
+      max-width: 1280px;
+      margin: 0 auto;
+    }
+
+    nav {
+      padding: 20px 16px 40px;
+      border-right: 1px solid var(--border);
+      position: sticky;
+      top: 56px;
+      height: calc(100vh - 56px);
+      overflow-y: auto;
+    }
+
+    nav a {
+      display: block;
+      padding: 8px 12px;
+      border-radius: 8px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 500;
+      text-decoration: none;
+      margin-bottom: 2px;
+    }
+
+    nav a:hover, nav a.active {
+      background: var(--accent-soft);
+      color: var(--accent);
+    }
+
+    main { padding: 24px 28px 60px; min-width: 0; }
+
+    .hero {
+      background: linear-gradient(135deg, var(--surface) 0%, #1e2a3d 100%);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px 28px;
+      margin-bottom: 24px;
+    }
+
+    .hero p { color: var(--muted); font-size: 14px; max-width: 720px; margin-top: 8px; }
+
+    .section {
+      margin-bottom: 32px;
+      scroll-margin-top: 72px;
+    }
+
+    .section h2 {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .section-hint {
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 14px;
+    }
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 12px;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+    }
+
+    .card h3 { font-size: 13px; font-weight: 700; margin-bottom: 6px; }
+    .card p { font-size: 12.5px; color: var(--muted); line-height: 1.5; }
+
+    .card.tag-infra { border-left: 3px solid var(--orange); }
+    .card.tag-engine { border-left: 3px solid var(--purple); }
+    .card.tag-ops { border-left: 3px solid var(--green); }
+    .card.tag-open { border-left: 3px solid var(--accent); }
+
+    .pill {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 99px;
+      margin-right: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .pill-idea { background: var(--accent-soft); color: var(--accent); }
+    .pill-open { background: var(--orange-soft); color: var(--orange); }
+    .pill-decided { background: var(--green-soft); color: var(--green); }
+    .pill-deferred { background: var(--surface-2); color: var(--muted); }
+
+    .list-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .list-toolbar {
+      display: flex;
+      gap: 8px;
+      padding: 12px;
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+
+    .list-toolbar input, .list-toolbar select, .list-toolbar textarea {
+      flex: 1;
+      min-width: 140px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 10px;
+      color: var(--text);
+      font-size: 13px;
+      font-family: inherit;
+    }
+
+    .list-toolbar textarea { min-height: 36px; resize: vertical; }
+
+    .item-list { list-style: none; }
+
+    .item-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border);
+      font-size: 13px;
+    }
+
+    .item-list li:last-child { border-bottom: none; }
+
+    .item-body { flex: 1; min-width: 0; }
+    .item-meta { font-size: 11px; color: var(--muted); margin-top: 4px; }
+
+    .item-delete {
+      background: none;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 16px;
+      padding: 0 4px;
+      line-height: 1;
+    }
+
+    .item-delete:hover { color: #f87171; }
+
+    .empty-state {
+      padding: 28px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .diagram-box {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      font-family: var(--mono);
+      font-size: 11.5px;
+      line-height: 1.45;
+      color: var(--muted);
+      overflow-x: auto;
+      white-space: pre;
+    }
+
+    .carry-list {
+      list-style: none;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 4px 0;
+    }
+
+    .carry-list li {
+      padding: 10px 16px;
+      border-bottom: 1px solid var(--border);
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .carry-list li:last-child { border-bottom: none; }
+    .carry-list strong { color: var(--text); }
+
+    .save-hint {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 8px;
+    }
+
+    @media (max-width: 900px) {
+      .layout { grid-template-columns: 1fr; }
+      nav {
+        position: static;
+        height: auto;
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+        padding: 12px;
+      }
+      nav a { margin: 0; }
+      main { padding: 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="topbar">
+  <h1>
+    ES 9 + Matching
+    <span class="v2-badge">V2 BRAINSTORM</span>
+  </h1>
+  <div class="topbar-actions">
+    <a class="btn btn-ghost" href="../index.html">← V1 dashboard</a>
+    <button type="button" class="btn" id="exportBtn">Export JSON</button>
+    <button type="button" class="btn btn-primary" id="resetSeedBtn" title="Restore starter ideas from seed">Reset to seed</button>
+  </div>
+</div>
+
+<div class="layout">
+  <nav id="sideNav">
+    <a href="#overview" class="active">Overview</a>
+    <a href="#carry-forward">From V1</a>
+    <a href="#themes">Themes</a>
+    <a href="#ideas">Idea backlog</a>
+    <a href="#questions">Open questions</a>
+    <a href="#decisions">Decision log</a>
+    <a href="#sketches">Sketches</a>
+    <a href="#notes">Freeform notes</a>
+  </nav>
+
+  <main>
+    <section class="hero" id="overview">
+      <h2 style="font-size:20px;margin:0">Brainstorm workspace</h2>
+      <p>
+        V2 is a <strong>thinking surface</strong> — not a replacement for V1 yet. Use it to capture new ideas,
+        challenge assumptions, and shape the next iteration of the migration + matching-engine story before
+        merging anything back into the main dashboard.
+      </p>
+      <p class="save-hint" style="margin-top:12px">Ideas, questions, decisions, and notes auto-save in your browser (localStorage).</p>
+    </section>
+
+    <section class="section" id="carry-forward">
+      <h2>Carried forward from V1 discussions</h2>
+      <p class="section-hint">Agreements so far — edit or challenge in the sections below.</p>
+      <ul class="carry-list">
+        <li><strong>One service for now:</strong> <code>wi-matching-engine-ms</code> with internal <code>wi_matching_engine/</code> module; optional PyPI split later.</li>
+        <li><strong>Integrated plan:</strong> P0–P2 = adapter infra migration; P3–P4 = engine v0 (embed) + v1 (<code>match_jobs</code> experiment); post-P4 = ingest cutover only.</li>
+        <li><strong>Query path:</strong> apps call matching engine API — engine reads matching ES, does not HTTP-call profile-ms on hot path.</li>
+        <li><strong>Consistency:</strong> Postgres = truth; matching ES = eventual projection; lag + DLQ + backfill are operational requirements.</li>
+        <li><strong>Triton:</strong> inference-ms embedding API used inside L5 enrich pipeline — not called by app microservices.</li>
+      </ul>
+    </section>
+
+    <section class="section" id="themes">
+      <h2>Exploration themes</h2>
+      <p class="section-hint">Areas to push on in V2 — add cards via idea backlog or notes.</p>
+      <div class="card-grid">
+        <div class="card tag-infra">
+          <h3>Track A — Infra (P0–P2)</h3>
+          <p>Dual-write adapter, freeze, _reindex, C3/C4 without moving 30+ consumers. What’s missing from the runbook?</p>
+        </div>
+        <div class="card tag-engine">
+          <h3>Track B — Engine (P3–P4)</h3>
+          <p>Minimal engine to ship experiment: embed pipeline + match_jobs API. What’s the thinnest v1?</p>
+        </div>
+        <div class="card tag-engine">
+          <h3>Post-P4 cutover</h3>
+          <p>Consumer migration order, feature flags per event_type, how to avoid double-write during transition.</p>
+        </div>
+        <div class="card tag-ops">
+          <h3>Ops & SLOs</h3>
+          <p>Lag thresholds, DLQ playbooks, experiment kill-switch when projection is stale.</p>
+        </div>
+        <div class="card tag-open">
+          <h3>Product / experiment</h3>
+          <p>MAU cohort, semantic vs control, what “success” means for P4, rank in engine vs jobs-ms.</p>
+        </div>
+        <div class="card tag-open">
+          <h3>Org & ownership</h3>
+          <p>Who owns engine vs ES infra vs embedding models vs jobs-ms integration?</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="ideas">
+      <h2>Idea backlog</h2>
+      <p class="section-hint">Capture raw ideas — promote to decision log when ready.</p>
+      <div class="list-panel" data-store="ideas">
+        <div class="list-toolbar">
+          <input type="text" placeholder="Idea title…" data-field="title" />
+          <select data-field="tag">
+            <option value="infra">infra</option>
+            <option value="engine">engine</option>
+            <option value="ops">ops</option>
+            <option value="product">product</option>
+            <option value="other">other</option>
+          </select>
+          <textarea placeholder="Details (optional)…" data-field="body" rows="1"></textarea>
+          <button type="button" class="btn btn-primary" data-action="add">Add</button>
+        </div>
+        <ul class="item-list" data-list></ul>
+      </div>
+    </section>
+
+    <section class="section" id="questions">
+      <h2>Open questions</h2>
+      <p class="section-hint">Things we don’t know yet — park here until answered.</p>
+      <div class="list-panel" data-store="questions">
+        <div class="list-toolbar">
+          <input type="text" placeholder="Question…" data-field="title" style="flex:2" />
+          <button type="button" class="btn btn-primary" data-action="add">Add</button>
+        </div>
+        <ul class="item-list" data-list></ul>
+      </div>
+    </section>
+
+    <section class="section" id="decisions">
+      <h2>Decision log</h2>
+      <p class="section-hint">Proposed → decided → deferred. Link to V1 when merged.</p>
+      <div class="list-panel" data-store="decisions">
+        <div class="list-toolbar">
+          <input type="text" placeholder="Decision…" data-field="title" />
+          <select data-field="status">
+            <option value="proposed">proposed</option>
+            <option value="decided">decided</option>
+            <option value="deferred">deferred</option>
+          </select>
+          <textarea placeholder="Rationale…" data-field="body" rows="1"></textarea>
+          <button type="button" class="btn btn-primary" data-action="add">Add</button>
+        </div>
+        <ul class="item-list" data-list></ul>
+      </div>
+    </section>
+
+    <section class="section" id="sketches">
+      <h2>Architecture sketches</h2>
+      <p class="section-hint">Starter diagram — replace or extend in freeform notes.</p>
+      <div class="diagram-box">P0 ──► elastictoolkit + C3/C4 + scaffold wi-matching-engine-ms
+ │
+P1-P2 ──► adapter dual-write (existing consumers)
+ │
+P3 ──► engine v0: Kafka/event → Triton embed → C3/C4 vectors
+ │
+P4 ──► engine v1: jobs-ms → match_jobs(experiment) → kNN + rank
+ │
+Post-P4 ──► move ingest consumers; apps stop CandidateFeatureV3
+
+Query:  jobs-ms ──HTTP──► wi-matching-engine-ms ──► matching ES (C3/C4)
+Ingest: apps ──Kafka──► engine consumers ──► ingest() ──► ES
+        (no profile-ms HTTP on hot query path)</div>
+    </section>
+
+    <section class="section" id="notes">
+      <h2>Freeform notes</h2>
+      <p class="section-hint">Scratchpad for workshop sessions — saves automatically.</p>
+      <textarea id="freeformNotes" style="width:100%;min-height:200px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px;color:var(--text);font-size:13px;font-family:inherit;line-height:1.55;resize:vertical"></textarea>
+    </section>
+  </main>
+</div>
+
+<script>
+const STORAGE_KEY = "es9_dashboard_v2_brainstorm_v1";
+
+const SEED = {
+  ideas: [
+    { id: "i1", title: "P4 v1: engine does kNN recall only, jobs-ms keeps rank layer", tag: "engine", body: "Fastest path to experiment; engine owns vectors + recall, jobs-ms applies existing relevancy handlers on returned IDs.", ts: Date.now() },
+    { id: "i2", title: "Transactional outbox on profile-ms for critical fields", tag: "infra", body: "Reduce 'event never published' drift class before full engine cutover.", ts: Date.now() },
+    { id: "i3", title: "Experiment auto-fallback when consumer lag > SLO", tag: "ops", body: "Flagsmith routes MAU cohort to control if engine lag or DLQ depth breaches threshold.", ts: Date.now() },
+  ],
+  questions: [
+    { id: "q1", title: "What is the exact MAU field for P0 (_reindex filter)?", ts: Date.now() },
+    { id: "q2", title: "Rank in engine at P4 or defer to post-P4?", ts: Date.now() },
+    { id: "q3", title: "Which event types move to engine first during post-P4 cutover?", ts: Date.now() },
+    { id: "q4", title: "Does vector-store-ms die at P4 or coexist as legacy adapter?", ts: Date.now() },
+  ],
+  decisions: [
+    { id: "d1", title: "wi-matching-engine-ms only (no separate PyPI package for v1)", status: "decided", body: "Internal wi_matching_engine/ module; split later if needed.", ts: Date.now() },
+    { id: "d2", title: "P3–P4 require matching engine — not post-migration add-on", status: "decided", body: "Experiment is the matching product; infra alone is insufficient.", ts: Date.now() },
+    { id: "d3", title: "Engine does not HTTP-call profile-ms on match_jobs hot path", status: "proposed", body: "Use projection + caller context; HTTP only for async backfill.", ts: Date.now() },
+  ],
+  notes: "",
+};
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch (_) {}
+  return structuredClone(SEED);
+}
+
+function saveState(state) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+let state = loadState();
+
+function pillClass(kind, value) {
+  if (kind === "decisions") {
+    if (value === "decided") return "pill-decided";
+    if (value === "deferred") return "pill-deferred";
+    return "pill-open";
+  }
+  return "pill-idea";
+}
+
+function renderList(store) {
+  const panel = document.querySelector(`[data-store="${store}"]`);
+  if (!panel) return;
+  const list = panel.querySelector("[data-list]");
+  const items = state[store] || [];
+  if (!items.length) {
+    list.innerHTML = '<li class="empty-state">Nothing here yet — add one above.</li>';
+    return;
+  }
+  list.innerHTML = items.map(item => {
+    const tag = item.tag || item.status || "";
+    const pill = tag ? `<span class="pill ${pillClass(store, tag)}">${tag}</span>` : "";
+    const body = item.body ? `<div class="item-meta">${escapeHtml(item.body)}</div>` : "";
+    return `<li>
+      <div class="item-body">
+        ${pill}<strong>${escapeHtml(item.title)}</strong>
+        ${body}
+      </div>
+      <button type="button" class="item-delete" data-store="${store}" data-id="${item.id}" title="Remove">×</button>
+    </li>`;
+  }).join("");
+}
+
+function escapeHtml(s) {
+  return String(s)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+function renderAll() {
+  ["ideas", "questions", "decisions"].forEach(renderList);
+  document.getElementById("freeformNotes").value = state.notes || "";
+}
+
+function addItem(store, panel) {
+  const title = panel.querySelector('[data-field="title"]').value.trim();
+  if (!title) return;
+  const bodyEl = panel.querySelector('[data-field="body"]');
+  const body = bodyEl ? bodyEl.value.trim() : "";
+  const tagEl = panel.querySelector('[data-field="tag"]');
+  const statusEl = panel.querySelector('[data-field="status"]');
+  const item = {
+    id: `${store}_${Date.now()}`,
+    title,
+    body,
+    ts: Date.now(),
+  };
+  if (tagEl) item.tag = tagEl.value;
+  if (statusEl) item.status = statusEl.value;
+  state[store].unshift(item);
+  saveState(state);
+  panel.querySelector('[data-field="title"]').value = "";
+  if (bodyEl) bodyEl.value = "";
+  renderList(store);
+}
+
+document.querySelectorAll("[data-store]").forEach(panel => {
+  const store = panel.dataset.store;
+  panel.querySelector("[data-action=add]").addEventListener("click", () => addItem(store, panel));
+  panel.querySelector('[data-field="title"]')?.addEventListener("keydown", e => {
+    if (e.key === "Enter") addItem(store, panel);
+  });
+});
+
+document.addEventListener("click", e => {
+  const btn = e.target.closest(".item-delete");
+  if (!btn) return;
+  const { store, id } = btn.dataset;
+  state[store] = state[store].filter(x => x.id !== id);
+  saveState(state);
+  renderList(store);
+});
+
+document.getElementById("freeformNotes").addEventListener("input", e => {
+  state.notes = e.target.value;
+  saveState(state);
+});
+
+document.getElementById("exportBtn").addEventListener("click", () => {
+  const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = `es9-dashboard-v2-brainstorm-${new Date().toISOString().slice(0, 10)}.json`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+});
+
+document.getElementById("resetSeedBtn").addEventListener("click", () => {
+  if (!confirm("Replace all local ideas, questions, decisions, and notes with seed content?")) return;
+  state = structuredClone(SEED);
+  saveState(state);
+  renderAll();
+});
+
+document.querySelectorAll("#sideNav a").forEach(link => {
+  link.addEventListener("click", () => {
+    document.querySelectorAll("#sideNav a").forEach(a => a.classList.remove("active"));
+    link.classList.add("active");
+  });
+});
+
+renderAll();
+</script>
+</body>
+</html>

@@ -2765,6 +2765,7 @@
     <button type="button" class="filter-panel-toggle" id="sidebarToggle" aria-label="Toggle filter sidebar" aria-expanded="true" title="Hide filters">
       <span aria-hidden="true">◀</span> Hide filters
     </button>
+    <a href="v2/" class="filter-panel-toggle" style="text-decoration:none" title="V2 brainstorm workspace">V2 brainstorm →</a>
   </div>
   <p id="planSubtitle">Consolidated change tracker · Target: ES 9.4.2 · HNSW / nested dense_vector</p>
   <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
@@ -4233,6 +4234,72 @@ Post-P4 ──────► ENGINE v2 · move all ingest consumers · stop Can
       "Splitting wi_matching_engine/ into a separate PyPI package",
     ],
     verdict: "Ship Track A (P0–P2) on adapter timeline without blocking on consumer consolidation. Start Track B in parallel during P2: scaffold engine in P0, ship embed pipeline at P3, ship query API at P4. Post-P4 is ingest migration only — query and embeddings already live.",
+  },
+  consistencyAndFailureHandling: {
+    title: "Consistency & failure handling",
+    summary: "Kafka ingest is <strong>eventually consistent</strong> by design. Postgres (and the publishing service) is the source of truth; matching ES is a <strong>derived search projection</strong>. If the matching engine fails to process an event, matching ES can drift — this is a known, operable risk, not a bug in the model.",
+    model: [
+      { store: "Postgres (profile-ms, jobpost-ms, …)", role: "Source of truth — canonical profile, job, activity", consistency: "Strong (transactional)" },
+      { store: "Kafka", role: "Durable event log — at-least-once delivery to subscribers", consistency: "Ordered per partition key; retained for replay window" },
+      { store: "Matching ES (C1/C3, C2/C4, embedded)", role: "Private projection for search, filters, kNN", consistency: "Eventual — correct after successful ingest; may lag seconds to hours" },
+    ],
+    question: "If matching-engine consumers do not process an event, won&rsquo;t matching ES disagree with Postgres?",
+    answer: "<strong>Yes — until the event is processed or repaired.</strong> That is intentional tradeoff: apps do not block on ES indexing. Search quality tolerates small lag; sustained lag or DLQ buildup is an operational incident.",
+    failureModes: [
+      {
+        scenario: "Transient failure (ES timeout, Triton down, deploy)",
+        symptom: "Consumer lag spikes; offsets not committed",
+        outcome: "Temporary staleness — matching results use older profile/skills/vectors",
+        handling: "Kafka retains messages; consumer retries; lag catches up after recovery. Alert on lag SLO breach.",
+      },
+      {
+        scenario: "Poison message (bad schema, unmapped event_type)",
+        symptom: "Repeated failures on same offset",
+        outcome: "Persistent drift for affected entity until fixed",
+        handling: "Route to DLQ after N retries (L5). Fix config or payload; replay from DLQ. Metric + alert on DLQ depth.",
+      },
+      {
+        scenario: "Event never published",
+        symptom: "No Kafka message — engine never knew about the change",
+        outcome: "Silent drift — Postgres updated, matching ES unchanged",
+        handling: "Transactional outbox (ideal) or publish-after-commit with monitoring. Periodic reconciliation / backfill cron (e.g. CandidateBackfillFeaturePipelineConsumer pattern).",
+      },
+      {
+        scenario: "Partial pipeline success (profile doc written, embed failed)",
+        symptom: "C1/C3 doc updated but C3 embedded index stale",
+        outcome: "kNN experiment uses wrong vectors; filters may still work",
+        handling: "Separate retry for embed step; idempotent re-embed on next relevant field change; embed-specific DLQ.",
+      },
+      {
+        scenario: "Transition dual-path (P2–P4: adapter + engine)",
+        symptom: "Adapter wrote profile doc; engine embed consumer lagging",
+        outcome: "Profile fields fresh, vectors stale — split state across indices",
+        handling: "Feature flag per event type — one owner per field group. Do not double-write same field from two consumers.",
+      },
+      {
+        scenario: "Out-of-order events (same candidate_id)",
+        symptom: "Older event applied after newer (rare within partition)",
+        outcome: "Wrong field values until next event corrects",
+        handling: "Partition by <code>candidate_id</code> / <code>jobpost_id</code> for per-entity ordering. Merge with <code>updated_at</code> or field-level last-write if needed.",
+      },
+    ],
+    safeguards: [
+      { title: "Idempotent ingest", detail: "<code>ingest()</code> safe to replay — partial merge by field, not blind full replace. Same Kafka message twice should not corrupt the doc." },
+      { title: "At-least-once + offset commit on success", detail: "Commit Kafka offset only after L6 write succeeds (or DLQ handoff). Failed processing leaves message available for retry." },
+      { title: "DLQ per consumer group", detail: "Unprocessable events land in dead-letter topic — not silently dropped. Ops can inspect, fix, and replay." },
+      { title: "Observability (L5)", detail: "Metrics: consumer lag, error rate by <code>event_type</code>, governance rejections, DLQ depth, C1 vs C3 parity (shadow mode), embed latency." },
+      { title: "Reconciliation & backfill", detail: "Scheduled or on-demand jobs: read Postgres or C1 → rebuild matching projection. Existing patterns: backfill consumers, <code>reconcilejobsyncing</code> cron." },
+      { title: "Experiment guardrails (P4)", detail: "If engine lag or DLQ exceeds SLO → Flagsmith routes MAU cohort back to control (jobs-ms current relevancy). Do not run experiment on stale projections." },
+      { title: "Transactional outbox (target)", detail: "Postgres commit + Kafka publish in one logical unit — reduces &ldquo;event never published&rdquo; class of drift." },
+    ],
+    slos: [
+      { metric: "Consumer lag (p99)", target: "Under agreed threshold per topic (e.g. &lt; 5 min for profile events)", action: "Page on-call; scale consumers or fix blocker" },
+      { metric: "DLQ depth", target: "Near zero in steady state", action: "Investigate poison messages; replay after fix" },
+      { metric: "Embed pipeline success rate", target: "Matches Triton SLO (P3+)", action: "Retry + DLQ; block experiment arm if sustained failure" },
+      { metric: "C1 vs C3 doc parity (shadow/dual-write)", target: "Field-level diff within tolerance during P1–P2", action: "Adapter drift hooks; do not cutover until parity green" },
+    ],
+    notNewProblem: "Today&rsquo;s fragmented consumers have the same class of problem: if <code>CandidateAppOpenBulkConsumer</code> lags, <code>last_app_open</code> on C1 is stale vs Postgres. Consolidating ingest into <code>wi-matching-engine-ms</code> <strong>centralizes</strong> monitoring and repair — it does not eliminate eventual consistency.",
+    verdict: "Accept eventual consistency for matching search. Operate the engine with lag alerts, DLQ, idempotent replay, and backfill. Postgres remains truth; matching ES is a projection that must be <em>operated</em>, especially during P3–P4 when experiment validity depends on fresh vectors.",
   },
   migrationStance: {
     title: "How this relates to the committed ES 9 HLD",
@@ -7072,6 +7139,11 @@ function buildMatchingEngineTabGuideHtml(m) {
     },
     {
       type: "section",
+      label: m.consistencyAndFailureHandling.title,
+      detail: "Eventual consistency model, failure modes (lag, DLQ, poison, dual-path), safeguards, and P4 experiment SLOs.",
+    },
+    {
+      type: "section",
       label: m.consumerDistribution.title,
       detail: "Where Kafka consumers live (inside wi-matching-engine-ms, not profile-ms). Today vs target table for groups, partitioning, scaling.",
     },
@@ -7631,6 +7703,22 @@ function renderMatchingEngine() {
   const migP4StepsHtml = imp.p4Integration.steps.map(s => `<li>${s}</li>`).join("");
   const migNotP4Html = imp.notRequiredForP4.map(s => `<li>${s}</li>`).join("");
 
+  const cf = m.consistencyAndFailureHandling;
+  const cfModelHtml = cf.model.map(r => `
+    <tr><td>${r.store}</td><td>${r.role}</td><td>${r.consistency}</td></tr>
+  `).join("");
+  const cfFailureHtml = cf.failureModes.map(r => `
+    <tr>
+      <td><strong>${r.scenario}</strong><br><span style="font-size:11px;color:var(--muted)">${r.symptom}</span></td>
+      <td>${r.outcome}</td>
+      <td>${r.handling}</td>
+    </tr>
+  `).join("");
+  const cfSafeguardsHtml = cf.safeguards.map(s => `<li><strong>${s.title}</strong> — ${s.detail}</li>`).join("");
+  const cfSlosHtml = cf.slos.map(s => `
+    <tr><td>${s.metric}</td><td>${s.target}</td><td>${s.action}</td></tr>
+  `).join("");
+
   document.getElementById("matchingEngineView").innerHTML = `
     <span class="me-source-badge">${m.source}</span>
     <p class="section-subtitle" style="margin-top:0"><strong>${m.headline}</strong> — ${m.summary}</p>
@@ -7720,6 +7808,40 @@ function renderMatchingEngine() {
       <p class="section-subtitle">${m.dataSyncFlow.summary}</p>
       <div class="me-hld-wrap"><div class="cons-flow">${m.dataSyncFlow.diagram}</div></div>
       <ol style="margin:0;padding-left:18px;font-size:12px;line-height:1.6;color:var(--muted)">${syncStepsHtml}</ol>
+    `)}
+
+    ${meSection(cf.title, "Eventual consistency · DLQ · lag · backfill", `
+      <p class="section-subtitle">${cf.summary}</p>
+
+      <h3 style="font-size:13px;margin:16px 0 8px">Consistency model</h3>
+      <table class="cons-decision-table">
+        <thead><tr><th>Store</th><th>Role</th><th>Consistency</th></tr></thead>
+        <tbody>${cfModelHtml}</tbody>
+      </table>
+
+      <div class="me-callout" style="margin:14px 0">
+        <strong>${cf.question}</strong><br>${cf.answer}
+      </div>
+
+      <h3 style="font-size:13px;margin:16px 0 8px">Failure modes &amp; handling</h3>
+      <table class="cons-decision-table">
+        <thead><tr><th>Scenario</th><th>Outcome if unhandled</th><th>Handling</th></tr></thead>
+        <tbody>${cfFailureHtml}</tbody>
+      </table>
+
+      <h3 style="font-size:13px;margin:16px 0 8px">Safeguards (engine must implement)</h3>
+      <ul class="writer-data-list" style="font-size:12.5px;color:var(--muted);padding-left:20px;margin:0 0 14px">${cfSafeguardsHtml}</ul>
+
+      <h3 style="font-size:13px;margin:16px 0 8px">Operational SLOs (especially P3–P4)</h3>
+      <table class="cons-decision-table">
+        <thead><tr><th>Metric</th><th>Target</th><th>Action if breached</th></tr></thead>
+        <tbody>${cfSlosHtml}</tbody>
+      </table>
+
+      <p class="section-subtitle" style="font-size:12px;margin:14px 0">${cf.notNewProblem}</p>
+      <div class="consolidation-verdict recommend-proceed" style="margin:0">
+        <p style="margin:0;font-size:13px">${cf.verdict}</p>
+      </div>
     `)}
 
     ${meSection(m.consumerDistribution.title, "Where Kafka consumers live", `

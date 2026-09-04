@@ -4,15 +4,19 @@ Interactive requirements tracker for the Elasticsearch **8.x → 9.4.2** migrati
 
 ## View the dashboard
 
-Open **[index.html](./index.html)** in a browser, or use GitHub Pages (if enabled):
+| Version | URL | Purpose |
+|---------|-----|---------|
+| **V1** | [index.html](./index.html) · [Live](https://wi-rajeev-ranjan.github.io/es-9-migration-dashboard/) | Full migration tracker — HLD, adapter writes, matching engine tab, Q&A |
+| **V2** | [v2/index.html](./v2/index.html) · [Live V2](https://wi-rajeev-ranjan.github.io/es-9-migration-dashboard/v2/) | Brainstorm workspace — ideas, open questions, decision log (localStorage) |
 
-**Live:** https://wi-rajeev-ranjan.github.io/es-9-migration-dashboard/
+Open either HTML file in a browser. No build step required.
 
 ## Contents
 
 | File | Description |
 |------|-------------|
-| `index.html` | Full interactive dashboard — migration_v0 (HLD), migration_v1 (draft), write_consolidation tab, Q&A |
+| `index.html` | V1 — full interactive dashboard |
+| `v2/index.html` | V2 — lightweight brainstorm board for next-iteration ideas |
 | `hld-01-architecture.svg` | Target architecture & data flow |
 | `hld-02-roadmap.svg` | Phase roadmap |
 | `hld-03-migration-window.svg` | P2 freeze / reindex window |
